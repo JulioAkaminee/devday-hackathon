@@ -55,16 +55,16 @@ export const CAPITULOS: Capitulo[] = [
   {
     titulo: 'Novas pessoas',
     objetivo: 'Conheça alguém de outra área',
-    abertura: 'Primeira missão: achar alguém que trabalha com algo bem diferente de você. Gente diferente é onde moram as ideias boas. Mostra meu código por aí.',
-    encontro: '{amigo}, o pet de {dono_amigo}, apareceu! Ele me olhou desconfiado. Acho que gostou de mim.',
-    pergunta: 'Como a gente conduz essa conversa?',
+    abertura: 'Primeira missão: achar alguém de uma área diferente da sua. Se você é de front, procura alguém de dados ou de design. Mostra meu código por aí.',
+    encontro: '{amigo}, o pet de {dono_amigo}, apareceu e me olhou de cima a baixo. Acho que passei no teste.',
+    pergunta: 'Como a gente puxa essa conversa?',
     ampla: {
       opcao: 'Papo rápido e segue em frente',
-      consequencia: 'Vocês trocaram nomes, uma piada sobre o Wi-Fi e cada um foi para um lado. {amigo} acenou de longe. Acho que ele vai lembrar do meu nome… talvez.',
+      consequencia: 'Vocês trocaram nomes, uma piada sobre o Wi-Fi e cada um foi para um lado. {amigo} acenou de longe. Será que vai lembrar do meu nome?',
     },
     profunda: {
       opcao: 'Fazer a pergunta-desafio',
-      consequencia: 'Você perguntou qual foi o pior bug da vida de {dono_amigo}. Virou uma história de 10 minutos com servidor caindo em plena Black Friday. Saí daqui sabendo coisas que nem estão no LinkedIn.',
+      consequencia: 'Você perguntou qual foi o pior bug da vida de {dono_amigo}. Virou dez minutos de história, com servidor caindo em plena Black Friday e deploy às 3 da manhã. Eu ouvi tudo sem piscar.',
     },
   },
   {

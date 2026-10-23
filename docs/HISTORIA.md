@@ -27,22 +27,22 @@ vai me apresentar.
 
 ---
 
-## Capítulo 1 — Novas pessoas
+## Capítulo 1: Novas pessoas
 
 **Objetivo (cartão):** Conheça alguém de outra área
 
-**Abertura:** Primeira missão: achar alguém que trabalha com algo bem diferente de você. Gente
-diferente é onde moram as ideias boas. Mostra meu QR por aí.
+**Abertura:** Primeira missão: achar alguém de uma área diferente da sua. Se você é de front, procura
+alguém de dados ou de design. Mostra meu código por aí.
 
-**Encontro:** {amigo}, o pet de {dono_amigo}, apareceu! Ele me olhou desconfiado. Acho que gostou de
-mim.
+**Encontro:** {amigo}, o pet de {dono_amigo}, apareceu e me olhou de cima a baixo. Acho que passei no
+teste.
 
-**Escolha:** Como a gente conduz essa conversa?
+**Escolha:** Como a gente puxa essa conversa?
 
 | | Opção | Consequência |
 |---|---|---|
-| Ampla | Papo rápido e segue em frente | Vocês trocaram nomes, uma piada sobre o Wi-Fi e cada um foi para um lado. {amigo} acenou de longe. Acho que ele vai lembrar do meu nome… talvez. |
-| Profunda | Fazer a pergunta-desafio | Você perguntou qual foi o pior bug da vida de {dono_amigo}. Virou uma história de 10 minutos com servidor caindo em plena Black Friday. Saí daqui sabendo coisas que nem estão no LinkedIn. |
+| Ampla | Papo rápido e segue em frente | Vocês trocaram nomes, uma piada sobre o Wi-Fi e cada um foi para um lado. {amigo} acenou de longe. Será que vai lembrar do meu nome? |
+| Profunda | Fazer a pergunta-desafio | Você perguntou qual foi o pior bug da vida de {dono_amigo}. Virou dez minutos de história, com servidor caindo em plena Black Friday e deploy às 3 da manhã. Eu ouvi tudo sem piscar. |
 
 ---
 
