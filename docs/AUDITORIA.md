@@ -46,7 +46,7 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
 - [x] **C5 · Safe-area do iPhone**: `.cartao` no celular com `bottom: calc(max(8px,
       env(safe-area-inset-bottom)) + 66px)`; topo de `.criar` e `.demo-lista` com
       `env(safe-area-inset-top)`.
-- [ ] **C6 · Sem rede**: `fetch` com `AbortSignal.timeout(8000)` e mensagem "sem conexão, tente de
+- [x] **C6 · Sem rede**: `fetch` com `AbortSignal.timeout(8000)` e mensagem "sem conexão, tente de
       novo" (hoje aparece "Failed to fetch"); boot que falha tenta de novo em 3 s.
 - [ ] **C7 · Vazamento de GPU**: `atualizarMapa`, `cenaFinal` e `trocarPet` recriam texturas,
       geometrias e materiais sem `dispose`. Textura do selo e sombra do pet como constantes do módulo;

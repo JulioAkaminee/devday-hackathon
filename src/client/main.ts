@@ -86,11 +86,17 @@ function aviso(msg: string, tipo: 'erro' | 'ok' = 'erro') {
 }
 
 async function api<T = Visao>(rota: string, corpo?: object): Promise<T> {
-  const r = await fetch('/api/' + rota, {
-    method: corpo ? 'POST' : 'GET',
-    headers: { 'content-type': 'application/json', ...(token ? { 'x-token': token } : {}) },
-    body: corpo ? JSON.stringify(corpo) : undefined,
-  })
+  let r: Response
+  try {
+    r = await fetch('/api/' + rota, {
+      method: corpo ? 'POST' : 'GET',
+      headers: { 'content-type': 'application/json', ...(token ? { 'x-token': token } : {}) },
+      body: corpo ? JSON.stringify(corpo) : undefined,
+      signal: AbortSignal.timeout(8000),
+    })
+  } catch {
+    throw new Error('sem conexão, tente de novo') // em vez de "Failed to fetch"
+  }
   const dados = await r.json().catch(() => ({}))
   // token velho (servidor perdeu os pets): recomeça pela criação em vez de travar em erro
   if (r.status === 401 && token) { guardado.set('qg-token', null); location.reload() }
@@ -243,6 +249,7 @@ async function iniciarJogo() {
   } catch (err) {
     if ((err as { status?: number }).status === 401) { token = null; guardado.set('qg-token', null); return telaCriar() }
     aviso((err as Error).message)
+    setTimeout(iniciarJogo, 3000) // Wi-Fi do evento caiu na abertura: tenta de novo sozinho
     return
   }
   document.body.className = 'jogando'
