@@ -1,6 +1,6 @@
 import express from 'express'
 import { randomBytes } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
+import { mkdirSync, renameSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import {
   ErroDeFase, ErroDeRegra, amigoAtual, motivoRecusa, avancar, comecar, conhecer, encontrar, escolher, novoEstado, type Estado,
@@ -9,6 +9,7 @@ import {
   habilidadeFraca, novaAcademia, progresso, proximaAtividade, responderAtividade, responderDiagnostico, type Academia,
 } from '../shared/academia.ts'
 import { ACESSORIOS, COR_ESPECIE, ESPECIES, TEMAS, type Acessorio, type Especie, type Tema } from '../shared/story.ts'
+import { ErroHttp, Limite, alvoDoEncontro, completar, lerSnapshot } from './regras.ts'
 
 interface Pet {
   id: string
@@ -74,18 +75,21 @@ function semear() {
 }
 
 function carregar() {
-  if (!existsSync(ARQUIVO)) return
   // pets de uma versão antiga (espécie que não existe mais) ficam de fora
-  for (const p of JSON.parse(readFileSync(ARQUIVO, 'utf8')) as Pet[]) {
-    if (ESPECIES.includes(p.especie)) pets.set(p.id, { ...p, academia: p.academia ?? novaAcademia() })
+  for (const p of lerSnapshot(ARQUIVO) as Pet[]) {
+    if (ESPECIES.includes(p?.especie)) pets.set(p.id, completar(p))
   }
 }
 function salvar() {
   if (!sujo) return
-  mkdirSync(DATA_DIR, { recursive: true })
-  writeFileSync(ARQUIVO + '.tmp', JSON.stringify([...pets.values()]))
-  renameSync(ARQUIVO + '.tmp', ARQUIVO)
-  sujo = false
+  try {
+    mkdirSync(DATA_DIR, { recursive: true })
+    writeFileSync(ARQUIVO + '.tmp', JSON.stringify([...pets.values()]))
+    renameSync(ARQUIVO + '.tmp', ARQUIVO)
+    sujo = false
+  } catch (e) {
+    console.error('falha ao salvar o snapshot; tento de novo em 5 s:', (e as Error).message) // sujo continua true
+  }
 }
 
 function mudar(p: Pet, novo: Estado) {
@@ -94,9 +98,6 @@ function mudar(p: Pet, novo: Estado) {
   sujo = true
 }
 
-class ErroHttp extends Error {
-  constructor(public status: number, msg: string) { super(msg) }
-}
 const um = <T extends string>(v: unknown, lista: readonly T[], campo: string): T => {
   if (typeof v !== 'string' || !lista.includes(v as T)) throw new ErroHttp(400, `${campo} inválido`)
   return v as T
@@ -107,7 +108,9 @@ app.use(express.json({ limit: '10kb' }))
 
 app.get('/health', (_req, res) => { res.send('ok') })
 
+const MAX_PETS = 2000 // sem teto, novoCodigo fica lento e trava quando os códigos acabam
 app.post('/api/pets', (req, res) => {
+  if (pets.size >= MAX_PETS) throw new ErroHttp(503, 'evento lotado: não cabem mais pets')
   const b = req.body ?? {}
   const nome = typeof b.nome === 'string' ? b.nome.trim() : ''
   const dono = typeof b.dono === 'string' ? b.dono.trim() : ''
@@ -180,13 +183,22 @@ app.post('/api/comecar', (req, res) => {
   res.json(visao(p))
 })
 
+const limite = new Limite()
 app.post('/api/encontro', (req, res) => {
   const p = eu(req)
   const codigo = String(req.body?.codigo ?? '').trim().toUpperCase()
-  const outro = [...pets.values()].find((x) => x.codigo === codigo)
-  if (!outro) throw new ErroHttp(404, 'código não encontrado')
+  const agora = Date.now()
+  limite.checar(p.token, agora)
+  let outro: Pet
+  try {
+    outro = alvoDoEncontro(p.estado, codigo, (c) => [...pets.values()].find((x) => x.codigo === c))
+  } catch (e) {
+    if (e instanceof ErroHttp) limite.errou(p.token, agora)
+    throw e
+  }
   if (outro.id === p.id) throw new ErroHttp(400, 'esse é o seu próprio pet')
   mudar(p, encontrar(p.estado, outro.id))
+  limite.encontrou(p.token, agora)
   // O encontro vale para os dois: se o outro está esperando alguém, o capítulo dele abre também (L3)
   // (se a missão do outro não aceita este encontro, ele só registra que te conheceu)
   if (!outro.demo) {
@@ -252,7 +264,12 @@ if (PROD) {
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err instanceof ErroHttp) return void res.status(err.status).json({ erro: err.message })
   if (err instanceof ErroDeRegra) return void res.status(400).json({ erro: err.message })
-  if (err instanceof ErroDeFase) return void res.status(409).json({ erro: 'ação fora de hora: ' + err.message })
+  if (err instanceof ErroDeFase) return void res.status(409).json({ erro: 'essa ação não vale agora; a tela foi atualizada' })
+  // JSON inválido, corpo grande demais etc. (body-parser): culpa do pedido, sem stack no log
+  const status = (err as { status?: unknown }).status
+  if (typeof status === 'number' && status >= 400 && status < 500) {
+    return void res.status(status === 413 ? 413 : 400).json({ erro: status === 413 ? 'pedido grande demais' : 'pedido inválido' })
+  }
   console.error(err)
   res.status(500).json({ erro: 'erro interno' })
 })

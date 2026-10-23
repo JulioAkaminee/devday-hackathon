@@ -47,7 +47,7 @@ button.principal { background: var(--verde); border-color: var(--verde); color: 
 button.principal:hover { background: var(--verde-escuro); border-color: var(--verde-escuro); }
 button.discreto { border-color: transparent; background: none; padding: 6px 0; min-height: 36px; color: var(--cinza); }
 button.discreto:hover { background: none; color: var(--tinta); }
-input, select { font: inherit; border: 1.5px solid var(--linha); border-radius: var(--raio); padding: 10px; background: var(--papel); width: 100%; min-height: 44px; color: var(--tinta); }
+input, select { font: inherit; font-size: 16px; /* menos que 16 px dá zoom no iOS */ border: 1.5px solid var(--linha); border-radius: var(--raio); padding: 10px; background: var(--papel); width: 100%; min-height: 44px; color: var(--tinta); }
 label { font-size: 0.8rem; color: var(--cinza); display: grid; gap: 4px; }
 
 /* marca */

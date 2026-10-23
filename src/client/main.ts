@@ -92,6 +92,8 @@ async function api<T = Visao>(rota: string, corpo?: object): Promise<T> {
     body: corpo ? JSON.stringify(corpo) : undefined,
   })
   const dados = await r.json().catch(() => ({}))
+  // token velho (servidor perdeu os pets): recomeça pela criação em vez de travar em erro
+  if (r.status === 401 && token) { guardado.set('qg-token', null); location.reload() }
   if (!r.ok) throw Object.assign(new Error(dados.erro ?? 'falha na rede'), { status: r.status })
   return dados
 }
@@ -144,6 +146,9 @@ function telaCriar() {
   })
   form.addEventListener('submit', async (e) => {
     e.preventDefault()
+    const botao = form.querySelector<HTMLButtonElement>('button.principal')!
+    if (botao.disabled) return
+    botao.disabled = true // clique duplo criava dois pets
     const f = new FormData(form)
     try {
       const r = await api<{ token: string }>('pets', {
@@ -152,7 +157,7 @@ function telaCriar() {
       token = r.token
       guardado.set('qg-token', token)
       iniciarJogo()
-    } catch (err) { aviso((err as Error).message) }
+    } catch (err) { aviso((err as Error).message); botao.disabled = false }
   })
 }
 
@@ -170,6 +175,10 @@ let atividadeAberta: string | null = null
 let resultado: { acertou: boolean; explicacao: string } | null = null
 let medidas = { ampla: 0, profunda: 0 }
 let chaveCartao = ''
+// sobe a cada ação: resposta de sondagem que saiu antes dela chega velha e é descartada
+let versao = 0
+let sondando = false
+let sondagem: ReturnType<typeof setInterval> | undefined
 
 const questao = (q: Questao, attr: string, rotulo: string) =>
   `<p class="rotulo">${rotulo} <span>${NOMES_HABILIDADE[q.habilidade]}</span></p><p class="situacao">${esc(q.situacao)}</p>
@@ -238,19 +247,25 @@ async function iniciarJogo() {
   }
   document.body.className = 'jogando'
   render()
-  setInterval(async () => {
+  clearInterval(sondagem)
+  sondagem = setInterval(async () => {
+    if (sondando || document.hidden) return
+    sondando = true
+    const v0 = versao
     try {
       const antes = visao!.conhecidos.length
       const nova = await api('eu')
+      if (versao !== v0) return
       visao = nova
       const novo = nova.conhecidos.at(-1)
       if (nova.conhecidos.length > antes && novo) aviso(`${novo.nome}, de ${novo.dono}, te encontrou`, 'ok')
       render()
-    } catch { /* rede oscilou: tenta de novo no próximo ciclo */ }
+    } catch { /* rede oscilou: tenta de novo no próximo ciclo */ } finally { sondando = false }
   }, 2000)
 }
 
 async function acao(rota: string, corpo: object = {}) {
+  versao++
   try { visao = await api(rota, corpo); render() } catch (err) {
     // 409 = a ação já aconteceu (clique duplo, outra aba): só sincroniza, sem mensagem técnica
     if ((err as { status?: number }).status === 409) { visao = await api('eu').catch(() => visao); render(); return }
@@ -449,6 +464,7 @@ ui.addEventListener('click', (ev) => {
     render()
   } else if (d.atividade) { atividadeAberta = d.atividade; resultado = null; render() }
   else if (d.resposta !== undefined) {
+    versao++
     api<Visao & { resultado: typeof resultado }>('atividade', { id: atividadeAberta, opcao: Number(d.resposta) })
       .then((r) => { resultado = r.resultado; visao = r; render() })
       .catch((err) => aviso((err as Error).message))
