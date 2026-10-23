@@ -132,6 +132,8 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chips button { border-color: var(--fio); padding: 8px 12px; font-size: 0.9rem; }
 .chips button.sel { background: var(--tinta); border-color: var(--tinta); color: var(--papel); }
+/* mais de uma resposta por pergunta: o visto deixa claro que marcar outra não desmarca a primeira */
+.chips button[aria-pressed="true"]::before { content: '✓'; margin-right: 6px; font-weight: 600; }
 .navegacao { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
 .subchamada { margin-top: -10px; color: var(--cinza); font-size: 0.98rem; line-height: 1.4; }
 .dica { margin-top: 8px; font-size: 0.8rem; color: var(--cinza); }

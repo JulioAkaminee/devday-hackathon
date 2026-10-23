@@ -23,9 +23,10 @@ interface Pet {
   especie: Especie
   cor: string
   acessorio: Acessorio
-  area: Tema
-  procura: Tema
-  oferece: Tema
+  // sempre lista: desde 23/10 a pessoa pode marcar mais de uma área em cada pergunta
+  area: Tema[]
+  procura: Tema[]
+  oferece: Tema[]
   demo: boolean
   estado: Estado
   historico: Estado[] // estado no início de cada capítulo, para retomar dali (demo dos dois caminhos)
@@ -56,14 +57,14 @@ const publico = (p: Pet) => ({
 })
 
 // Semente: pets de exemplo para a demo não depender do público (QUEBRA-GELO.md, seção 7)
-const SEMENTE: [string, string, Especie, Acessorio, Tema, Tema, Tema][] = [
-  ['XICA', 'Xícara|Ana', 'xicara', 'nenhum', 'design', 'back', 'design'],
-  ['CADE', 'Caderninho|Bruno', 'caderninho', 'nenhum', 'back', 'design', 'back'],
-  ['LAMP', 'Lâmpada|Carla', 'lampada', 'nenhum', 'dados', 'produto', 'dados'],
-  ['CORA', 'Coração|Diego', 'coracao', 'nenhum', 'front', 'carreira', 'front'],
-  ['GLOB', 'Globinho|Elisa', 'globinho', 'nenhum', 'mobile', 'front', 'mobile'],
-  ['CONE', 'Conezinho|Fábio', 'conezinho', 'nenhum', 'produto', 'dados', 'produto'],
-  ['NUVE', 'Nuvem|Gabi', 'nuvem', 'boina', 'carreira', 'mobile', 'carreira'],
+const SEMENTE: [string, string, Especie, Acessorio, Tema[], Tema[], Tema[]][] = [
+  ['XICA', 'Xícara|Ana', 'xicara', 'nenhum', ['design'], ['back'], ['design']],
+  ['CADE', 'Caderninho|Bruno', 'caderninho', 'nenhum', ['back'], ['design'], ['back']],
+  ['LAMP', 'Lâmpada|Carla', 'lampada', 'nenhum', ['dados'], ['produto'], ['dados']],
+  ['CORA', 'Coração|Diego', 'coracao', 'nenhum', ['front'], ['carreira'], ['front']],
+  ['GLOB', 'Globinho|Elisa', 'globinho', 'nenhum', ['mobile'], ['front'], ['mobile']],
+  ['CONE', 'Conezinho|Fábio', 'conezinho', 'nenhum', ['produto'], ['dados'], ['produto']],
+  ['NUVE', 'Nuvem|Gabi', 'nuvem', 'boina', ['carreira'], ['mobile'], ['carreira']],
 ]
 function semear() {
   for (const [codigo, nomes, especie, acessorio, area, procura, oferece] of SEMENTE) {
@@ -79,8 +80,19 @@ function semear() {
 
 function carregar() {
   // pets de uma versão antiga (espécie que não existe mais) ficam de fora
+  const lista = (v: unknown, padrao: Tema): Tema[] =>
+    Array.isArray(v) ? (v as Tema[]).filter((t) => TEMAS.includes(t)) :
+      typeof v === 'string' && TEMAS.includes(v as Tema) ? [v as Tema] : [padrao]
   for (const p of lerSnapshot(ARQUIVO) as Pet[]) {
-    if (ESPECIES.includes(p?.especie)) pets.set(p.id, completar(p))
+    if (!ESPECIES.includes(p?.especie)) continue
+    // snapshot de antes do multi-escolha guardava uma área só (string): vira lista de um item
+    const antigo = p as unknown as { area?: unknown; procura?: unknown; oferece?: unknown }
+    pets.set(p.id, completar({
+      ...p,
+      area: lista(antigo.area, 'front'),
+      procura: lista(antigo.procura, 'back'),
+      oferece: lista(antigo.oferece, 'front'),
+    }))
   }
 }
 function salvar() {
@@ -104,6 +116,15 @@ function mudar(p: Pet, novo: Estado) {
 const um = <T extends string>(v: unknown, lista: readonly T[], campo: string): T => {
   if (typeof v !== 'string' || !lista.includes(v as T)) throw new ErroHttp(400, `${campo} inválido`)
   return v as T
+}
+
+/** Uma ou mais áreas por pergunta: tira repetido, exige pelo menos uma e cabe nos dedos de uma mão. */
+const temas = (v: unknown, campo: string): Tema[] => {
+  if (!Array.isArray(v) || v.length === 0) throw new ErroHttp(400, `escolha pelo menos uma opção em ${campo}`)
+  const lista = [...new Set(v)]
+  if (lista.length > 4) throw new ErroHttp(400, `escolha até 4 opções em ${campo}`)
+  for (const t of lista) if (typeof t !== 'string' || !TEMAS.includes(t as Tema)) throw new ErroHttp(400, `${campo} inválido`)
+  return lista as Tema[]
 }
 
 const app = express()
@@ -130,9 +151,9 @@ app.post('/api/pets', (req, res) => {
     especie: um(b.especie, ESPECIES, 'especie'),
     cor: COR_ESPECIE[b.especie as Especie],
     acessorio: um(b.acessorio, ACESSORIOS, 'acessorio'),
-    area: um(b.area, TEMAS, 'area'),
-    procura: um(b.procura, TEMAS, 'procura'),
-    oferece: um(b.oferece, TEMAS, 'oferece'),
+    area: temas(b.area, 'area'),
+    procura: temas(b.procura, 'procura'),
+    oferece: temas(b.oferece, 'oferece'),
     demo: false,
     estado: novoEstado(),
     historico: [],
@@ -237,8 +258,9 @@ function visao(p: Pet) {
       // gente real vai sem o código: o encontro só vale com o código que a pessoa mostra ao vivo
       .map((x) => (x.demo ? publico(x) : { ...publico(x), codigo: '' }))
   const cap = p.estado.cap
-  const sugestoes = cap === 1 || cap === 3 ? novos((x) => x.area !== p.area)
-    : cap === 2 ? novos((x) => x.oferece === p.procura)
+  const cruza = (a: Tema[], b: Tema[]) => a.some((t) => b.includes(t))
+  const sugestoes = cap === 1 || cap === 3 ? novos((x) => !cruza(x.area, p.area))
+    : cap === 2 ? novos((x) => cruza(x.oferece, p.procura))
     : cap === 4 ? p.estado.conhecidos.map(pub).filter((x) => x !== null) : []
   return {
     pet: publico(p),

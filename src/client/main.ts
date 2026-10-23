@@ -15,7 +15,8 @@ import './mao.ts'
 import './style.css'
 
 interface PetPublico extends DNA {
-  id: string; codigo: string; nome: string; dono: string; linkedin?: string; area: Tema; procura: Tema; oferece: Tema; demo: boolean
+  id: string; codigo: string; nome: string; dono: string; linkedin?: string
+  area: Tema[]; procura: Tema[]; oferece: Tema[]; demo: boolean
 }
 interface Visao {
   pet: PetPublico
@@ -35,6 +36,9 @@ const NOMES_TEMA: Record<Tema, string> = {
 // na criação, as áreas de fora da tecnologia vêm primeiro: quem é de RH ou comercial se acha sem rolar
 const FORA_DA_TI: readonly Tema[] = ['marketing', 'comercial', 'rh', 'gestao']
 const ORDEM_TEMAS = [...FORA_DA_TI, ...TEMAS.filter((t) => !FORA_DA_TI.includes(t))]
+/** Lista de áreas em português: "front-end", "front-end e design", "front-end, design e dados". */
+const nomes = (ts: Tema[] = []) =>
+  ts.length > 1 ? `${ts.slice(0, -1).map((t) => NOMES_TEMA[t]).join(', ')} e ${NOMES_TEMA[ts[ts.length - 1]]}` : NOMES_TEMA[ts[0]] ?? ''
 const SUGESTOES_NOME = ['Xícaro', 'Bolacha', 'Pipoca', 'Tampinha', 'Biscoito', 'Faísca', 'Pudim', 'Teco', 'Bug', 'Cometa']
 
 // Ícones de traço (24px, traço 1.75): desenhados aqui, sem biblioteca e sem emoji
@@ -155,10 +159,13 @@ function telaCriar() {
     `<svg class="marca bola-criar" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="var(--verde)"/><ellipse class="olho" cx="24" cy="26" rx="6" ry="8.2" fill="none" stroke="var(--tinta)" stroke-width="3.4"/><ellipse class="olho" cx="52" cy="24" rx="6" ry="8.2" fill="none" stroke="var(--tinta)" stroke-width="3.4"/></svg>`)
   const dna: DNA = { especie: 'xicara', cor: COR_ESPECIE.xicara, acessorio: 'nenhum' }
   // procura começa diferente da área: o par procura/oferece é o que cruza as pessoas na Missão 2
-  type Campo = 'nome' | 'dono' | 'linkedin' | 'area' | 'procura' | 'oferece'
+  type Campo = 'nome' | 'dono' | 'linkedin'
+  type Pergunta = 'area' | 'procura' | 'oferece'
   const perfil: Record<Campo, string> = {
-    nome: SUGESTOES_NOME[Math.floor(Math.random() * SUGESTOES_NOME.length)], dono: '', linkedin: '', area: 'front', procura: 'back', oferece: 'front',
+    nome: SUGESTOES_NOME[Math.floor(Math.random() * SUGESTOES_NOME.length)], dono: '', linkedin: '',
   }
+  // mais de uma por pergunta: "trabalho com front e design" é comum, e restringir a uma empobrece as sugestões
+  const marcados: Record<Pergunta, Tema[]> = { area: ['front'], procura: ['back'], oferece: ['front'] }
   let passo = -1 // -1 é a boas-vindas: proposta e como funciona antes de pedir qualquer coisa
   mundo.mostrarVitrine(dna)
 
@@ -168,14 +175,14 @@ function telaCriar() {
     `<div class="progresso" aria-label="Passo ${passo + 1} de ${TOTAL}">${Array.from({ length: TOTAL }, (_, i) => `<i class="${i < passo ? 'feito' : i === passo ? 'atual' : ''}"></i>`).join('')}<span>${passo + 1} de ${TOTAL}</span></div>`
   const opcao = (grupo: string, v: string, rotulo: string, sel: boolean, extra = '') =>
     `<button type="button" class="${sel ? 'sel' : ''}" aria-pressed="${sel}" data-v="${v}" ${grupo === 'especie' ? `aria-label="${rotulo}"` : ''}>${extra}${grupo === 'especie' ? `<span>${rotulo}</span>` : rotulo}</button>`
-  const chips = (campo: 'area' | 'procura' | 'oferece') =>
-    `<div class="chips" data-perfil="${campo}">${ORDEM_TEMAS.map((t) => opcao(campo, t, NOMES_TEMA[t], perfil[campo] === t)).join('')}</div>`
+  const chips = (campo: Pergunta) =>
+    `<div class="chips" data-perfil="${campo}" role="group" aria-label="Escolha uma ou mais">${ORDEM_TEMAS.map((t) => opcao(campo, t, NOMES_TEMA[t], marcados[campo].includes(t))).join('')}</div>`
   const proximo = `<button class="principal">Próximo ${ICONE.seta}</button>`
   // as três perguntas do dia: título, por que importa e as áreas para tocar
   const PERGUNTAS: Record<number, { campo: 'area' | 'procura' | 'oferece'; titulo: string; dica: string }> = {
-    2: { campo: 'area', titulo: 'Com o que você trabalha?', dica: 'É assim que o jogo sugere com quem conversar em cada missão.' },
-    3: { campo: 'procura', titulo: 'Com o que você quer ajuda hoje?', dica: 'Na Missão 2 a gente te mostra quem pode ajudar com isso.' },
-    4: { campo: 'oferece', titulo: 'Com o que você pode ajudar?', dica: 'Quem precisa disso vai ver o seu pet como sugestão.' },
+    2: { campo: 'area', titulo: 'Com o que você trabalha?', dica: 'Pode marcar mais de uma. É assim que o jogo sugere com quem conversar.' },
+    3: { campo: 'procura', titulo: 'Com o que você quer ajuda hoje?', dica: 'Pode marcar mais de uma. Na Missão 2 a gente mostra quem pode ajudar com isso.' },
+    4: { campo: 'oferece', titulo: 'Com o que você pode ajudar?', dica: 'Pode marcar mais de uma. Quem precisa disso vê o seu pet como sugestão.' },
   }
   const voltar = (para: number) => `<button type="button" class="discreto" data-ir="${para}">${ICONE.voltar} Voltar</button>`
 
@@ -254,8 +261,21 @@ function telaCriar() {
       }
       const grupo = b.closest<HTMLElement>('[data-campo], [data-perfil]')
       if (!grupo || !b.dataset.v) return
+      if (grupo.dataset.perfil) {
+        // alterna: o primeiro não sai (a resposta precisa de pelo menos uma área)
+        const campo = grupo.dataset.perfil as Pergunta
+        const t = b.dataset.v as Tema
+        const dentro = marcados[campo].includes(t)
+        if (dentro && marcados[campo].length === 1) return
+        marcados[campo] = dentro ? marcados[campo].filter((x) => x !== t) : [...marcados[campo], t]
+        grupo.querySelectorAll('button').forEach((x) => {
+          const sel = marcados[campo].includes(x.dataset.v as Tema)
+          x.classList.toggle('sel', sel)
+          x.setAttribute('aria-pressed', String(sel))
+        })
+        return
+      }
       grupo.querySelectorAll('button').forEach((x) => { x.classList.toggle('sel', x === b); x.setAttribute('aria-pressed', String(x === b)) })
-      if (grupo.dataset.perfil) { perfil[grupo.dataset.perfil as Campo] = b.dataset.v; return }
       ;(dna as unknown as Record<string, string>)[grupo.dataset.campo!] = b.dataset.v
       dna.cor = COR_ESPECIE[dna.especie]
       form.querySelector('.personalidade')!.textContent = PERSONALIDADE[dna.especie]
@@ -271,7 +291,8 @@ function telaCriar() {
       botao.disabled = true // clique duplo criava dois pets
       try {
         const r = await api<{ token: string }>('pets', {
-          ...dna, nome: perfil.nome.trim(), dono: perfil.dono.trim(), linkedin: perfil.linkedin.trim(), area: perfil.area, procura: perfil.procura, oferece: perfil.oferece,
+          ...dna, nome: perfil.nome.trim(), dono: perfil.dono.trim(), linkedin: perfil.linkedin.trim(),
+          area: marcados.area, procura: marcados.procura, oferece: marcados.oferece,
         })
         token = r.token
         guardado.set('qg-token', token)
@@ -446,9 +467,9 @@ function variaveis(v: Visao) {
   const ultimo = v.conhecidos.find((c) => c.id === v.estado.encontros.at(-1)) ?? v.conhecidos.at(-1)
   return {
     pet: v.pet.nome,
-    amigo: amigo?.nome ?? 'essa pessoa', dono_amigo: amigo?.dono ?? 'essa pessoa', oferta: amigo ? NOMES_TEMA[amigo.oferece] : '',
+    amigo: amigo?.nome ?? 'essa pessoa', dono_amigo: amigo?.dono ?? 'essa pessoa', oferta: amigo ? nomes(amigo.oferece) : '',
     contato: (v.estado.fase === 'final' ? ultimo?.nome : contato?.nome) ?? 'alguém', dono_contato: contato?.dono ?? 'alguém',
-    procura: NOMES_TEMA[v.pet.procura], minha_oferta: NOMES_TEMA[v.pet.oferece],
+    procura: nomes(v.pet.procura), minha_oferta: nomes(v.pet.oferece),
     lista_amigos: v.conhecidos.map((c) => c.nome).join(', ') || 'ninguém', n: v.conhecidos.length,
   }
 }
@@ -569,9 +590,9 @@ function cartaoMissao(v: Visao) {
   if (e.fase === 'aguardando') {
     const sug = v.sugestoes.length
       // gente real: o encontro só vale com o código que a pessoa mostra; pet de exemplo (sem dono no evento) abre no toque
-      ? `<div class="sugestoes"><p class="rotulo">${e.cap === 4 ? 'Seus contatos' : e.cap === 2 ? `Oferecem ${NOMES_TEMA[v.pet.procura]}` : 'De outra área'} <span>procure no evento e peça o código</span></p>${v.sugestoes.map((s) => s.demo
+      ? `<div class="sugestoes"><p class="rotulo">${e.cap === 4 ? 'Seus contatos' : e.cap === 2 ? `Oferecem ${nomes(v.pet.procura)}` : 'De outra área'} <span>procure no evento e peça o código</span></p>${v.sugestoes.map((s) => s.demo
         ? `<button data-codigo="${s.codigo}">${foto(s, 'mini')}<span><b>${esc(s.nome)}</b> · ${esc(s.dono)}<small>pet de exemplo · toque para encontrar</small></span><code>${s.codigo}</code></button>`
-        : `<button data-procurar="${esc(s.dono)}">${foto(s, 'mini')}<span><b>${esc(s.nome)}</b> · ${esc(s.dono)}<small>${NOMES_TEMA[s.area]}</small></span></button>`).join('')}</div>`
+        : `<button data-procurar="${esc(s.dono)}">${foto(s, 'mini')}<span><b>${esc(s.nome)}</b> · ${esc(s.dono)}<small>${nomes(s.area)}</small></span></button>`).join('')}</div>`
       : ''
     const f = v.academia.fraca
     const treino = f && CAPITULO_SUGERIDO[f] === e.cap ? `<p class="nota">Aqui você treina <b>${NOMES_HABILIDADE[f]}</b>, sua habilidade mais fraca.</p>` : ''
@@ -616,7 +637,7 @@ function painelAba(v: Visao) {
   const e = v.estado
   if (aba === 'contatos') {
     const lista = v.conhecidos.length
-      ? `<ul class="lista">${v.conhecidos.map((c) => `<li>${foto(c, 'mini')}<div><b>${esc(c.nome)}</b> · ${esc(c.dono)}<small>${NOMES_TEMA[c.area]} · ajuda com ${NOMES_TEMA[c.oferece]}</small></div>${linkedin(c, 'linkedin')}<code>${c.codigo}</code></li>`).join('')}</ul>`
+      ? `<ul class="lista">${v.conhecidos.map((c) => `<li>${foto(c, 'mini')}<div><b>${esc(c.nome)}</b> · ${esc(c.dono)}<small>${nomes(c.area)} · ajuda com ${nomes(c.oferece)}</small></div>${linkedin(c, 'linkedin')}<code>${c.codigo}</code></li>`).join('')}</ul>`
       : '<p class="texto">Ninguém ainda. Na aba Mapa, mostre seu código para alguém ou digite o código da pessoa.</p>'
     return `<div class="cartao-topo"><span>${v.conhecidos.length} ${v.conhecidos.length === 1 ? 'pessoa' : 'pessoas'}</span></div><h2>Quem eu conheci</h2>${lista}`
   }
@@ -831,7 +852,7 @@ async function telaDemo() {
   const pets = await api<PetPublico[]>('demo')
   const cards = await Promise.all(pets.map(async (p) => {
     const qr = await QRCode.toDataURL(`${location.origin}/?c=${p.codigo}`, { margin: 1, width: 200, color: { dark: '#141414', light: '#ffffff' } })
-    return `<div class="card">${foto(p, 'mini')}<b class="grande">${p.codigo}</b><span>${esc(p.nome)} · ${esc(p.dono)}</span><small>${NOMES_TEMA[p.area]} · ajuda com ${NOMES_TEMA[p.oferece]}</small><img src="${qr}" alt=""></div>`
+    return `<div class="card">${foto(p, 'mini')}<b class="grande">${p.codigo}</b><span>${esc(p.nome)} · ${esc(p.dono)}</span><small>${nomes(p.area)} · ajuda com ${nomes(p.oferece)}</small><img src="${qr}" alt=""></div>`
   }))
   h(`<div class="demo-lista"><header class="criar-topo">${LOGO()}${EVENTO}</header><h2>Pets de exemplo</h2><p class="texto">Para testar e demonstrar sem depender do público.</p><div class="cards">${cards.join('')}</div></div>`)
 }
