@@ -84,6 +84,14 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .pets button img { width: 100%; max-width: 64px; aspect-ratio: 1; }
 .pets button.sel { border-color: var(--linha); background: var(--suave); box-shadow: inset 0 -4px 0 var(--verde); }
 .personalidade { font-size: 0.9rem; color: var(--cinza); }
+.subchamada { margin-top: -10px; color: var(--cinza); font-size: 0.98rem; line-height: 1.4; }
+.dica { margin-top: 8px; font-size: 0.8rem; color: var(--cinza); }
+/* legenda no palco da criação: o pet ganha nome e jeito antes de nascer */
+.legenda-pet { position: absolute; left: 520px; right: 0; top: 9vh; display: grid; justify-items: center; gap: 6px; text-align: center; pointer-events: none !important; }
+.legenda-pet b { font-size: 3rem; font-weight: 600; letter-spacing: -0.045em; line-height: 1; }
+.legenda-pet span { color: var(--cinza); font-size: 1.05rem; }
+@media (min-width: 761px) { .personalidade { display: none; } }
+@media (max-width: 760px) { .legenda-pet { display: none; } }
 .segmentos { display: flex; border: 1.5px solid var(--linha); border-radius: var(--raio); }
 .segmentos button { flex: 1; border: 0; border-radius: 0; justify-content: center; font-size: 0.9rem; }
 .segmentos button + button { border-left: 1.5px solid var(--linha); }

@@ -121,6 +121,7 @@ function telaCriar() {
     <form class="criar">
       <header class="criar-topo">${LOGO()}${EVENTO}</header>
       <p class="chamada">Seu pet só avança quando você conversa com alguém de verdade.</p>
+      <p class="subchamada">Monte seu pet em um minuto. Cada pessoa que você encontrar no evento vira um capítulo da história.</p>
       <fieldset><legend><i>01</i> Pet</legend>
         <div class="pets" data-campo="especie">${ESPECIES.map((e, i) => `<button type="button" class="${i ? '' : 'sel'}" aria-pressed="${!i}" data-v="${e}" aria-label="${NOMES_ESPECIE[e]}">${foto({ especie: e, cor: '', acessorio: 'nenhum' })}<span>${NOMES_ESPECIE[e]}</span></button>`).join('')}</div>
         <p class="personalidade">${PERSONALIDADE.xicara}</p>
@@ -133,14 +134,25 @@ function telaCriar() {
           <label>Do pet<input name="nome" minlength="2" maxlength="16" required value="${SUGESTOES_NOME[Math.floor(Math.random() * SUGESTOES_NOME.length)]}"></label>
           <label>Seu primeiro nome<input name="dono" minlength="2" maxlength="16" required placeholder="Ana" autocomplete="given-name"></label>
         </div>
+        <p class="dica">Quem encontrar seu pet vê estes dois nomes.</p>
       </fieldset>
-      <fieldset><legend><i>04</i> Hoje</legend>
+      <fieldset><legend><i>04</i> No evento hoje</legend>
         <div class="linha">${select('area', 'Minha área')}${select('procura', 'Procuro ajuda com', 'back')}${select('oferece', 'Posso ajudar com')}</div>
+        <p class="dica">Com isso o jogo sugere quem você deve procurar em cada missão.</p>
       </fieldset>
       <button class="principal">Criar meu pet ${ICONE.seta}</button>
-    </form>`)
+    </form>
+    <div class="legenda-pet" aria-live="polite"><b></b><span></span></div>`)
 
   const form = ui.querySelector('form')!
+  // legenda do palco: nome digitado, espécie e personalidade do pet escolhido
+  const legenda = () => {
+    const nome = (form.querySelector<HTMLInputElement>('input[name=nome]')!.value.trim() || NOMES_ESPECIE[dna.especie])
+    ui.querySelector('.legenda-pet b')!.textContent = nome
+    ui.querySelector('.legenda-pet span')!.textContent = `${NOMES_ESPECIE[dna.especie]} · ${PERSONALIDADE[dna.especie]}`
+  }
+  legenda()
+  form.querySelector('input[name=nome]')!.addEventListener('input', legenda)
   animate(form.querySelectorAll('.criar > *'), { opacity: [0, 1], y: [14, 0] }, { delay: stagger(0.05), duration: 0.45, ease: [0.2, 0.8, 0.2, 1] })
   form.querySelectorAll<HTMLDivElement>('[data-campo]').forEach((grupo) => {
     grupo.addEventListener('click', (e) => {
@@ -150,6 +162,7 @@ function telaCriar() {
       ;(dna as unknown as Record<string, string>)[grupo.dataset.campo!] = b.dataset.v!
       dna.cor = COR_ESPECIE[dna.especie]
       form.querySelector('.personalidade')!.textContent = PERSONALIDADE[dna.especie]
+      legenda()
       mundo.trocarPet(dna)
     })
   })
