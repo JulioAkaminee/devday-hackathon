@@ -178,7 +178,7 @@ const questao = (q: Questao, attr: string, rotulo: string) =>
 function diagnostico() {
   const i = diagRespostas.length
   if (i >= DIAGNOSTICO.length) return '<p class="texto">Montando sua trilha…</p>'
-  return `<p class="texto">Cinco situações rápidas. Não existe resposta errada aqui: elas montam sua trilha na Academia.</p>
+  return `<p class="texto">Cinco situações rápidas. Suas respostas montam sua trilha na Academia.</p>
     ${questao(DIAGNOSTICO[i], 'data-diag', `${i + 1}/${DIAGNOSTICO.length}`)}`
 }
 
@@ -208,7 +208,7 @@ function academia(v: Visao) {
   }).join('')
   const n = CAPITULO_SUGERIDO[fraca]
   return `<div class="cartao-topo"><span>Academia</span></div><h2>Sua trilha</h2>
-    <p class="texto">Começa por <b>${NOMES_HABILIDADE[fraca]}</b>, sua habilidade mais fraca. Na Aventura, quem treina isso é a Missão ${n}, ${CAPITULOS[n - 1].titulo}.</p>
+    <p class="texto">Começa por <b>${NOMES_HABILIDADE[fraca]}</b>, sua habilidade mais fraca. Na Aventura, você treina isso na Missão ${n}, ${CAPITULOS[n - 1].titulo}.</p>
     <div class="trilha">${trilha}</div>${a.proxima ? '' : '<p class="texto"><b>Trilha completa.</b></p>'}`
 }
 
@@ -300,7 +300,7 @@ function cartaoMissao(v: Visao) {
     // Credenciamento: o diagnóstico da Academia vem antes da aventura (K4)
     if (!v.academia.diagnostico) return `${topo('Credenciamento', 'Antes de entrar')}${diagnostico()}`
     const fraca = v.academia.fraca!
-    return `${topo('Credenciamento', 'Bem-vindo ao DevDay')}<p class="texto">${esc(preencher(PROLOGO, vars))}</p>
+    return `${topo('Credenciamento', 'Boas-vindas ao DevDay')}<p class="texto">${esc(preencher(PROLOGO, vars))}</p>
       <p class="nota">Sua trilha na Academia começa por <b>${NOMES_HABILIDADE[fraca]}</b>.</p>
       <button class="principal" data-acao="comecar">Começar a aventura ${ICONE.seta}</button>`
   }
@@ -309,7 +309,7 @@ function cartaoMissao(v: Visao) {
       ? `<div class="sugestoes"><p class="rotulo">Oferecem ${NOMES_TEMA[v.pet.procura]}</p>${v.sugestoes.map((s) => `<button data-codigo="${s.codigo}">${foto(s, 'mini')}<span><b>${esc(s.nome)}</b> · ${esc(s.dono)}</span><code>${s.codigo}</code></button>`).join('')}</div>`
       : ''
     const f = v.academia.fraca
-    const treino = f && CAPITULO_SUGERIDO[f] === e.cap ? `<p class="nota">Esta missão treina <b>${NOMES_HABILIDADE[f]}</b>, sua habilidade mais fraca.</p>` : ''
+    const treino = f && CAPITULO_SUGERIDO[f] === e.cap ? `<p class="nota">Aqui você treina <b>${NOMES_HABILIDADE[f]}</b>, sua habilidade mais fraca.</p>` : ''
     return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}<p class="texto">${esc(preencher(cap.abertura, vars))}</p>${treino}${escolhas(false)}${sug}${escanear}`
   }
   if (e.fase === 'encontro') {
@@ -347,7 +347,7 @@ function painelAba(v: Visao) {
       return `<li class="${o ?? ''}"><i>${i + 1}</i><div><b>${c.titulo}</b><small>${o ? `${esc(preencher(c[o].opcao, { ...variaveis(v), dono_amigo: quem?.dono ?? '', amigo: quem?.nome ?? '' }))}` : 'ainda não'}</small></div><span>${o ? (o === 'ampla' ? '+2 A' : '+2 P') : ''}</span></li>`
     }).join('')
     return `<div class="cartao-topo"><span>Minhas conexões</span></div><h2>Alcance ${e.alcance} · Profundidade ${e.profundidade}</h2>
-      <p class="texto">Alcance é quanta gente você conheceu. Profundidade é o quanto essas conversas foram longe.</p><ol class="conexoes">${linhas}</ol>`
+      <p class="texto">Alcance: quanta gente você conheceu. Profundidade: até onde você levou cada conversa.</p><ol class="conexoes">${linhas}</ol>`
   }
   if (aba === 'finais') {
     const atual = e.fase === 'final' ? finalDe(e) : null
