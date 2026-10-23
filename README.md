@@ -60,13 +60,13 @@ conforme as regras do programa.
 ## Como rodar
 
 ```bash
-# 1. dependências
-# 2. variáveis de ambiente (copie o modelo; NUNCA comite o .env)
-cp .env.example .env
-# 3. subir
+npm install          # na rede do evento o registro oficial falha: use --registry=https://registry.npmmirror.com
+npm run dev          # http://localhost:3000 (servidor + Vite na mesma porta)
+npm test             # garante que os 3 finais são alcançáveis
 ```
 
-_(preencher quando o stack estiver definido)_
+- `/` cria o pet e joga; `/demo` mostra os pets de exemplo com código e QR.
+- Produção: `docker build` com o `Dockerfile` (Dokploy), volume em `/data`, healthcheck em `/health`.
 
 ## Estrutura do repositório
 

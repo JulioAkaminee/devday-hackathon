@@ -6,3 +6,5 @@ node_modules/
 .venv/
 __pycache__/
 *.log
+data/
+dist/
