@@ -4,26 +4,34 @@ Os 10 pets do Quebra-Gelo em **voxel 3D**, feitos a partir da referência
 [`docs/referencias/pets-do-evento-v1.png`](../../docs/referencias/pets-do-evento-v1.png). Os modelos são
 gerados por código: não há arquivo de modelagem externo para manter.
 
+O estilo segue a referência:
+- cubos grandes e rostos de poucos blocos;
+- plástico macio, com a beirada de cada cubo levemente arredondada;
+- estampas nítidas (logo e texto) aplicadas como adesivos por cima dos voxels.
+
+**Todos os pets usam uma mochila preta com a logo da OpenAI nas costas.**
+
 | | Pet | Personalidade | Voxels | Tamanho (L × A × P) |
 |---|---|---|---|---|
-| <img src="png/xicara.png" width="72"> | **01 Xícara** | Curioso e sempre puxa assunto. | 2.378 | 20 × 24 × 12 |
-| <img src="png/caderninho.png" width="72"> | **02 Caderninho** | Organizado e adora trocar ideias. | 1.241 | 19 × 19 × 6 |
-| <img src="png/laptopinho.png" width="72"> | **03 Laptopinho** | Criativo e sempre tem um projeto. | 908 | 19 × 18 × 10 |
-| <img src="png/plantinha.png" width="72"> | **04 Plantinha** | Tranquila e faz conexões inesperadas. | 2.096 | 17 × 25 × 16 |
-| <img src="png/lampada.png" width="72"> | **05 Lâmpada** | Cheio de ideias e energia. | 1.668 | 21 × 24 × 13 |
-| <img src="png/coracao.png" width="72"> | **06 Coração** | Empático e sempre escuta de verdade. | 1.600 | 19 × 20 × 10 |
-| <img src="png/globinho.png" width="72"> | **07 Globinho** | Adora gente de todas as áreas. | 2.091 | 19 × 19 × 18 |
-| <img src="png/estrelinha.png" width="72"> | **08 Estrelinha** | Animado e sempre incentiva os outros. | 914 | 17 × 20 × 11 |
-| <img src="png/conezinho.png" width="72"> | **09 Conezinho** | Direto e ajuda a focar no objetivo. | 1.391 | 15 × 22 × 16 |
-| <img src="png/nuvem.png" width="72"> | **10 Nuvem** | Observador e sempre vê o lado diferente. | 1.499 | 17 × 20 × 15 |
+| <img src="png/xicara.png" width="72"> | **01 Xícara** | Curioso e sempre puxa assunto. | 1.868 | 18 × 23 × 13 |
+| <img src="png/caderninho.png" width="72"> | **02 Caderninho** | Organizado e adora trocar ideias. | 1.190 | 17 × 19 × 9 |
+| <img src="png/laptopinho.png" width="72"> | **03 Laptopinho** | Criativo e sempre tem um projeto. | 974 | 18 × 19 × 12 |
+| <img src="png/plantinha.png" width="72"> | **04 Plantinha** | Tranquila e faz conexões inesperadas. | 1.271 | 15 × 20 × 13 |
+| <img src="png/lampada.png" width="72"> | **05 Lâmpada** | Cheio de ideias e energia. | 1.309 | 19 × 23 × 13 |
+| <img src="png/coracao.png" width="72"> | **06 Coração** | Empático e sempre escuta de verdade. | 2.105 | 21 × 22 × 11 |
+| <img src="png/globinho.png" width="72"> | **07 Globinho** | Adora gente de todas as áreas. | 1.264 | 17 × 17 × 14 |
+| <img src="png/estrelinha.png" width="72"> | **08 Estrelinha** | Animado e sempre incentiva os outros. | 871 | 17 × 20 × 9 |
+| <img src="png/conezinho.png" width="72"> | **09 Conezinho** | Direto e ajuda a focar no objetivo. | 1.293 | 15 × 21 × 15 |
+| <img src="png/nuvem.png" width="72"> | **10 Nuvem** | Observador e sempre vê o lado diferente. | 1.529 | 17 × 20 × 15 |
 
 ## Arquivos
 
 | Arquivo | O que é |
 |---|---|
 | `especies.js` | **Fonte da verdade.** A paleta e a construção de cada pet, voxel a voxel |
-| `voxel.js` | Ferramentas de modelagem (caixa, esfera, cilindro, extrusão, desenhar o rosto…), sem dependências |
-| `malha.js` | Transforma os dados em malha Three.js (só as faces visíveis, com sombreamento nos cantos) e anima |
+| `voxel.js` | Ferramentas de modelagem (caixa, esfera, cilindro, extrusão, desenhar o rosto, decalques, hastes), sem dependências |
+| `malha.js` | Transforma os dados em malha Three.js (só as faces visíveis, sombreamento nos cantos e bisel macio), cria os decalques e anima |
+| `logo.js` | Desenho vetorial da logo da OpenAI, usado nos decalques |
 | `index.html` | Galeria para ver, girar, animar e baixar cada pet |
 | `json/<id>.json` | Os dados de cada pet, prontos para o jogo carregar sem rodar `especies.js` |
 | `png/<id>.png` | Imagem 1024 × 1024 com fundo transparente, para README, slides e vídeo |
@@ -73,6 +81,7 @@ mostrarParte(pet, 'mochila', false);               // acessórios podem ser esco
   "id": "xicara", "numero": 1, "nome": "Xícara", "personalidade": "...",
   "animacao": "acenar",            // animação padrão na galeria
   "pose": { "bracoD": 0.45 },      // ângulo de repouso dos braços (radianos), quando houver
+  "escala": 1,                    // voxels por unidade do projeto
   "paleta": ["#f6f3ec", "#3ee07f*", ...], // '*' = voxel que brilha (não recebe luz)
   "limites": { "min": [x, y, z], "max": [x, y, z] },
   "tamanho": [largura, altura, profundidade],
@@ -80,6 +89,13 @@ mostrarParte(pet, 'mochila', false);               // acessórios podem ser esco
   "partes": [
     { "nome": "corpo",  "tipo": "corpo", "pai": "raiz",  "pivo": [7, 3, 6], "voxels": [[x, y, z, corDaPaleta], ...] },
     { "nome": "bracoD", "tipo": "braco", "pai": "corpo", "pivo": [14.5, 10.5, 6], "lado": "D", "levantar": 2.4, "voxels": [...] }
+  ],
+  "decalques": [                  // estampas planas e nítidas sobre a superfície
+    { "parte": "mochila", "tipo": "logo", "centro": [6, 12, -3], "normal": [0, 0, -1], "largura": 5.2, "altura": 5.2, "cor": "#f3f4f6" },
+    { "parte": "corpo", "tipo": "texto", "texto": "</>", ... }
+  ],
+  "hastes": [                     // arames finos, como a armação dos óculos do Coração
+    { "parte": "oculos", "de": [x, y, z], "para": [x, y, z], "raio": 0.17, "cor": "#17181b" }
   ],
   "ancoras": { "cabeca": [x, y, z], "rosto": [...], "costas": [...] }
 }
@@ -104,8 +120,9 @@ mostrarParte(pet, 'mochila', false);               // acessórios podem ser esco
 
 ## Diferenças em relação à referência
 
-- **Marca:** o logo da OpenAI que aparece no Caderninho e no Laptopinho foi trocado pela marca do
-  Quebra-Gelo (um cristal de gelo azul), porque o evento é não oficial.
+- **Mochila em todos:** a referência só mostra a mochila em alguns pets; aqui todos usam uma, com a logo
+  da OpenAI estampada nas costas. A logo também aparece na etiqueta do Caderninho e na base do
+  Laptopinho, como na referência.
 - **Texto:** "Oriativo" virou "Criativo".
 - **Nome:** a caneca se chama **Xícara**, como na referência dos pets. No mapa da aventura ela aparece
   como "Xícaro".

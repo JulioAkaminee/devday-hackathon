@@ -353,6 +353,16 @@
       return cartao;
     });
 
+    /** Balança de leve e, de tempos em tempos, dá uma volta inteira para mostrar a mochila. */
+    function giroNaGaleria(t, fase) {
+      const balanco = Math.sin(t * 0.45 + fase) * 0.4;
+      const ciclo = 14, duracao = 2.6;
+      const q = ((t + fase * 4.1) % ciclo) - (ciclo - duracao);
+      if (q <= 0) return balanco;
+      const s = q / duracao;
+      return balanco + s * s * (3 - 2 * s) * Math.PI * 2;
+    }
+
     function desenharGaleria(t) {
       const largura = document.documentElement.clientWidth, altura = document.documentElement.clientHeight;
       const tamanho = renderizador.getSize(new THREE.Vector2());
@@ -365,7 +375,7 @@
         if (r.bottom < 0 || r.top > altura || r.width === 0) continue;
         const animacao = c.foco ? (temBraco(c.def.id) ? 'comemorar' : 'pular') : c.def.animacao;
         animarPet(c.pet, t + c.fase, animacao);
-        c.pet.raiz.rotation.y = Math.sin(t * 0.45 + c.fase) * 0.4;
+        c.pet.raiz.rotation.y = giroNaGaleria(t, c.fase);
         const aspecto = r.width / r.height;
         if (c.camera.aspect !== aspecto) {
           c.camera.aspect = aspecto;
@@ -406,7 +416,8 @@
       controles.minDistance = 18;
       controles.maxDistance = 160;
       controles.maxPolarAngle = Math.PI * 0.495;
-      aplicarVista('3/4');
+      aplicarVista(VISTAS[params.get('vista')] ? params.get('vista') : '3/4');
+      params.delete('vista');
       preencherPainel();
       history.replaceState(null, '', `?pet=${id}`);
     }
