@@ -46,21 +46,21 @@ teste.
 
 ---
 
-## Capítulo 2 — Troca de ajuda
+## Capítulo 2: Troca de ajuda
 
 **Objetivo (cartão):** Encontre quem pode te ajudar
 
-**Abertura:** Você disse que hoje procura {procura}. Farejei por aí e achei três pessoas que oferecem
-exatamente isso. Escolhe uma e vai lá.
+**Abertura:** Você disse que hoje procura ajuda com {procura}. Farejei o evento e separei três pessoas
+que oferecem isso. Escolhe uma e vai lá.
 
-**Encontro:** {amigo} chegou abanando o rabo. {dono_amigo} entende de {oferta}. É agora.
+**Encontro:** {amigo} chegou pulando na minha frente. {dono_amigo} entende de {oferta}. Sua vez.
 
 **Escolha:** Como você chega?
 
 | | Opção | Consequência |
 |---|---|---|
-| Ampla | Pedir ajuda direto | Você foi direto ao ponto e saiu com uma dica valiosa em dois minutos. {dono_amigo} já estava sendo chamado por outra pessoa. Eficiente! Mas fiquei com a sensação de que dava para ir além. |
-| Profunda | Oferecer ajuda primeiro | Antes de pedir qualquer coisa, você ofereceu ajuda com {minha_oferta}. Era exatamente o que estava travando o projeto de {dono_amigo}. A ajuda voltou em dobro, e {amigo} me deu metade do biscoito dele. |
+| Ampla | Pedir ajuda direto | Você foi ao ponto e saiu com uma dica em dois minutos. Logo depois chamaram {dono_amigo} do outro lado da sala. A dica ficou anotada, mas eu não sei nada sobre a pessoa. |
+| Profunda | Oferecer ajuda primeiro | Antes de pedir, você ofereceu ajuda com {minha_oferta}, o que travava o projeto de {dono_amigo}. Depois a pessoa respondeu a sua dúvida com calma. E {amigo} me deu metade do biscoito. |
 
 ---
 

@@ -70,16 +70,16 @@ export const CAPITULOS: Capitulo[] = [
   {
     titulo: 'Troca de ajuda',
     objetivo: 'Encontre quem pode te ajudar',
-    abertura: 'Você disse que hoje procura ajuda com {procura}. Farejei por aí e achei gente que oferece exatamente isso. Escolhe uma e vai lá.',
-    encontro: '{amigo} chegou abanando o rabo. {dono_amigo} entende de {oferta}. É agora.',
+    abertura: 'Você disse que hoje procura ajuda com {procura}. Farejei o evento e separei três pessoas que oferecem isso. Escolhe uma e vai lá.',
+    encontro: '{amigo} chegou pulando na minha frente. {dono_amigo} entende de {oferta}. Sua vez.',
     pergunta: 'Como você chega?',
     ampla: {
       opcao: 'Pedir ajuda direto',
-      consequencia: 'Você foi direto ao ponto e saiu com uma dica valiosa em dois minutos. {dono_amigo} já estava sendo chamado por outra pessoa. Eficiente! Mas fiquei com a sensação de que dava para ir além.',
+      consequencia: 'Você foi ao ponto e saiu com uma dica em dois minutos. Logo depois chamaram {dono_amigo} do outro lado da sala. A dica ficou anotada, mas eu não sei nada sobre a pessoa.',
     },
     profunda: {
       opcao: 'Oferecer ajuda primeiro',
-      consequencia: 'Antes de pedir qualquer coisa, você ofereceu ajuda com {minha_oferta}. Era exatamente o que estava travando o projeto de {dono_amigo}. A ajuda voltou em dobro, e {amigo} me deu metade do biscoito dele.',
+      consequencia: 'Antes de pedir, você ofereceu ajuda com {minha_oferta}, o que travava o projeto de {dono_amigo}. Depois a pessoa respondeu a sua dúvida com calma. E {amigo} me deu metade do biscoito.',
     },
   },
   {
