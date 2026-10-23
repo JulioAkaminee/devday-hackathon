@@ -433,10 +433,8 @@ export class Mundo {
     this.camera.aspect = w / h
     this.camera.updateProjectionMatrix()
     const r = w / h
-    // na criação o formulário ocupa a esquerda: o pet fica no centro do espaço livre
     // painel à esquerda (formulário da criação, cartão da missão): o foco vai para o centro do espaço livre
-    const r0 = w / h
-    const painel = w <= 760 ? 0 : this.modo === 'vitrine' ? Math.min(520, w) : this.modo === 'final' || r0 < 1.1 ? 464 : 0
+    const painel = w <= 760 ? 0 : this.modo === 'vitrine' ? Math.min(520, w) : 464
     if (painel) this.camera.setViewOffset(w, h, -painel / 2, 0, w, h)
     else this.camera.clearViewOffset()
     if (this.modo === 'vitrine') {
@@ -460,8 +458,8 @@ export class Mundo {
       this.camPos.set(e.x, 34 * d, e.z + 36 * d)
       this.camOlhar.set(e.x, 0, e.z - 2.5)
     } else {
-      // visão da referência: as 4 ilhas, de frente e de cima; janelas mais estreitas afastam
-      const d = Math.max(1, 1.85 / r)
+      // visão da referência: as 4 ilhas, de frente e de cima, no espaço ao lado do cartão; menos espaço afasta
+      const d = Math.max(1, 1.85 / ((w - painel) / h))
       this.camPos.set(0, 40 * d, 72 * d)
       this.camOlhar.set(0, -1, 0.5)
     }
