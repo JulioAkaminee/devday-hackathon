@@ -1,0 +1,132 @@
+[
+  {
+    "id": "xicara",
+    "numero": 1,
+    "nome": "Xícara",
+    "personalidade": "Curioso e sempre puxa assunto.",
+    "arquivo": "xicara.json",
+    "voxels": 2378,
+    "tamanho": [
+      20,
+      24,
+      12
+    ]
+  },
+  {
+    "id": "caderninho",
+    "numero": 2,
+    "nome": "Caderninho",
+    "personalidade": "Organizado e adora trocar ideias.",
+    "arquivo": "caderninho.json",
+    "voxels": 1241,
+    "tamanho": [
+      19,
+      19,
+      6
+    ]
+  },
+  {
+    "id": "laptopinho",
+    "numero": 3,
+    "nome": "Laptopinho",
+    "personalidade": "Criativo e sempre tem um projeto.",
+    "arquivo": "laptopinho.json",
+    "voxels": 908,
+    "tamanho": [
+      19,
+      18,
+      10
+    ]
+  },
+  {
+    "id": "plantinha",
+    "numero": 4,
+    "nome": "Plantinha",
+    "personalidade": "Tranquila e faz conexões inesperadas.",
+    "arquivo": "plantinha.json",
+    "voxels": 2096,
+    "tamanho": [
+      17,
+      25,
+      16
+    ]
+  },
+  {
+    "id": "lampada",
+    "numero": 5,
+    "nome": "Lâmpada",
+    "personalidade": "Cheio de ideias e energia.",
+    "arquivo": "lampada.json",
+    "voxels": 1668,
+    "tamanho": [
+      21,
+      24,
+      13
+    ]
+  },
+  {
+    "id": "coracao",
+    "numero": 6,
+    "nome": "Coração",
+    "personalidade": "Empático e sempre escuta de verdade.",
+    "arquivo": "coracao.json",
+    "voxels": 1600,
+    "tamanho": [
+      19,
+      20,
+      10
+    ]
+  },
+  {
+    "id": "globinho",
+    "numero": 7,
+    "nome": "Globinho",
+    "personalidade": "Adora gente de todas as áreas.",
+    "arquivo": "globinho.json",
+    "voxels": 2091,
+    "tamanho": [
+      19,
+      19,
+      18
+    ]
+  },
+  {
+    "id": "estrelinha",
+    "numero": 8,
+    "nome": "Estrelinha",
+    "personalidade": "Animado e sempre incentiva os outros.",
+    "arquivo": "estrelinha.json",
+    "voxels": 914,
+    "tamanho": [
+      17,
+      20,
+      11
+    ]
+  },
+  {
+    "id": "conezinho",
+    "numero": 9,
+    "nome": "Conezinho",
+    "personalidade": "Direto e ajuda a focar no objetivo.",
+    "arquivo": "conezinho.json",
+    "voxels": 1391,
+    "tamanho": [
+      15,
+      22,
+      16
+    ]
+  },
+  {
+    "id": "nuvem",
+    "numero": 10,
+    "nome": "Nuvem",
+    "personalidade": "Observador e sempre vê o lado diferente.",
+    "arquivo": "nuvem.json",
+    "voxels": 1499,
+    "tamanho": [
+      17,
+      20,
+      15
+    ]
+  }
+]

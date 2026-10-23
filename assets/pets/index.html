@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quebra-Gelo · Pets do evento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="icon" href="data:,">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --fundo: #f4f1ea;
+      --cartao: #ebe7df;
+      --tinta: #1f2024;
+      --suave: #6d6a64;
+      --verde: #22b24c;
+      --linha: #dcd6ca;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      background: var(--fundo);
+      color: var(--tinta);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    body.travado { overflow: hidden; }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      padding: 30px 44px 10px;
+    }
+    .logo {
+      font-family: 'Press Start 2P', ui-monospace, monospace;
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: -1px;
+      white-space: nowrap;
+    }
+    .logo .gelo, .logo .seta { color: var(--verde); }
+    .logo .seta { font-size: 24px; position: relative; top: -4px; }
+    .evento { border-left: 1px solid var(--linha); padding-left: 36px; }
+    .evento strong { display: block; font-size: 23px; font-weight: 700; letter-spacing: -0.01em; }
+    .evento span { color: var(--suave); font-size: 15px; }
+    .titulo {
+      margin-left: auto;
+      letter-spacing: 0.18em;
+      font-weight: 600;
+      font-size: 14px;
+      color: #3a3936;
+      white-space: nowrap;
+    }
+    .titulo::after {
+      content: '';
+      display: inline-block;
+      width: 26px;
+      height: 2px;
+      margin-left: 14px;
+      vertical-align: middle;
+      background: currentColor;
+    }
+
+    main { padding: 18px 44px 36px; }
+    .grade {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 26px 22px;
+    }
+    .cartao {
+      cursor: pointer;
+      border-radius: 24px;
+      outline: none;
+      transition: transform 0.2s ease;
+    }
+    .cartao:hover, .cartao:focus-visible { transform: translateY(-4px); }
+    .cartao:focus-visible .vista { box-shadow: 0 0 0 3px var(--verde); }
+    .vista {
+      aspect-ratio: 1 / 1.04;
+      border-radius: 24px;
+      background: radial-gradient(120% 90% at 50% 38%, #f3f0ea 0%, var(--cartao) 70%);
+      transition: box-shadow 0.2s ease;
+    }
+    .cartao:hover .vista { box-shadow: 0 14px 30px -18px rgba(40, 32, 20, 0.45); }
+    .legenda {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 12px;
+      align-items: baseline;
+      padding: 16px 10px 0 18px;
+    }
+    .num { color: #7b7871; font-size: 17px; font-weight: 500; font-variant-numeric: tabular-nums; }
+    .nome { font-size: 19px; font-weight: 800; letter-spacing: -0.01em; }
+    .texto { grid-column: 2; margin: 5px 0 0; color: #57544f; font-size: 14.5px; line-height: 1.45; }
+
+    footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 24px;
+      justify-content: space-between;
+      padding: 0 44px 34px;
+      color: var(--suave);
+      font-size: 13.5px;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.92em;
+      background: #e9e4da;
+      padding: 1px 6px;
+      border-radius: 6px;
+    }
+
+    #palco {
+      position: fixed;
+      left: 0;
+      top: 0;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* Detalhe de um pet */
+    #detalhe {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+    }
+    #detalhe[hidden] { display: none; }
+    .veu { position: absolute; inset: 0; background: rgba(31, 32, 36, 0.42); backdrop-filter: blur(3px); }
+    .janela {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      width: min(1180px, 100%);
+      height: min(760px, 100%);
+      overflow: hidden;
+      border-radius: 28px;
+      background: var(--fundo);
+      box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.55);
+    }
+    .visor {
+      position: relative;
+      min-height: 0;
+      background: radial-gradient(110% 85% at 50% 40%, #f6f3ee 0%, #e8e3d9 75%);
+    }
+    #canvasDetalhe { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+    #canvasDetalhe:active { cursor: grabbing; }
+    .dica { position: absolute; left: 22px; bottom: 18px; color: var(--suave); font-size: 13px; }
+    .vistas { position: absolute; left: 18px; top: 18px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .seta-nav {
+      position: absolute;
+      top: 50%;
+      width: 42px;
+      height: 42px;
+      margin-top: -21px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.85);
+      color: var(--tinta);
+      font-size: 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.35);
+    }
+    .seta-nav.ant { left: 16px; }
+    .seta-nav.prox { right: 16px; }
+    .info { overflow-y: auto; padding: 30px 28px 26px; border-left: 1px solid var(--linha); }
+    .info .num { font-size: 15px; }
+    .info h2 { margin: 2px 0 6px; font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
+    .info > p { margin: 0 0 18px; color: #57544f; line-height: 1.5; }
+    .info h3 {
+      margin: 20px 0 9px;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #77736c;
+    }
+    .fechar {
+      position: absolute;
+      right: 16px;
+      top: 14px;
+      width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: 50%;
+      background: #e7e2d8;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .botoes { display: flex; flex-wrap: wrap; gap: 7px; }
+    .botao {
+      border: 1px solid #d8d2c6;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--tinta);
+      padding: 7px 13px;
+      font: 600 13.5px Inter, system-ui, sans-serif;
+      cursor: pointer;
+    }
+    .botao:hover { border-color: #b9b2a4; }
+    .botao[aria-pressed='true'] { background: var(--tinta); border-color: var(--tinta); color: #fff; }
+    .botao.verde { background: var(--verde); border-color: var(--verde); color: #fff; }
+    .paleta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 10px; }
+    .cor { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #4d4a45; }
+    .cor i { width: 18px; height: 18px; border-radius: 5px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12); flex: none; }
+    .cor small { color: #8c877e; margin-left: auto; font-variant-numeric: tabular-nums; }
+    dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; font-size: 13.5px; }
+    dt { color: #77736c; }
+    dd { margin: 0; }
+
+    @media (max-width: 1180px) {
+      .grade { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 860px) {
+      header { flex-wrap: wrap; gap: 14px 24px; padding: 22px 20px 6px; }
+      .logo { font-size: 24px; }
+      .logo .seta { font-size: 17px; top: -3px; }
+      .evento { padding-left: 24px; }
+      .titulo { margin-left: 0; }
+      main { padding: 14px 20px 30px; }
+      footer { padding: 0 20px 30px; }
+      .grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 14px; }
+      .legenda { padding: 12px 6px 0 10px; }
+      #detalhe { padding: 0; }
+      .janela { grid-template-columns: 1fr; grid-template-rows: 52% 48%; height: 100%; border-radius: 0; }
+      .info { border-left: 0; border-top: 1px solid var(--linha); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo"><span class="seta">&gt;</span> QUEBRA-<span class="gelo">GELO</span> <span class="seta">&lt;</span></div>
+    <div class="evento">
+      <strong>DevDay · São Paulo</strong>
+      <span>Community Hackathon</span>
+    </div>
+    <div class="titulo">PETS DO EVENTO</div>
+  </header>
+
+  <main>
+    <section class="grade" id="grade" aria-label="Pets do evento"></section>
+  </main>
+
+  <footer>
+    <span>Clique num pet para girar, animar e baixar o modelo.</span>
+    <span>Modelos em voxel: <code>assets/pets/especies.js</code> · dados: <code>assets/pets/json/</code></span>
+  </footer>
+
+  <canvas id="palco" aria-hidden="true"></canvas>
+
+  <div id="detalhe" hidden>
+    <div class="veu" data-fechar></div>
+    <section class="janela" role="dialog" aria-modal="true" aria-labelledby="detalheNome">
+      <div class="visor">
+        <canvas id="canvasDetalhe"></canvas>
+        <div class="vistas" id="vistas"></div>
+        <button class="seta-nav ant" id="anterior" aria-label="Pet anterior">‹</button>
+        <button class="seta-nav prox" id="proximo" aria-label="Próximo pet">›</button>
+        <span class="dica">Arraste para girar · role para aproximar</span>
+      </div>
+      <aside class="info">
+        <button class="fechar" data-fechar aria-label="Fechar">×</button>
+        <span class="num" id="detalheNum"></span>
+        <h2 id="detalheNome"></h2>
+        <p id="detalheTexto"></p>
+        <h3>Animações</h3>
+        <div class="botoes" id="animacoes"></div>
+        <h3 id="tituloAcessorios">Acessórios</h3>
+        <div class="botoes" id="acessorios"></div>
+        <h3>Paleta</h3>
+        <div class="paleta" id="paleta"></div>
+        <h3>Ficha</h3>
+        <dl id="ficha"></dl>
+        <h3>Baixar</h3>
+        <div class="botoes">
+          <button class="botao verde" id="baixarPng">PNG (1024 px)</button>
+          <button class="botao" id="baixarJson">JSON do modelo</button>
+        </div>
+      </aside>
+    </section>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { PETS, gerarPet } from './especies.js';
+    import {
+      ACESSORIOS, ANIMACOES, animarPet, configurarRenderizador, criarEstudio, criarPet3D, descartarPet, enquadrar, mostrarParte,
+    } from './malha.js';
+
+    const NOMES_ACESSORIOS = { mochila: 'Mochila', oculos: 'Óculos', boina: 'Boina', caneta: 'Caneta', vapor: 'Vapor', brilhos: 'Brilhos' };
+    const VISTAS = {
+      '3/4': { azimute: -0.42, elevacao: 0.3 },
+      Frente: { azimute: 0, elevacao: 0.12 },
+      Lado: { azimute: -Math.PI / 2, elevacao: 0.15 },
+      Costas: { azimute: Math.PI, elevacao: 0.22 },
+      Cima: { azimute: -0.42, elevacao: 1.05 },
+    };
+
+    const dados = Object.fromEntries(PETS.map((p) => [p.id, gerarPet(p.id)]));
+    const params = new URLSearchParams(location.search);
+    const relogio = new THREE.Clock();
+    const $ = (s) => document.querySelector(s);
+    const temBraco = (id) => dados[id].partes.some((p) => p.tipo === 'braco');
+
+    // ----- Galeria: um único canvas por cima da página desenha cada pet dentro do seu cartão -----
+    const palco = $('#palco');
+    const renderizador = configurarRenderizador(new THREE.WebGLRenderer({ canvas: palco, antialias: true, alpha: true }));
+    renderizador.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderizador.setClearColor(0x000000, 0);
+    renderizador.autoClear = false;
+
+    const cartoes = PETS.map((def, i) => {
+      const el = document.createElement('article');
+      el.className = 'cartao';
+      el.tabIndex = 0;
+      el.setAttribute('role', 'button');
+      el.setAttribute('aria-label', `Ver ${def.nome} em detalhe`);
+      el.innerHTML = `
+        <div class="vista"></div>
+        <div class="legenda">
+          <span class="num">${String(def.numero).padStart(2, '0')}</span>
+          <strong class="nome">${def.nome}</strong>
+          <p class="texto">${def.personalidade}</p>
+        </div>`;
+      $('#grade').append(el);
+      const pet = criarPet3D(dados[def.id]);
+      const cena = criarEstudio();
+      cena.add(pet.raiz);
+      const cartao = { def, el, vista: el.querySelector('.vista'), pet, cena, camera: new THREE.PerspectiveCamera(24, 1, 0.1, 500), fase: i * 0.83, foco: false };
+      el.addEventListener('pointerenter', () => (cartao.foco = true));
+      el.addEventListener('pointerleave', () => (cartao.foco = false));
+      el.addEventListener('click', () => abrir(def.id));
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          abrir(def.id);
+        }
+      });
+      return cartao;
+    });
+
+    function desenharGaleria(t) {
+      const largura = document.documentElement.clientWidth, altura = document.documentElement.clientHeight;
+      const tamanho = renderizador.getSize(new THREE.Vector2());
+      if (tamanho.x !== largura || tamanho.y !== altura) renderizador.setSize(largura, altura);
+      renderizador.setScissorTest(false);
+      renderizador.clear();
+      renderizador.setScissorTest(true);
+      for (const c of cartoes) {
+        const r = c.vista.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > altura || r.width === 0) continue;
+        const animacao = c.foco ? (temBraco(c.def.id) ? 'comemorar' : 'pular') : c.def.animacao;
+        animarPet(c.pet, t + c.fase, animacao);
+        c.pet.raiz.rotation.y = Math.sin(t * 0.45 + c.fase) * 0.4;
+        const aspecto = r.width / r.height;
+        if (c.camera.aspect !== aspecto) {
+          c.camera.aspect = aspecto;
+          enquadrar(c.camera, c.pet);
+        }
+        const y = altura - r.bottom;
+        renderizador.setViewport(r.left, y, r.width, r.height);
+        renderizador.setScissor(r.left, y, r.width, r.height);
+        renderizador.render(c.cena, c.camera);
+      }
+    }
+
+    // ----- Detalhe -----
+    const detalhe = $('#detalhe');
+    const canvasDetalhe = $('#canvasDetalhe');
+    let rDetalhe, controles, atual;
+
+    function abrir(id) {
+      const def = PETS.find((p) => p.id === id);
+      if (!rDetalhe) {
+        rDetalhe = configurarRenderizador(new THREE.WebGLRenderer({ canvas: canvasDetalhe, antialias: true, alpha: true }));
+        rDetalhe.setPixelRatio(Math.min(devicePixelRatio, 2));
+        rDetalhe.setClearColor(0x000000, 0);
+      }
+      if (atual) descartarPet(atual.pet);
+      controles?.dispose();
+      detalhe.hidden = false;
+      document.body.classList.add('travado');
+      const pet = criarPet3D(dados[id]);
+      const cena = criarEstudio();
+      cena.add(pet.raiz);
+      const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 600);
+      atual = { id, def, pet, cena, camera, animacao: params.get('anim') ?? def.animacao, inicio: relogio.getElapsedTime(), vista: '3/4' };
+      ajustarDetalhe(true);
+      controles = new OrbitControls(camera, canvasDetalhe);
+      controles.enableDamping = true;
+      controles.enablePan = false;
+      controles.minDistance = 18;
+      controles.maxDistance = 160;
+      controles.maxPolarAngle = Math.PI * 0.495;
+      aplicarVista('3/4');
+      preencherPainel();
+      history.replaceState(null, '', `?pet=${id}`);
+    }
+
+    function fechar() {
+      detalhe.hidden = true;
+      document.body.classList.remove('travado');
+      history.replaceState(null, '', location.pathname);
+      cartoes.find((c) => c.def.id === atual?.id)?.el.focus();
+    }
+
+    function navegar(passo) {
+      const i = PETS.findIndex((p) => p.id === atual.id);
+      abrir(PETS[(i + passo + PETS.length) % PETS.length].id);
+    }
+
+    function ajustarDetalhe(forcar = false) {
+      const { clientWidth: l, clientHeight: a } = canvasDetalhe.parentElement;
+      const tamanho = rDetalhe.getSize(new THREE.Vector2());
+      if (!forcar && tamanho.x === l && tamanho.y === a) return;
+      rDetalhe.setSize(l, a, false);
+      atual.camera.aspect = l / a;
+      atual.camera.updateProjectionMatrix();
+    }
+
+    function aplicarVista(nome) {
+      atual.vista = nome;
+      const alvo = enquadrar(atual.camera, atual.pet, { ...VISTAS[nome], margem: 1.32 });
+      controles.target.copy(alvo);
+      controles.update();
+      document.querySelectorAll('#vistas .botao').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.vista === nome)));
+    }
+
+    function botao(texto, aoClicar, extra = {}) {
+      const b = document.createElement('button');
+      b.className = 'botao';
+      b.textContent = texto;
+      Object.assign(b.dataset, extra);
+      b.addEventListener('click', aoClicar);
+      return b;
+    }
+
+    function preencherPainel() {
+      const { def, pet, id } = atual;
+      const d = dados[id];
+      $('#detalheNum').textContent = String(def.numero).padStart(2, '0');
+      $('#detalheNome').textContent = def.nome;
+      $('#detalheTexto').textContent = def.personalidade;
+
+      const animacoes = $('#animacoes');
+      animacoes.replaceChildren(...Object.entries(ANIMACOES).map(([chave, rotulo]) => {
+        const b = botao(rotulo, () => {
+          atual.animacao = chave;
+          atual.inicio = relogio.getElapsedTime();
+          animacoes.querySelectorAll('.botao').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        });
+        b.setAttribute('aria-pressed', String(chave === atual.animacao));
+        return b;
+      }));
+
+      const presentes = ACESSORIOS.filter((nome) => pet.grupos[nome]);
+      $('#tituloAcessorios').hidden = !presentes.length;
+      $('#acessorios').replaceChildren(...presentes.map((nome) => {
+        const b = botao(NOMES_ACESSORIOS[nome], () => {
+          const ligado = b.getAttribute('aria-pressed') !== 'true';
+          b.setAttribute('aria-pressed', String(ligado));
+          mostrarParte(pet, nome, ligado);
+        });
+        b.setAttribute('aria-pressed', 'true');
+        return b;
+      }));
+
+      const contagem = new Map();
+      for (const p of d.partes) for (const v of p.voxels) contagem.set(v[3], (contagem.get(v[3]) ?? 0) + 1);
+      $('#paleta').replaceChildren(...[...contagem].sort((a, b) => b[1] - a[1]).map(([i, n]) => {
+        const hex = d.paleta[i];
+        const el = document.createElement('div');
+        el.className = 'cor';
+        el.innerHTML = `<i style="background:${hex.replace('*', '')}"></i>${hex.replace('*', '')}${hex.endsWith('*') ? ' ✦' : ''}<small>${n}</small>`;
+        el.title = hex.endsWith('*') ? 'Brilha (não recebe sombra)' : '';
+        return el;
+      }));
+
+      const [l, a, p] = d.tamanho;
+      $('#ficha').innerHTML = `
+        <dt>Voxels</dt><dd>${d.totalVoxels.toLocaleString('pt-BR')}</dd>
+        <dt>Tamanho</dt><dd>${l} × ${a} × ${p} (larg. × alt. × prof.)</dd>
+        <dt>Partes</dt><dd>${d.partes.map((q) => q.nome).join(', ')}</dd>
+        <dt>Arquivo</dt><dd><code>json/${id}.json</code></dd>`;
+
+      $('#vistas').replaceChildren(...Object.keys(VISTAS).map((nome) => botao(nome, () => aplicarVista(nome), { vista: nome })));
+      aplicarVista(atual.vista);
+    }
+
+    function desenharDetalhe(t) {
+      ajustarDetalhe();
+      animarPet(atual.pet, t - atual.inicio, atual.animacao);
+      controles.update();
+      rDetalhe.render(atual.cena, atual.camera);
+    }
+
+    detalhe.addEventListener('click', (e) => e.target.closest('[data-fechar]') && fechar());
+    $('#anterior').addEventListener('click', () => navegar(-1));
+    $('#proximo').addEventListener('click', () => navegar(1));
+    addEventListener('keydown', (e) => {
+      if (detalhe.hidden) return;
+      if (e.key === 'Escape') fechar();
+      if (e.key === 'ArrowLeft') navegar(-1);
+      if (e.key === 'ArrowRight') navegar(1);
+    });
+
+    // ----- Exportação -----
+    let rFoto;
+    function fotografar(cena, camera, tamanho) {
+      rFoto ??= configurarRenderizador(new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }));
+      rFoto.setPixelRatio(1);
+      rFoto.setSize(tamanho, tamanho, false);
+      rFoto.setClearColor(0x000000, 0);
+      rFoto.render(cena, camera);
+      return rFoto.domElement.toDataURL('image/png');
+    }
+
+    /** PNG de um pet com fundo transparente (usado pelo botão e pela exportação automática). */
+    function exportarPNG(id, tamanho = 1024, { azimute = -0.42, elevacao = 0.3, animacao, t = 0.35, giro = 0.12 } = {}) {
+      const pet = criarPet3D(dados[id]);
+      const cena = criarEstudio();
+      cena.add(pet.raiz);
+      animarPet(pet, t, animacao ?? (dados[id].animacao === 'acenar' ? 'acenar' : 'parado'));
+      pet.raiz.rotation.y = giro;
+      const camera = new THREE.PerspectiveCamera(24, 1, 0.1, 500);
+      enquadrar(camera, pet, { azimute, elevacao, margem: 1.12 });
+      const url = fotografar(cena, camera, tamanho);
+      descartarPet(pet);
+      return url;
+    }
+
+    function baixar(nome, href) {
+      const a = document.createElement('a');
+      a.download = nome;
+      a.href = href;
+      a.click();
+    }
+
+    $('#baixarPng').addEventListener('click', () => {
+      const { camera } = atual;
+      const aspecto = camera.aspect;
+      camera.aspect = 1;
+      camera.updateProjectionMatrix();
+      baixar(`${atual.id}.png`, fotografar(atual.cena, camera, 1024));
+      camera.aspect = aspecto;
+      camera.updateProjectionMatrix();
+    });
+    $('#baixarJson').addEventListener('click', () => {
+      const url = URL.createObjectURL(new Blob([JSON.stringify(dados[atual.id])], { type: 'application/json' }));
+      baixar(`${atual.id}.json`, url);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+
+    window.__qg = { PETS, dados, exportarPNG };
+
+    // ----- Laço -----
+    function quadro() {
+      const t = relogio.getElapsedTime();
+      if (!detalhe.hidden && atual) desenharDetalhe(t);
+      else desenharGaleria(t);
+      window.__pronto = true;
+      requestAnimationFrame(quadro);
+    }
+    if (params.get('pet') && dados[params.get('pet')]) abrir(params.get('pet'));
+    requestAnimationFrame(quadro);
+  </script>
+</body>
+</html>
