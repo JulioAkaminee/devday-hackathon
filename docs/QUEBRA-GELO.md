@@ -26,6 +26,7 @@ toda escolha nasce de um encontro.
 | D2 | A narrativa é reforçada: cada missão é um **capítulo com texto**, e a consequência é **contada na história**, não só mostrada na barra |
 | D3 | A demo não depende do público: **a dupla do time basta**, com pets de exemplo e partida salva (seção 7) |
 | D4 | O critério é **complexidade, não tempo**: trabalho dividido em módulos com contrato, tocados em paralelo por duas pessoas e vários agentes (seção 9) |
+| D6 | O projeto cumpre também o **desafio nº 4** (liberado pelo embaixador): a **Academia** ensina networking, a **Aventura** põe em prática. Os dois ficam separados nas regras para cada desafio ser verificável sozinho (seção 3B) |
 | D5 | A aventura acontece num **mundo 3D em Three.js, no estilo Overcooked / Moving Out**: fases pequenas com câmera fixa, o pet anda livre dentro da fase e **as decisões são lugares para onde ele caminha** (seção 3A) |
 
 ## 2. Regras oficiais do evento
@@ -113,6 +114,58 @@ pelo outro jogador.
 - uma luz direcional e uma luz ambiente, sem sombra real (círculo escuro embaixo dos personagens);
 - `pixelRatio` limitado a 1,5 e renderização pausada com a aba escondida;
 - meta de 30 fps num Android intermediário.
+
+### 3B. A Academia — desafio nº 4 (D6)
+
+O Quebra-Gelo **joga** networking na Aventura e **ensina** networking na Academia. Assunto: networking
+em eventos. Três habilidades, cada uma ligada a capítulos da Aventura:
+
+| Habilidade | O que é | Capítulo que pratica |
+|---|---|---|
+| **Abordar** | puxar conversa | 1 |
+| **Escutar** | aprofundar | 2 |
+| **Conectar** | apresentar pessoas, follow-up | 3 e 4 |
+
+**a) 5 questões diagnósticas → credenciamento.** Na primeira entrada, um pet-recepcionista faz 5
+perguntas de situação; cada uma mede uma habilidade. Exemplo:
+> "Você chega e vê 3 pessoas conversando em roda. O que faz?"
+> (a) espera alguém olhar para você · (b) se aproxima e pergunta "posso entrar?" · (c) vai pegar café e
+> desiste — a (b) pontua em Abordar.
+
+**b) Trilha a partir dos resultados → prédio Academia.** Caminho de bolinhas estilo Duolingo com as 3
+habilidades; **a mais fraca vem primeiro**. Quem errou Abordar começa por Abordar; quem errou Conectar
+começa por Conectar. Essa é a demonstração do desafio: dois perfis, dois percursos.
+
+**c) Atividades com explicação → pet-instrutor.** Cada bolinha é uma situação curta com escolha e a
+explicação do porquê. Exemplo (Conectar): "Você conheceu alguém que procura designer e você conhece
+uma. O que faz?" → "Apresentar os dois na hora vale mais que passar o contato depois: a conversa já
+começa com contexto."
+
+**d) Acompanhamento de progresso → barras por habilidade** e bolinhas concluídas no caminho, salvas como
+a aventura.
+
+**Ligação com a Aventura:** a trilha **sugere** o capítulo que treina a habilidade fraca ("sua habilidade
+fraca é Abordar: o capítulo 1 é o seu treino").
+
+**Separação obrigatória:**
+- respostas da Academia **não** mexem em Alcance e Profundidade;
+- atividades da Academia **não** contam como decisões da Aventura (que continua com 4 decisões e 3
+  finais).
+
+**Banco de questões:** o desafio diz que a organização fornece; como não forneceu, **escrevemos o
+nosso** e dizemos isso no README e no vídeo.
+
+**Menu do mundo** (estrutura do Julio): Credenciamento (diagnóstico, só na 1ª vez) · Aventura
+(desafio 10) · Academia (desafio 4) · Quem eu conheci.
+
+| O desafio nº 4 pede | Como cumprimos |
+|---|---|
+| 5 questões diagnósticas | credenciamento, 5 situações |
+| selecionar uma trilha pelos resultados | habilidade mais fraca primeiro |
+| atividades com explicações | situações com o pet-instrutor |
+| acompanhamento de progresso | barras e bolinhas concluídas, salvas |
+| 1 assunto, 3 habilidades | networking: Abordar, Escutar, Conectar |
+| demo: dois perfis, percursos diferentes | dois diagnósticos levando a trilhas em ordem diferente |
 
 ### As duas características
 - **Alcance:** quantas pessoas você conheceu.
