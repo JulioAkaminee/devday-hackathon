@@ -324,7 +324,33 @@ export function criarPet(dna: DNA, itens: Itens = { crachas: false, xicara: fals
   return pet
 }
 
-export const itensDe = (alcance: number, profundidade: number): Itens => ({
+// Retrato 2D do pet (avatar do cabeçalho, listas, criação): um renderer pequeno compartilhado
+let fotografo: THREE.WebGLRenderer | null = null
+const fotos = new Map<string, string>()
+export function retrato(dna: DNA): string {
+  const k = dna.especie + '|' + dna.acessorio
+  if (fotos.has(k)) return fotos.get(k)!
+  fotografo ??= new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true })
+  fotografo.setSize(160, 160, false)
+  const cena = new THREE.Scene()
+  cena.add(new THREE.HemisphereLight('#ffffff', '#b8a98c', 2.3))
+  const sol = new THREE.DirectionalLight('#ffffff', 1.5)
+  sol.position.set(3, 6, 8)
+  const pet = criarPet(dna)
+  pet.children[1].visible = false // sem sombra no retrato
+  cena.add(sol, pet)
+  const caixa = new THREE.Box3().setFromObject(pet)
+  const c = caixa.getCenter(new THREE.Vector3())
+  const t = caixa.getSize(new THREE.Vector3()).length()
+  const cam = new THREE.PerspectiveCamera(30, 1, 0.01, 50)
+  cam.position.set(c.x + t * 0.5, c.y + t * 0.35, c.z + t * 1.75)
+  cam.lookAt(c)
+  fotografo.render(cena, cam)
+  fotos.set(k, fotografo.domElement.toDataURL())
+  return fotos.get(k)!
+}
+
+export const itensDe =(alcance: number, profundidade: number): Itens => ({
   crachas: alcance >= 4,
   xicara: profundidade >= 4,
   capa: alcance >= 4 && profundidade >= 4,

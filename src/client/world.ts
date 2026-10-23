@@ -2,29 +2,38 @@ import * as THREE from 'three'
 import type { Opcao } from '../shared/engine.ts'
 import { criarPet, type DNA, type Itens } from './pet.ts'
 
-// Mapa de ilhas voxel (docs/referencias/mapa-aventura-v1.png). Cada ilha é a fase de um capítulo,
-// no estilo Overcooked: a câmera aproxima, o pet anda livre e escolhe caminhando até uma zona (D5).
-// Coordenadas de FASES são locais à ilha: x de -6 a 6, z de -4 a 4,3.
+// Mapa da aventura (docs/referencias/mapa-aventura-v1.png): as 4 ilhas sempre à vista, ligadas por um
+// caminho. A escolha é feita no cartão (D8); o mundo mostra onde o pet está e o que já aconteceu.
+// Identidade: banner do evento (branco, preto, um verde só, bola verde com olhos de anel).
 
-export const CORES_MUNDO = {
-  fundo: '#f4efe4',
-  agua: '#bfe6ee',
-  terra: '#f3ead7',
-  penhasco: '#e6dcc6',
-  grama: '#4cc960',
-  gramaEscura: '#2f9e44',
-  caminho: '#2b2b2b',
-  caminhoBorda: '#1fbf5f',
-  ampla: '#1fbf5f',
-  profunda: '#1b1b1b',
+export const COR = {
+  ceu: '#f2f3ef',
+  agua: '#cfe8ea',
+  espuma: '#e6f4f4',
+  terra: '#f1ead9',
+  penhasco: '#e3d8c2',
+  penhascoClaro: '#ece3d0',
+  verde: '#22b04b',
+  verdeEscuro: '#178a39',
+  verdeClaro: '#5fd07d',
+  preto: '#141414',
+  branco: '#ffffff',
+  madeira: '#a77b52',
 }
 
-interface Fase {
-  titulo: string
-  limites: [number, number, number, number] // xmin, xmax, zmin, zmax (locais)
-  montar(g: THREE.Group): void
-  zonas: [x: number, z: number][] // [ampla, profunda]
-}
+const E = 2.4 // escala dos pets no mapa: na referência o pet ocupa ~1/4 da ilha
+
+// Centro de cada ilha (Missões 1 a 4) e estação onde o pet para em cada capítulo.
+// Capítulo 0 (Credenciamento) fica na ilha 1, ao lado da bandeira.
+const ILHAS = [new THREE.Vector3(-27, 0, 1), new THREE.Vector3(-9, 0, 8), new THREE.Vector3(9, 0, -4), new THREE.Vector3(29, 0, -4)]
+const ESTACOES = [
+  new THREE.Vector3(-31, 0, 4),
+  new THREE.Vector3(-22.5, 0, 4.5),
+  new THREE.Vector3(-8, 0, 11),
+  new THREE.Vector3(5, 0, -0.5),
+  new THREE.Vector3(25, 0, -0.5),
+]
+const ILHA_DO_CAP = [0, 0, 1, 2, 3]
 
 const geo = new THREE.BoxGeometry(1, 1, 1)
 const mats = new Map<string, THREE.MeshLambertMaterial>()
@@ -39,200 +48,353 @@ function caixa(g: THREE.Object3D, cor: string, w: number, h: number, d: number, 
   g.add(m)
   return m
 }
-const mesa = (g: THREE.Object3D, x: number, z: number, w = 1.6, d = 0.9, cor = '#c8946a') => {
-  caixa(g, cor, w, 0.12, d, x, 0.62, z)
-  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) caixa(g, '#8d6748', 0.1, 0.62, 0.1, x + dx * (w / 2 - 0.1), 0, z + dz * (d / 2 - 0.1))
-}
-const banco = (g: THREE.Object3D, x: number, z: number, cor = '#2b2b2b') => {
-  caixa(g, cor, 0.45, 0.1, 0.45, x, 0.35, z)
-  caixa(g, '#6c6c6c', 0.08, 0.35, 0.08, x, 0, z)
-}
-const laptop = (g: THREE.Object3D, x: number, z: number) => {
-  caixa(g, '#adb5bd', 0.4, 0.03, 0.28, x, 0.74, z)
-  caixa(g, '#343a40', 0.4, 0.26, 0.03, x, 0.77, z - 0.13)
-}
-const arvore = (g: THREE.Object3D, x: number, z: number, a = 1) => {
-  caixa(g, '#8d6748', 0.3, 0.9 * a, 0.3, x, 0, z)
-  caixa(g, CORES_MUNDO.gramaEscura, 1.2 * a, 0.9 * a, 1.2 * a, x, 0.8 * a, z)
-  caixa(g, CORES_MUNDO.grama, 0.8 * a, 0.6 * a, 0.8 * a, x, 1.6 * a, z)
-}
 
-const FASES: Fase[] = [
-  { // 0 prólogo: credenciamento
-    titulo: 'Credenciamento', limites: [-5.5, 5.5, -2.8, 3.8], zonas: [],
-    montar(g) {
-      caixa(g, '#1b1b1b', 4, 1, 0.8, 0, 0, -2.6)
-      caixa(g, '#ffffff', 4.1, 0.1, 0.9, 0, 1, -2.6)
-      for (let i = -1; i <= 1; i++) caixa(g, CORES_MUNDO.ampla, 0.3, 0.02, 0.4, i * 1.2, 1.1, -2.5)
-    },
-  },
-  { // 1 Novas pessoas: mesas do hackathon
-    titulo: 'Novas pessoas', limites: [-5.5, 5.5, -1.2, 3.8], zonas: [[-3.6, 2.2], [3.6, 2.2]],
-    montar(g) {
-      for (const x of [-2.5, 0]) { mesa(g, x, -2); laptop(g, x - 0.35, -2); laptop(g, x + 0.4, -2) }
-      for (const [x, z] of [[-4.4, 2.2], [-2.8, 2.2], [-3.6, 1.3], [-3.6, 3.1]]) banco(g, x, z, CORES_MUNDO.ampla)
-      caixa(g, '#8d6748', 1.4, 0.4, 0.45, 3.6, 0, 3.2)
-      caixa(g, '#8d6748', 1.4, 0.4, 0.12, 3.6, 0.4, 3.4)
-    },
-  },
-  { // 2 Troca de ajuda: balcão de mentoria
-    titulo: 'Troca de ajuda', limites: [-5.5, 5.5, -1.6, 3.8], zonas: [[-3.6, 1.8], [3.6, 1.8]],
-    montar(g) {
-      caixa(g, '#1b1b1b', 5, 1, 0.8, -0.8, 0, -2.6)
-      caixa(g, '#ffffff', 5.1, 0.1, 0.9, -0.8, 1, -2.6)
-      for (let i = 0; i < 4; i++) caixa(g, CORES_MUNDO.ampla, 0.3, 0.6, 0.3, -3.6, 0, -1 + i * 0.7)
-      mesa(g, 3.6, 1.8, 1.4, 1.0, '#e9e2d0'); banco(g, 3.0, 2.7); banco(g, 4.2, 2.7)
-      laptop(g, 3.3, 1.8); laptop(g, 3.9, 1.8)
-    },
-  },
-  { // 3 Cultive conexões: duas metades separadas por um vão
-    titulo: 'Cultive conexões', limites: [-5.5, -1.1, -1.5, 3.8], zonas: [[-1.6, 0.5], [-4.4, 2.6]],
-    montar(g) {
-      caixa(g, CORES_MUNDO.agua, 2, 0.05, 9.2, 0, -0.03, 0.15)
-      mesa(g, -3.3, -1.8); laptop(g, -3.3, -1.8)
-      mesa(g, 3.3, -1.8); laptop(g, 3.3, -1.8)
-      caixa(g, '#1b1b1b', 0.7, 1.1, 0.6, -4.4, 0, 3.3)
-      caixa(g, '#ffffff', 0.3, 0.3, 0.05, -4.4, 0.6, 2.98)
-      for (let x = -5; x <= 5; x += 1) caixa(g, x % 2 ? '#ffe066' : '#fff3bf', 0.12, 0.12, 0.12, x, 2.4 - Math.abs(x) * 0.06, -3)
-    },
-  },
-  { // 4 Palco DevDay: auditório (também é o cenário do final)
-    titulo: 'Palco DevDay', limites: [-5.5, 5.5, -1.6, 3.8], zonas: [[-4.8, 2.6], [0, -1.2]],
-    montar(g) {
-      caixa(g, '#1b1b1b', 8, 0.6, 1.6, 0, 0, -3)
-      caixa(g, '#ffffff', 4, 2, 0.1, 0, 0.6, -3.7)
-      caixa(g, CORES_MUNDO.ampla, 1.2, 1.2, 0.12, 0.8, 1, -3.62)
-      for (const z of [0.2, 1.4, 2.6]) for (let x = -3; x <= 3; x += 1) banco(g, x, z)
-    },
-  },
-]
+// pseudo-aleatório determinístico: o mapa é igual em todo dispositivo
+let semente = 11
+const rnd = () => ((semente = (semente * 16807) % 2147483647) / 2147483647)
 
-// Centros das ilhas no mapa: zigue-zague da esquerda para a direita, como na referência
-const ILHAS = [new THREE.Vector3(-34, 0, 6), new THREE.Vector3(-17, 0, -2), new THREE.Vector3(0, 0, 6), new THREE.Vector3(17, 0, -2), new THREE.Vector3(34, 0, 4)]
-const ARCO = new THREE.Vector3(4.6, 0, -3.3) // por onde o pet do outro chega (local)
-const INICIO = new THREE.Vector3(-1.5, 0, 2.6) // onde o pet entra na ilha (local)
+// ---------- texturas desenhadas em canvas ----------
 
-function textoSprite(texto: string, fundo: string, cor = '#ffffff', altura = 0.55) {
+const FONTE = '"Inter Tight", "Helvetica Neue", Arial, sans-serif'
+
+function textura(w: number, h: number, desenhar: (c: CanvasRenderingContext2D) => void) {
   const cv = document.createElement('canvas')
-  cv.width = 1024; cv.height = 128
-  const ctx = cv.getContext('2d')!
-  ctx.font = 'bold 50px system-ui, sans-serif'
-  const t = texto.length > 40 ? texto.slice(0, 39) + '…' : texto
-  const w = Math.min(1016, ctx.measureText(t).width + 70)
-  ctx.fillStyle = fundo
-  ctx.beginPath(); ctx.roundRect(512 - w / 2, 4, w, 120, 30); ctx.fill()
-  ctx.fillStyle = cor
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-  ctx.fillText(t, 512, 66)
-  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), depthTest: false }))
-  s.scale.set(altura * 8, altura, 1)
+  cv.width = w; cv.height = h
+  desenhar(cv.getContext('2d')!)
+  const t = new THREE.CanvasTexture(cv)
+  t.colorSpace = THREE.SRGBColorSpace
+  t.anisotropy = 4
+  return t
+}
+
+/** Bola verde com olhos de anel, como no banner. `corte` desloca para fora do quadro. */
+function bola(c: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
+  c.fillStyle = COR.verde
+  c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2); c.fill()
+  c.strokeStyle = COR.preto
+  c.lineWidth = r * 0.075
+  for (const [ox, oy] of [[-0.62, -0.38], [0.12, -0.42]]) {
+    c.beginPath(); c.ellipse(cx + ox * r, cy + oy * r, r * 0.11, r * 0.15, 0, 0, Math.PI * 2); c.stroke()
+  }
+}
+
+/** Placa de texto que sempre olha para a câmera. */
+function placa(texto: string, { fundo = COR.branco, cor = COR.preto, altura = 1.1, peso = 600 } = {}) {
+  const px = 96
+  const medir = document.createElement('canvas').getContext('2d')!
+  medir.font = `${peso} ${px}px ${FONTE}`
+  const w = Math.ceil(medir.measureText(texto).width + px * 0.9)
+  const h = Math.ceil(px * 1.5)
+  const t = textura(w, h, (c) => {
+    c.fillStyle = fundo
+    c.fillRect(0, 0, w, h)
+    c.fillStyle = cor
+    c.font = `${peso} ${px}px ${FONTE}`
+    c.textBaseline = 'middle'
+    c.fillText(texto, px * 0.45, h / 2 + px * 0.04)
+  })
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t }))
+  s.scale.set((altura * w) / h, altura, 1)
   return s
 }
 
-// pseudo-aleatório determinístico: o mapa é igual em todo dispositivo
-let semente = 7
-const rnd = () => ((semente = (semente * 16807) % 2147483647) / 2147483647)
+/** Número da missão: quadrado preto, algarismo branco. */
+function numero(n: string, lado = 1.5) {
+  const t = textura(160, 160, (c) => {
+    c.fillStyle = COR.preto; c.fillRect(0, 0, 160, 160)
+    c.fillStyle = COR.branco; c.font = `600 112px ${FONTE}`
+    c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(n, 80, 86)
+  })
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t }))
+  s.scale.set(lado, lado, 1)
+  return s
+}
 
-export type Modo = 'mapa' | 'ilha' | 'vitrine'
+/** Selo de concluída: círculo verde com ✓ em traço preto. */
+function selo() {
+  const t = textura(160, 160, (c) => {
+    c.fillStyle = COR.verde; c.beginPath(); c.arc(80, 80, 76, 0, Math.PI * 2); c.fill()
+    c.strokeStyle = COR.preto; c.lineWidth = 14; c.lineCap = 'square'
+    c.beginPath(); c.moveTo(46, 82); c.lineTo(70, 106); c.lineTo(116, 56); c.stroke()
+  })
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t }))
+  s.scale.set(1.4, 1.4, 1)
+  return s
+}
+
+/** Balão de fala de um pet do mapa: retângulo branco com rabicho, símbolo desenhado. */
+function balao(tipo: 'reticencias' | 'oi' | 'brilho') {
+  const t = textura(160, 150, (c) => {
+    c.fillStyle = COR.branco
+    c.fillRect(8, 8, 144, 104)
+    c.beginPath(); c.moveTo(56, 112); c.lineTo(80, 142); c.lineTo(92, 112); c.fill()
+    c.fillStyle = COR.preto; c.strokeStyle = COR.preto
+    if (tipo === 'reticencias') for (const x of [52, 80, 108]) { c.beginPath(); c.arc(x, 60, 9, 0, Math.PI * 2); c.fill() }
+    else if (tipo === 'oi') { c.font = `600 60px ${FONTE}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('oi!', 80, 62) }
+    else { c.lineWidth = 9; for (let i = 0; i < 6; i++) { const a = (i * Math.PI) / 3; c.beginPath(); c.moveTo(80 + Math.cos(a) * 16, 60 + Math.sin(a) * 16); c.lineTo(80 + Math.cos(a) * 36, 60 + Math.sin(a) * 36); c.stroke() } }
+  })
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t }))
+  s.scale.set(1.5, 1.4, 1)
+  return s
+}
+
+// ---------- peças do cenário ----------
+
+function arvore(g: THREE.Object3D, x: number, z: number, a = 1) {
+  caixa(g, COR.madeira, 0.5 * a, 1.6 * a, 0.5 * a, x, 0, z)
+  caixa(g, COR.verdeEscuro, 2.2 * a, 1.3 * a, 2.2 * a, x, 1.3 * a, z)
+  caixa(g, COR.verde, 1.7 * a, 1.1 * a, 1.7 * a, x, 2.5 * a, z)
+  caixa(g, COR.verdeClaro, 1 * a, 0.8 * a, 1 * a, x, 3.5 * a, z)
+}
+const arbusto = (g: THREE.Object3D, x: number, z: number) => {
+  caixa(g, COR.verde, 1, 0.7, 1, x, 0, z)
+  caixa(g, COR.verdeClaro, 0.6, 0.4, 0.6, x + 0.15, 0.7, z - 0.1)
+}
+function mesa(g: THREE.Object3D, x: number, z: number, w = 2.2, d = 1.3) {
+  caixa(g, COR.madeira, w, 0.18, d, x, 0.95, z)
+  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) caixa(g, '#7d5a3c', 0.16, 0.95, 0.16, x + dx * (w / 2 - 0.15), 0, z + dz * (d / 2 - 0.15))
+}
+const xicara = (g: THREE.Object3D, x: number, z: number, y = 1.13) => caixa(g, COR.branco, 0.28, 0.3, 0.28, x, y, z)
+function banco(g: THREE.Object3D, x: number, z: number, w = 2.4) {
+  caixa(g, COR.madeira, w, 0.18, 0.7, x, 0.55, z)
+  caixa(g, COR.madeira, w, 0.6, 0.14, x, 0.73, z - 0.3)
+  for (const dx of [-1, 1]) caixa(g, '#7d5a3c', 0.16, 0.55, 0.6, x + dx * (w / 2 - 0.2), 0, z)
+}
+function cadeira(g: THREE.Object3D, x: number, z: number) {
+  caixa(g, COR.preto, 0.7, 0.14, 0.7, x, 0.5, z)
+  caixa(g, COR.preto, 0.7, 0.6, 0.12, x, 0.64, z + 0.3)
+  caixa(g, '#3a3a3a', 0.12, 0.5, 0.12, x, 0, z)
+}
+function poste(g: THREE.Object3D, x: number, z: number, h = 5) {
+  caixa(g, COR.preto, 0.3, h, 0.3, x, 0, z)
+  caixa(g, COR.preto, 0.7, 0.2, 0.7, x, 0, z)
+}
+/** Varal de lâmpadas entre dois pontos (local), caindo no meio. */
+function varal(g: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3) {
+  const n = 12
+  for (let i = 0; i <= n; i++) {
+    const t = i / n
+    const p = a.clone().lerp(b, t)
+    p.y -= Math.sin(t * Math.PI) * 0.9
+    const l = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: '#fff1b8' }))
+    l.scale.setScalar(0.22)
+    l.position.copy(p)
+    g.add(l)
+  }
+}
+/** Arco de entrada com o nome e o número da missão. */
+function arco(g: THREE.Object3D, x: number, z: number, n: number, nome: string) {
+  for (const dx of [-1.9, 1.9]) {
+    for (let y = 0; y < 4; y++) caixa(g, y % 2 ? COR.penhascoClaro : COR.branco, 0.9, 1, 0.9, x + dx, y, z)
+  }
+  caixa(g, COR.branco, 4.8, 0.9, 1, x, 4, z)
+  caixa(g, COR.penhascoClaro, 4.8, 0.2, 1.05, x, 4.9, z)
+  const p = placa(nome, { altura: 1.25 })
+  p.position.set(x, 4.45, z + 0.7)
+  const num = numero(String(n))
+  num.position.set(x, 6.1, z)
+  g.add(p, num)
+}
+
+/** Telão do palco: reproduz o banner do evento. */
+function telao(g: THREE.Object3D, x: number, z: number) {
+  const w = 10.5, h = 5.6
+  const t = textura(1050, 560, (c) => {
+    c.fillStyle = COR.branco; c.fillRect(0, 0, 1050, 560)
+    c.fillStyle = COR.preto
+    c.font = `500 64px ${FONTE}`
+    c.textBaseline = 'top'
+    c.fillText('OpenAI', 40, 34)
+    ;['DevDay', 'Community Hackathon', 'São Paulo'].forEach((l, i) => c.fillText(l, 330, 34 + i * 70))
+    c.save(); c.beginPath(); c.rect(0, 0, 1050, 560); c.clip()
+    bola(c, 600, 700, 400)
+    c.restore()
+  })
+  const painel = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t }))
+  painel.position.set(x, 2.6 + h / 2, z + 0.06)
+  g.add(painel)
+  caixa(g, COR.preto, w + 0.4, h + 0.4, 0.1, x, 2.4, z - 0.02)
+  // torres de treliça
+  for (const s of [-1, 1]) {
+    const tx = x + s * (w / 2 + 0.6)
+    for (const dx of [-0.35, 0.35]) caixa(g, COR.preto, 0.12, 8.6, 0.12, tx + dx, 0, z)
+    for (let y = 0.6; y < 8.6; y += 0.9) caixa(g, COR.preto, 0.8, 0.08, 0.1, tx, y, z)
+    const luz = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: '#fff1b8' }))
+    luz.scale.set(0.5, 0.35, 0.35); luz.position.set(tx, 8.8, z + 0.3); g.add(luz)
+  }
+}
+
+// ---------- ilhas ----------
+
+function montarIlha(g: THREE.Group, i: number) {
+  const W = 15, D = 11
+  caixa(g, COR.terra, W, 0.5, D, 0, -0.5, 0)
+  caixa(g, COR.penhasco, W - 0.4, 3.6, D - 0.4, 0, -4.1, 0)
+  // borda de penhasco em blocos, com grama por cima: o aspecto voxel da referência
+  for (let x = -W / 2 + 0.5; x < W / 2; x += 1) {
+    for (const z of [-D / 2 + 0.5, D / 2 - 0.5]) {
+      const h = 2.4 + rnd() * 1.6
+      caixa(g, rnd() > 0.5 ? COR.penhasco : COR.penhascoClaro, 1, h, 1.02, x, -0.5 - h + 0.02, z + Math.sign(z) * 0.05)
+      if (rnd() > 0.45) caixa(g, rnd() > 0.5 ? COR.verde : COR.verdeEscuro, 1, 0.35 + rnd() * 0.25, 1, x, 0, z)
+      if (rnd() > 0.8) caixa(g, COR.verde, 1, 0.5, 0.3, x, -0.9 - rnd(), z + Math.sign(z) * 0.55)
+    }
+  }
+  for (let z = -D / 2 + 1.5; z < D / 2 - 1; z += 1) {
+    for (const x of [-W / 2 + 0.5, W / 2 - 0.5]) {
+      const h = 2.4 + rnd() * 1.6
+      caixa(g, rnd() > 0.5 ? COR.penhasco : COR.penhascoClaro, 1.02, h, 1, x + Math.sign(x) * 0.05, -0.5 - h + 0.02, z)
+      if (rnd() > 0.5) caixa(g, rnd() > 0.5 ? COR.verde : COR.verdeEscuro, 1, 0.35 + rnd() * 0.25, 1, x, 0, z)
+    }
+  }
+  // espuma na água em volta
+  caixa(g, COR.espuma, W + 1.2, 0.05, D + 1.2, 0, -3.38, 0)
+
+  if (i === 0) {
+    // Novas pessoas + Credenciamento: bandeira do evento, mesa com laptops
+    caixa(g, COR.preto, 0.25, 7, 0.25, -6, 0, -3.5)
+    const bandeira = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 3.4), new THREE.MeshBasicMaterial({
+      side: THREE.DoubleSide,
+      map: textura(260, 340, (c) => { c.fillStyle = COR.verde; c.fillRect(0, 0, 260, 340); c.save(); c.beginPath(); c.rect(0, 0, 260, 340); c.clip(); bola(c, 150, 330, 230); c.restore(); c.fillStyle = COR.verde; c.fillRect(0, 0, 260, 120) }),
+    }))
+    bandeira.position.set(-4.65, 5.2, -3.5)
+    g.add(bandeira)
+    arco(g, 0.5, -1.5, 1, 'Novas pessoas')
+    mesa(g, 4.6, -3); caixa(g, '#cfd3d6', 0.7, 0.05, 0.5, 4.2, 1.13, -3); caixa(g, '#2b2b2b', 0.7, 0.45, 0.06, 4.2, 1.16, -3.25)
+    banco(g, -4.5, 1.2, 2.2)
+    arvore(g, -6.2, -4.2, 1.05); arvore(g, 6.4, 3.8, 0.85); arvore(g, 6.3, -4.4, 0.9)
+    arbusto(g, -2.4, 4.4); arbusto(g, 2.6, -4.6)
+  } else if (i === 1) {
+    // Troca de ajuda: arco com placa </>, bancos, árvores
+    arco(g, 1, -1.5, 2, 'Troca de ajuda')
+    const tag = placa('</>', { fundo: COR.preto, cor: COR.branco, altura: 0.8, peso: 600 })
+    tag.position.set(1, 2.2, -0.9)
+    g.add(tag)
+    mesa(g, 5, 1.5, 1.8, 1.2); xicara(g, 4.6, 1.5)
+    arvore(g, -5.6, -3.8, 1.1); arvore(g, -6.2, 3.4, 0.9); arvore(g, 6.3, -3.8, 0.95)
+    arbusto(g, 3.4, 4.3); arbusto(g, -3.4, -4.4)
+  } else if (i === 2) {
+    // Cultive conexões: varal de luzes, mesas de café, placa com xícara
+    for (const [x, z] of [[-5.5, -3.8], [5.5, -3.8], [-5.5, 2.5]]) poste(g, x, z)
+    varal(g, new THREE.Vector3(-5.5, 5, -3.8), new THREE.Vector3(5.5, 5, -3.8))
+    varal(g, new THREE.Vector3(-5.5, 5, -3.8), new THREE.Vector3(-5.5, 5, 2.5))
+    const p = placa('Cultive conexões', { altura: 1.25 }); p.position.set(0, 5.3, -3.6)
+    const num = numero('3'); num.position.set(0, 6.8, -3.6)
+    g.add(p, num)
+    mesa(g, -2, -0.5); xicara(g, -2.5, -0.5); xicara(g, -1.6, -0.3)
+    mesa(g, 2.6, 1.5); xicara(g, 2.3, 1.5)
+    for (const [x, z] of [[-3.4, -0.5], [-0.6, -0.5], [1.2, 1.5], [4, 1.5]]) cadeira(g, x, z)
+    caixa(g, COR.preto, 0.2, 2, 0.2, 5, 0, -1.2)
+    const cafe = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 1.4), new THREE.MeshBasicMaterial({
+      map: textura(140, 140, (c) => { c.fillStyle = COR.preto; c.fillRect(0, 0, 140, 140); c.strokeStyle = COR.branco; c.lineWidth = 10; c.strokeRect(38, 44, 50, 56); c.beginPath(); c.arc(92, 72, 14, -Math.PI / 2, Math.PI / 2); c.stroke() }),
+    }))
+    cafe.position.set(5, 2.6, -1.08)
+    g.add(cafe)
+    arvore(g, -6.3, 4.2, 0.85); arvore(g, 6.4, 3.6, 1)
+  } else {
+    // Palco DevDay: telão do banner, palco, plateia
+    telao(g, 0, -4.4)
+    caixa(g, COR.preto, 11, 0.7, 2.6, 0, 0, -3.1)
+    for (let x = -3.5; x <= 3.5; x += 1.1) for (const z of [-0.6, 0.6, 1.8]) cadeira(g, x, z)
+    arvore(g, -6.5, 3.8, 0.85); arbusto(g, 6.5, -1.5); arbusto(g, -6.6, -1.2)
+  }
+}
+
+export type Modo = 'mapa' | 'final' | 'vitrine'
 
 export class Mundo {
   private renderer: THREE.WebGLRenderer
   private cena = new THREE.Scene()
-  private camera = new THREE.PerspectiveCamera(36, 1, 0.1, 300)
+  private camera = new THREE.PerspectiveCamera(28, 1, 0.5, 400)
   private camPos = new THREE.Vector3()
   private camOlhar = new THREE.Vector3()
   private olharAtual = new THREE.Vector3()
   private mapa = new THREE.Group()
-  private marcas = new THREE.Group() // ✓ das ilhas concluídas, ponte do cap. 3, contatos
-  private extras = new THREE.Group() // zonas e efeitos da ilha atual (coordenadas locais)
+  private marcas = new THREE.Group() // selos, contatos conhecidos
+  private extras = new THREE.Group() // cena do final
   private pet: THREE.Group | null = null
   private amigo: THREE.Group | null = null
-  private alvo = new THREE.Vector3()
-  private teclas = new Set<string>()
-  private zonas: { op: Opcao; x: number; z: number; obj: THREE.Group }[] = []
-  private aoEscolher: ((op: Opcao) => void) | null = null
-  private limites: Fase['limites'] = [-5, 5, -3, 3]
+  private amigoAlvo = new THREE.Vector3()
   private relogio = new THREE.Clock()
   private modo: Modo = 'vitrine'
-  private ilha = -1
-  private viagem: { de: THREE.Vector3; para: THREE.Vector3; t: number; fim: () => void } | null = null
+  private cap = -1
+  private viagem: { de: THREE.Vector3; para: THREE.Vector3; t: number } | null = null
   private pulo = 0
 
   constructor(canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5))
-    this.cena.background = new THREE.Color(CORES_MUNDO.fundo)
-    this.cena.fog = new THREE.Fog(CORES_MUNDO.fundo, 45, 140)
-    this.cena.add(new THREE.HemisphereLight('#ffffff', '#b8a98c', 2.3))
-    const sol = new THREE.DirectionalLight('#ffffff', 1.5)
-    sol.position.set(6, 12, 8)
+    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
+    this.cena.background = new THREE.Color(COR.ceu)
+    this.cena.fog = new THREE.Fog(COR.ceu, 70, 170)
+    this.cena.add(new THREE.HemisphereLight('#ffffff', '#c9bfa8', 2.4))
+    const sol = new THREE.DirectionalLight('#ffffff', 1.4)
+    sol.position.set(-8, 14, 10)
     this.cena.add(sol, this.mapa, this.marcas, this.extras)
     this.montarMapa()
-
     addEventListener('resize', () => this.ajustar())
-    addEventListener('keydown', (e) => { if (!(e.target instanceof HTMLInputElement)) this.teclas.add(e.key.toLowerCase()) })
-    addEventListener('keyup', (e) => this.teclas.delete(e.key.toLowerCase()))
-    addEventListener('blur', () => this.teclas.clear())
-    canvas.addEventListener('pointerdown', (e) => this.tocar(e))
     this.ajustar()
     this.camera.position.copy(this.camPos)
     this.olharAtual.copy(this.camOlhar)
     this.renderer.setAnimationLoop(() => this.quadro())
   }
 
-  // ---------- construção ----------
-
   private montarMapa() {
-    const agua = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshLambertMaterial({ color: CORES_MUNDO.agua }))
+    const agua = new THREE.Mesh(new THREE.PlaneGeometry(600, 600), mat(COR.agua))
     agua.rotation.x = -Math.PI / 2
-    agua.position.y = -0.9
+    agua.position.y = -3.4
     this.mapa.add(agua)
-    for (let i = 0; i < 40; i++) {
-      const s = 0.6 + rnd() * 1.6
-      caixa(this.mapa, rnd() > 0.5 ? '#e9e2d0' : '#bfe8b5', s, s, s, (rnd() - 0.5) * 110, -1.2 + rnd() * 0.6, (rnd() - 0.5) * 50)
+    // cubos boiando: creme e verde, alguns grandes perto da câmera
+    for (let i = 0; i < 70; i++) {
+      const perto = i < 10
+      const s = perto ? 3 + rnd() * 4 : 0.8 + rnd() * 2.2
+      const x = (rnd() - 0.5) * (perto ? 110 : 150)
+      const z = perto ? 22 + rnd() * 18 : (rnd() - 0.5) * 80
+      if (ILHAS.some((c) => Math.abs(c.x - x) < 9 + s && Math.abs(c.z - z) < 7 + s)) continue
+      caixa(this.mapa, rnd() > 0.55 ? COR.penhascoClaro : rnd() > 0.5 ? COR.verdeClaro : COR.verde, s, s, s, x, -3.4 - s * 0.35, z)
     }
-
     ILHAS.forEach((c, i) => {
       const g = new THREE.Group()
       g.position.copy(c)
-      // terra, penhasco e borda de grama
-      caixa(g, CORES_MUNDO.terra, 12.4, 0.3, 9.4, 0, -0.3, 0.15)
-      caixa(g, CORES_MUNDO.penhasco, 12.4, 2.4, 9.4, 0, -2.7, 0.15)
-      for (let x = -6; x <= 6; x += 0.8) {
-        if (rnd() > 0.35) caixa(g, rnd() > 0.5 ? CORES_MUNDO.grama : CORES_MUNDO.gramaEscura, 0.8, 0.25 + rnd() * 0.3, 0.8, x, -0.05, -4.4)
-        if (rnd() > 0.7) caixa(g, CORES_MUNDO.grama, 0.8, 0.2, 0.8, x, -0.05, 4.6)
-      }
-      arvore(g, -5.4, -3.8, 1.1); arvore(g, 5.6, 3.9, 0.8)
-      if (i % 2) arvore(g, -5.5, 3.6, 0.9); else arvore(g, 1.8, -3.9, 1)
-      FASES[i].montar(g)
-      // arco de entrada com o número da missão
-      caixa(g, '#f8f4ea', 0.4, 2.4, 0.4, ARCO.x - 0.9, 0, ARCO.z)
-      caixa(g, '#f8f4ea', 0.4, 2.4, 0.4, ARCO.x + 0.9, 0, ARCO.z)
-      caixa(g, '#f8f4ea', 2.4, 0.5, 0.5, ARCO.x, 2.4, ARCO.z)
-      const n = textoSprite(i === 0 ? '★' : String(i), '#1b1b1b', '#ffffff', 0.9)
-      n.scale.set(0.9, 0.9, 1)
-      n.position.set(ARCO.x, 3.5, ARCO.z)
-      const t = textoSprite(FASES[i].titulo, '#f8f4ea', '#1b1b1b', 0.6)
-      t.position.set(ARCO.x - 3.2, 2.6, ARCO.z)
-      g.add(n, t)
-      // marcador verde onde o pet chega
-      const m = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.12, 24), mat(CORES_MUNDO.caminhoBorda))
-      m.position.set(INICIO.x, 0.03, INICIO.z)
-      g.add(m)
+      montarIlha(g, i)
       this.mapa.add(g)
     })
-
-    // caminho entre as ilhas
-    for (let i = 0; i < ILHAS.length - 1; i++) {
-      const a = ILHAS[i].clone().add(new THREE.Vector3(6.2, 0, 1.5))
-      const b = ILHAS[i + 1].clone().add(new THREE.Vector3(-6.2, 0, 1.5))
+    // caminho: faixa preta com bordas verdes e marcadores circulares
+    for (let i = 1; i < ESTACOES.length - 1; i++) {
+      const a = ESTACOES[i], b = ESTACOES[i + 1]
       const meio = a.clone().add(b).multiplyScalar(0.5)
-      const comp = a.distanceTo(b)
       const ang = Math.atan2(b.x - a.x, b.z - a.z)
-      for (const [w, cor, y] of [[1.6, CORES_MUNDO.caminhoBorda, -0.12], [1.1, CORES_MUNDO.caminho, -0.08]] as const) {
-        const p = caixa(this.mapa, cor, w, 0.2, comp, meio.x, y, meio.z)
+      const comp = a.distanceTo(b)
+      for (const [w, cor, y] of [[2.1, COR.verde, -0.02], [1.4, COR.preto, 0]] as const) {
+        const p = caixa(this.mapa, cor, w, 0.14, comp, meio.x, y, meio.z)
         p.rotation.y = ang
       }
+      // pilares onde o caminho passa sobre a água
+      for (let t = 0.15; t < 1; t += 0.14) {
+        const p = a.clone().lerp(b, t)
+        if (ILHAS.some((c) => Math.abs(c.x - p.x) < 7.5 && Math.abs(c.z - p.z) < 5.5)) continue
+        caixa(this.mapa, COR.penhasco, 0.7, 3.4, 0.7, p.x, -3.4, p.z)
+      }
+    }
+    for (const e of ESTACOES.slice(1)) {
+      const anel = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.18, 40), mat(COR.verde))
+      anel.position.set(e.x, 0.09, e.z)
+      const meio = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, 0.2, 40), mat(COR.verdeClaro))
+      meio.position.set(e.x, 0.1, e.z)
+      this.mapa.add(anel, meio)
+    }
+    // outros participantes no mapa, com balões (como na referência)
+    const figurantes: [DNA, number, number, 'reticencias' | 'oi' | 'brilho' | null][] = [
+      [{ especie: 'nuvem', cor: '', acessorio: 'boina' }, -13.5, 9.5, 'oi'],
+      [{ especie: 'lampada', cor: '', acessorio: 'oculos' }, 12.5, -2.5, 'reticencias'],
+      [{ especie: 'plantinha', cor: '', acessorio: 'oculos' }, 33, -1.5, null],
+      [{ especie: 'coracao', cor: '', acessorio: 'oculos' }, 35.2, -2.3, 'brilho'],
+    ]
+    for (const [dna, x, z, b] of figurantes) {
+      const p = criarPet(dna)
+      p.scale.setScalar(E)
+      p.position.set(x, 0, z)
+      p.rotation.y = -0.4
+      this.mapa.add(p)
+      if (b) { const s = balao(b); s.position.set(x + 0.9, 4.1, z); this.mapa.add(s) }
     }
   }
 
@@ -245,27 +407,26 @@ export class Mundo {
     this.camera.updateProjectionMatrix()
     const r = w / h
     if (this.modo === 'vitrine') {
-      this.camPos.set(0, 2.2, 5.2)
-      this.camOlhar.set(0, 0.6, 0)
-    } else if (this.modo === 'mapa' || this.ilha < 0) {
-      const d = r < 0.8 ? 2.6 : r < 1.2 ? 1.6 : 1
-      this.camPos.set(0, 42 * d, 46 * d)
-      this.camOlhar.set(0, 0, 1)
+      this.camPos.set(0, 1.5, 4.6)
+      this.camOlhar.set(0, 0.55, 0)
+    } else if (this.modo === 'final') {
+      const c = ILHAS[3]
+      const d = r < 0.8 ? 1.9 : 1
+      this.camPos.set(c.x, 20 * d, c.z + 36 * d)
+      this.camOlhar.set(c.x - 2, 1.5, c.z)
+    } else if (r < 1.1) {
+      // celular em pé: as 4 ilhas não cabem; a câmera acompanha a ilha atual
+      const e = ESTACOES[Math.max(0, this.cap)]
+      const d = r < 0.7 ? 1.25 : 1
+      this.camPos.set(e.x, 34 * d, e.z + 36 * d)
+      this.camOlhar.set(e.x, 0, e.z - 2.5)
     } else {
-      // retrato (celular em pé) precisa de mais distância para caber a ilha
-      const d = r < 0.8 ? 1.9 : r < 1.2 ? 1.35 : 1
-      const c = ILHAS[this.ilha]
-      this.camPos.set(c.x, 11 * d, c.z + 10 * d)
-      this.camOlhar.set(c.x, 0, c.z + 0.6)
+      // visão da referência: as 4 ilhas, de frente e de cima; janelas mais estreitas afastam
+      const d = Math.max(1, 1.85 / r)
+      this.camPos.set(0, 40 * d, 72 * d)
+      this.camOlhar.set(0, -1, 0.5)
     }
   }
-
-  /** 'mapa' mostra todas as ilhas; 'ilha' aproxima da ilha atual. */
-  verModo(modo: Exclude<Modo, 'vitrine'>) {
-    this.modo = modo
-    this.ajustar()
-  }
-  get modoAtual() { return this.modo }
 
   // ---------- pets ----------
 
@@ -273,7 +434,9 @@ export class Mundo {
   mostrarVitrine(dna: DNA) {
     this.modo = 'vitrine'
     this.mapa.visible = false
+    this.marcas.visible = false
     this.trocarPet(dna)
+    this.pet!.scale.setScalar(1)
     this.pet!.position.set(0, 0, 0)
     this.ajustar()
     this.camera.position.copy(this.camPos)
@@ -285,261 +448,146 @@ export class Mundo {
     const rot = this.pet?.rotation.y ?? 0
     if (this.pet) this.cena.remove(this.pet)
     this.pet = criarPet(dna, itens)
+    this.pet.scale.setScalar(this.modo === 'vitrine' ? 1 : E)
     if (pos) this.pet.position.copy(pos)
     this.pet.rotation.y = rot
     this.cena.add(this.pet)
   }
 
-  /**
-   * Leva o pet para a ilha do capítulo. Ilha nova: a câmera abre o mapa, o pet atravessa o caminho e
-   * a câmera aproxima. Mesma ilha: só reinicia a ilha (zonas, amigo).
-   */
+  /** Leva o pet até a estação do capítulo, andando pelo caminho. */
   irPara(cap: number, dna: DNA, itens: Itens) {
+    const primeira = this.modo === 'vitrine' || !this.pet
     this.mapa.visible = true
-    const primeira = this.ilha < 0 || this.modo === 'vitrine'
-    if (!this.pet || primeira) this.trocarPet(dna, itens)
-    this.limparIlha()
-    const destino = ILHAS[cap].clone().add(INICIO)
-    if (cap === this.ilha && !primeira) return
-    const de = this.ilha >= 0 && !primeira ? this.pet!.position.clone() : null
-    this.ilha = cap
-    this.limites = [...FASES[cap].limites]
-    this.extras.position.copy(ILHAS[cap])
-    if (!de) {
-      this.pet!.position.copy(destino)
-      this.alvo.copy(destino)
-      this.verModo('ilha')
-      return
-    }
-    this.verModo('mapa')
-    this.viagem = { de, para: destino, t: 0, fim: () => { this.alvo.copy(destino); this.verModo('ilha') } }
-  }
-
-  private limparIlha() {
+    this.marcas.visible = true
     this.extras.clear()
-    this.zonas = []
-    this.aoEscolher = null
-    if (this.amigo) { this.cena.remove(this.amigo); this.amigo = null }
+    if (this.amigo && cap !== this.cap) { this.cena.remove(this.amigo); this.amigo = null }
+    if (primeira) { this.modo = 'mapa'; this.trocarPet(dna, itens) }
+    this.modo = 'mapa'
+    const destino = ESTACOES[cap]
+    if (primeira || cap < this.cap) { this.pet!.position.copy(destino); this.pet!.rotation.y = 0 }
+    else if (cap !== this.cap) this.viagem = { de: this.pet!.position.clone(), para: destino.clone(), t: 0 }
+    this.cap = cap
+    this.ajustar()
   }
 
-  /** Estado persistente do mapa: ilhas concluídas, ponte do cap. 3 e contatos parados nas ilhas onde foram conhecidos. */
-  atualizarMapa(capAtual: number, escolhas: Opcao[], contatosPorIlha: (DNA | null)[]) {
+  /** Selos nas missões concluídas e contatos parados nas ilhas onde foram conhecidos. */
+  atualizarMapa(capAtual: number, _escolhas: Opcao[], contatosPorIlha: (DNA | null)[]) {
     this.marcas.clear()
+    const ALTURA_SELO = [5.6, 5.6, 6.3, 9.8]
+    const X_SELO = [2.6, 3.1, 2.4, 6.3]
     for (let i = 1; i < Math.min(capAtual, 5); i++) {
-      const v = textoSprite('✓', CORES_MUNDO.ampla, '#ffffff', 0.9)
-      v.scale.set(0.9, 0.9, 1)
-      v.position.copy(ILHAS[i]).add(new THREE.Vector3(ARCO.x + 1.4, 3.4, ARCO.z))
-      this.marcas.add(v)
+      const s = selo()
+      const c = ILHAS[i - 1]
+      s.position.set(c.x + X_SELO[i - 1], ALTURA_SELO[i - 1], c.z - (i === 3 ? 3.6 : 1.5) + 0.8)
+      this.marcas.add(s)
     }
-    if (escolhas[2] === 'ampla') this.ponte(this.marcas, ILHAS[3], false)
     contatosPorIlha.forEach((dna, i) => {
-      if (!dna || i + 1 === this.ilha) return
+      if (!dna || i + 1 === this.cap) return
       const p = criarPet(dna)
-      p.position.copy(ILHAS[i + 1]).add(new THREE.Vector3(-4.6, 0, -0.6))
+      p.scale.setScalar(E)
+      p.position.copy(ESTACOES[i + 1]).add(new THREE.Vector3(2.8, 0, 1.6))
       p.rotation.y = 0.5
       this.marcas.add(p)
     })
   }
 
-  /** O pet do outro chega pelo arco e passa a seguir o seu. */
+  /** O pet de quem você encontrou chega e para ao lado do seu. */
   chegarAmigo(dna: DNA) {
-    if (this.amigo || this.ilha < 0) return
+    if (this.amigo || !this.pet) return
     this.amigo = criarPet(dna)
-    this.amigo.position.copy(ILHAS[this.ilha]).add(ARCO).add(new THREE.Vector3(0, 0, 0.3))
+    this.amigo.scale.setScalar(E)
+    const e = ESTACOES[this.cap]
+    this.amigo.position.copy(e).add(new THREE.Vector3(5, 0, -3))
+    this.amigoAlvo.copy(e).add(new THREE.Vector3(2.6, 0, 0.2))
     this.cena.add(this.amigo)
   }
 
-  /** Pet parado na ilha atual (coordenadas locais): contato antigo no cap. 3, amigos no final. */
-  colocar(dna: DNA, x: number, z: number, rotY = 0, y = 0) {
-    const p = criarPet(dna)
-    p.position.set(x, y, z)
-    p.rotation.y = rotY
-    this.extras.add(p)
-    return p
-  }
-
-  mostrarZonas(rotulos: [string, string], aoEscolher: (op: Opcao) => void) {
-    for (const z of this.zonas) this.extras.remove(z.obj)
-    const f = FASES[this.ilha]
-    this.zonas = (['ampla', 'profunda'] as const).map((op, i) => {
-      const [x, z] = f.zonas[i]
-      const cor = op === 'ampla' ? CORES_MUNDO.ampla : CORES_MUNDO.profunda
-      const obj = new THREE.Group()
-      const anel = new THREE.Mesh(new THREE.RingGeometry(0.75, 0.95, 32), new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: 0.9 }))
-      anel.rotation.x = -Math.PI / 2
-      anel.position.y = 0.04
-      const disco = new THREE.Mesh(new THREE.CircleGeometry(0.75, 32), new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: 0.2 }))
-      disco.rotation.x = -Math.PI / 2
-      disco.position.y = 0.03
-      const r = textoSprite(rotulos[i], cor)
-      r.position.y = 2.1
-      obj.add(anel, disco, r)
-      obj.position.set(x, 0, z)
-      this.extras.add(obj)
-      return { op, x, z, obj }
-    })
-    this.aoEscolher = aoEscolher
-  }
-
-  private ponte(g: THREE.Object3D, base: THREE.Vector3, animar: boolean) {
-    for (let i = 0; i < 5; i++) {
-      const t = caixa(g, '#a0522d', 0.35, 0.12, 1.2, base.x - 0.8 + i * 0.4, animar ? -0.8 : 0, base.z + 0.5)
-      if (animar) t.userData.subir = 0.25 + i * 0.12
-    }
-  }
-
-  /** Consequência visível na ilha. */
-  consequencia(op: Opcao) {
-    for (const z of this.zonas) this.extras.remove(z.obj)
-    this.zonas = []
-    this.aoEscolher = null
-    if (this.ilha === 3 && op === 'ampla') {
-      this.ponte(this.extras, new THREE.Vector3(), true)
-      this.limites[1] = 5.5
-    }
+  /** Consequência: o pet comemora. */
+  consequencia(_op: Opcao) {
     this.pulo = 1
   }
 
-  /** Final no Palco DevDay: os pets dos contatos aparecem conforme o final. */
+  /** Final no Palco DevDay: a câmera aproxima e os contatos aparecem conforme o final. */
   cenaFinal(tipo: 'time' | 'colecionador' | 'amigo', contatos: DNA[]) {
-    const c = ILHAS[4]
+    this.modo = 'final'
+    this.ajustar()
+    if (this.amigo) { this.cena.remove(this.amigo); this.amigo = null }
+    this.extras.clear()
+    const c = ILHAS[3]
     const pet = this.pet!
+    this.viagem = null
+    pet.rotation.y = 0
+    const no = (dna: DNA, x: number, y: number, z: number, festa = false) => {
+      const p = criarPet(dna)
+      p.scale.setScalar(E)
+      p.position.set(c.x + x, y, c.z + z)
+      p.userData.festa = festa
+      this.extras.add(p)
+    }
     if (tipo === 'amigo') {
-      caixa(this.extras, '#8d6748', 2, 0.35, 0.6, 0, 0.5, 0.6)
-      pet.position.set(c.x - 0.5, 0.85, c.z + 0.6)
-      this.limites = [-0.5, -0.5, 0.6, 0.6]
-      if (contatos[0]) this.colocar(contatos[0], 0.5, 0.6, 0, 0.85)
+      banco(this.extras, c.x, c.z + 3.6, 5.6)
+      pet.position.set(c.x - 1.4, 0.55, c.z + 3.6)
+      if (contatos[0]) no(contatos[0], 1.4, 0.55, 3.6)
     } else {
-      pet.position.set(c.x, 0.6, c.z - 2.8)
-      this.limites = [-3.5, 3.5, -3.2, -2.4]
+      pet.position.set(c.x, 0.7, c.z - 3)
       if (tipo === 'time') {
-        contatos.slice(0, 6).forEach((d, i) => {
-          const p = this.colocar(d, (i % 2 ? 1 : -1) * (1.2 + Math.floor(i / 2) * 1.1), -2.7, 0, 0.6)
-          p.userData.festa = true
-        })
+        contatos.slice(0, 4).forEach((d, i) => no(d, (i % 2 ? 1 : -1) * (2.6 + Math.floor(i / 2) * 2.4), 0.7, -3, true))
       } else {
-        for (let i = 0; i < 26; i++) {
-          const k = caixa(this.extras, i % 2 ? '#1fbf5f' : '#ffffff', 0.35, 0.02, 0.45, (rnd() - 0.5) * 6, 0.6 + rnd() * 0.1, -2.8 + (rnd() - 0.5) * 1.2)
+        for (let i = 0; i < 40; i++) {
+          const k = caixa(this.extras, i % 3 ? COR.branco : COR.verde, 0.5, 0.04, 0.7, c.x + (rnd() - 0.5) * 10, 0.72, c.z - 3 + (rnd() - 0.5) * 2.2)
           k.rotation.y = rnd() * 3
         }
       }
     }
-    pet.rotation.y = 0
-    this.alvo.copy(pet.position)
   }
 
-  // ---------- entrada e animação ----------
-
-  private tocar(e: PointerEvent) {
-    if (this.modo !== 'ilha' || !this.pet || this.viagem) return
-    const r = (e.target as HTMLElement).getBoundingClientRect()
-    const ndc = new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1)
-    const ray = new THREE.Raycaster()
-    ray.setFromCamera(ndc, this.camera)
-    const p = new THREE.Vector3()
-    if (ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -this.pet.position.y), p)) this.alvo.copy(p)
-  }
+  // ---------- animação ----------
 
   private quadro() {
     const dt = Math.min(this.relogio.getDelta(), 0.05)
     const t = this.relogio.elapsedTime
     if (document.hidden) return
-    this.camera.position.lerp(this.camPos, Math.min(1, dt * 3))
-    this.olharAtual.lerp(this.camOlhar, Math.min(1, dt * 3))
+    this.camera.position.lerp(this.camPos, Math.min(1, dt * 2.5))
+    this.olharAtual.lerp(this.camOlhar, Math.min(1, dt * 2.5))
     this.camera.lookAt(this.olharAtual)
-    if (this.modo === 'vitrine' && this.pet) {
-      this.pet.rotation.y += dt * 0.8
-      this.pet.userData.corpo.position.y = Math.abs(Math.sin(t * 3)) * 0.06
-    } else if (this.pet) {
-      if (this.viagem) this.viajar(dt, t)
-      else this.moverPet(dt, t)
-      this.moverAmigo(dt, t)
-      this.animarExtras(dt, t)
-    }
-    this.renderer.render(this.cena, this.camera)
-  }
-
-  private viajar(dt: number, t: number) {
-    const v = this.viagem!
-    v.t = Math.min(1, v.t + dt / 2.2)
-    const s = v.t * v.t * (3 - 2 * v.t)
-    this.pet!.position.lerpVectors(v.de, v.para, s)
-    this.pet!.rotation.y = Math.atan2(v.para.x - v.de.x, v.para.z - v.de.z)
-    this.pet!.userData.corpo.position.y = Math.abs(Math.sin(t * 14)) * 0.15
-    if (v.t >= 1) { this.viagem = null; v.fim() }
-  }
-
-  private moverPet(dt: number, t: number) {
-    const pet = this.pet!
-    const k = this.teclas
-    const dir = new THREE.Vector3(
-      (k.has('d') || k.has('arrowright') ? 1 : 0) - (k.has('a') || k.has('arrowleft') ? 1 : 0), 0,
-      (k.has('s') || k.has('arrowdown') ? 1 : 0) - (k.has('w') || k.has('arrowup') ? 1 : 0),
-    )
-    if (dir.lengthSq() > 0 && this.modo === 'ilha') this.alvo.copy(pet.position).addScaledVector(dir.normalize(), 0.5)
-    if (this.ilha >= 0) {
-      const c = ILHAS[this.ilha]
-      const [x0, x1, z0, z1] = this.limites
-      this.alvo.x = THREE.MathUtils.clamp(this.alvo.x, c.x + x0, c.x + x1)
-      this.alvo.z = THREE.MathUtils.clamp(this.alvo.z, c.z + z0, c.z + z1)
-    }
-    this.alvo.y = pet.position.y
-
-    const delta = this.alvo.clone().sub(pet.position)
-    const andando = delta.length() > 0.05
-    if (andando) {
-      pet.position.addScaledVector(delta.normalize(), Math.min(delta.length(), 4.5 * dt))
-      pet.rotation.y = Math.atan2(delta.x, delta.z)
-    }
-    const corpo: THREE.Group = pet.userData.corpo
-    if (this.pulo > 0) {
-      this.pulo = Math.max(0, this.pulo - dt * 1.2)
-      corpo.position.y = Math.sin(this.pulo * Math.PI * 3) ** 2 * 0.6
-      pet.rotation.y += dt * 8
-    } else {
-      corpo.position.y = andando ? Math.abs(Math.sin(t * 14)) * 0.12 : 0
-      corpo.scale.y = andando ? 1 : 1 + Math.sin(t * 3) * 0.03
-    }
-
-    if (this.aoEscolher) {
-      const c = ILHAS[this.ilha]
-      for (const z of this.zonas) {
-        if (Math.hypot(pet.position.x - c.x - z.x, pet.position.z - c.z - z.z) < 0.8) {
-          const cb = this.aoEscolher
-          this.aoEscolher = null
-          cb(z.op)
-          break
-        }
+    const pet = this.pet
+    if (pet) {
+      const corpo: THREE.Group = pet.userData.corpo
+      if (this.modo === 'vitrine') {
+        pet.rotation.y += dt * 0.8
+        corpo.position.y = Math.abs(Math.sin(t * 3)) * 0.05
+      } else if (this.viagem) {
+        const v = this.viagem
+        v.t = Math.min(1, v.t + dt / (v.de.distanceTo(v.para) / 9))
+        const s = v.t * v.t * (3 - 2 * v.t)
+        pet.position.lerpVectors(v.de, v.para, s)
+        pet.rotation.y = Math.atan2(v.para.x - v.de.x, v.para.z - v.de.z)
+        corpo.position.y = Math.abs(Math.sin(t * 12)) * 0.08
+        if (v.t >= 1) { this.viagem = null; pet.rotation.y = 0 }
+      } else if (this.pulo > 0) {
+        this.pulo = Math.max(0, this.pulo - dt * 1.1)
+        corpo.position.y = Math.sin(this.pulo * Math.PI * 3) ** 2 * 0.3
+        pet.rotation.y += dt * 7
+        if (this.pulo === 0) pet.rotation.y = 0
+      } else {
+        corpo.position.y = 0
+        corpo.scale.y = 1 + Math.sin(t * 2.5) * 0.025
+        if (this.modo === 'mapa') pet.rotation.y = Math.sin(t * 0.6) * 0.25
       }
     }
-  }
-
-  private moverAmigo(dt: number, t: number) {
     const a = this.amigo
-    if (!a) return
-    const pet = this.pet!
-    const destino = pet.position.clone().add(new THREE.Vector3(Math.sin(pet.rotation.y + 2.2), 0, Math.cos(pet.rotation.y + 2.2)).multiplyScalar(1.1))
-    destino.y = pet.position.y
-    const delta = destino.sub(a.position)
-    const andando = delta.length() > 0.15
-    if (andando) {
-      a.position.addScaledVector(delta.normalize(), Math.min(delta.length(), 4 * dt))
-      a.rotation.y = Math.atan2(delta.x, delta.z)
-    }
-    a.userData.corpo.position.y = andando ? Math.abs(Math.sin(t * 13 + 1)) * 0.12 : 0
-  }
-
-  private animarExtras(dt: number, t: number) {
-    for (const z of this.zonas) {
-      z.obj.children[0].scale.setScalar(1 + Math.sin(t * 4) * 0.06)
-      z.obj.children[2].position.y = 2.1 + Math.sin(t * 2) * 0.08
+    if (a) {
+      const delta = this.amigoAlvo.clone().sub(a.position)
+      const andando = delta.length() > 0.05
+      if (andando) {
+        a.position.addScaledVector(delta.normalize(), Math.min(delta.length(), 7 * dt))
+        a.rotation.y = Math.atan2(delta.x, delta.z)
+      } else a.rotation.y = -0.5
+      a.userData.corpo.position.y = andando ? Math.abs(Math.sin(t * 12 + 1)) * 0.08 : 0
     }
     for (const o of this.extras.children) {
-      if (o.userData.subir !== undefined) {
-        o.userData.subir -= dt
-        if (o.userData.subir < 0 && o.position.y < 0.06) o.position.y = Math.min(0.06, o.position.y + dt * 3)
-      }
-      if (o.userData.festa) o.userData.corpo.position.y = Math.abs(Math.sin(t * 6 + o.position.x)) * 0.3
+      if (o.userData.festa) o.userData.corpo.position.y = Math.abs(Math.sin(t * 6 + o.position.x)) * 0.15
     }
+    this.renderer.render(this.cena, this.camera)
   }
 }
