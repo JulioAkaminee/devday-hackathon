@@ -372,3 +372,10 @@ body.demo #ui { position: static; }
   /* o cabeçalho tem duas linhas aqui: o aviso desce para não cobrir as barras */
   .aviso { top: calc(env(safe-area-inset-top) + 124px); }
 }
+/* abertura: tela cheia com o cubo, que já entra rachando (delay negativo adianta o ciclo de 6 s da marca) */
+.abertura { position: fixed; inset: 0; z-index: 50; background: var(--papel); display: grid; place-content: center; justify-items: center; gap: 14px; text-align: center; cursor: pointer; padding: 16px; }
+.abertura .marca { width: clamp(110px, 18vw, 170px); height: clamp(110px, 18vw, 170px); margin-bottom: 10px; }
+.abertura .metade, .abertura .lasca { animation-delay: -2.7s; }
+.abertura b { font-size: clamp(54px, 11vw, 150px); font-weight: 600; letter-spacing: -0.055em; line-height: 0.95; }
+.abertura p { margin: 0; font-size: clamp(18px, 2.6vw, 34px); font-weight: 500; letter-spacing: -0.025em; }
+.abertura em { font-style: normal; font-weight: 600; color: var(--verde-texto); }

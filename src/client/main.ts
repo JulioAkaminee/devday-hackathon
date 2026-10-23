@@ -845,4 +845,26 @@ if (params.get('c')) {
 }
 if (location.pathname === '/demo') telaDemo()
 else if (token) iniciarJogo()
-else telaCriar()
+else { telaCriar(); abertura() }
+
+// Abertura: o cubo racha e o nome aparece; passa sozinha (ou num toque) e revela a boas-vindas já montada por trás.
+// Só na primeira visita da sessão, e só para quem ainda não tem pet.
+function abertura() {
+  if (sessao.get('qg-abertura')) return
+  sessao.set('qg-abertura', '1')
+  const calma = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const el = document.createElement('div')
+  el.className = 'abertura'
+  el.setAttribute('aria-hidden', 'true')
+  el.innerHTML = `${MARCA()}<b>Quebra-Gelo</b><p>O networking do DevDay, <em>jogável.</em></p>`
+  document.body.append(el)
+  if (!calma) animate(el.children, { opacity: [0, 1], y: [18, 0] }, { delay: stagger(0.12), duration: 0.5, ease: [0.2, 0.8, 0.2, 1] })
+  let saiu = false
+  const sair = () => {
+    if (saiu) return
+    saiu = true
+    animate(el, { opacity: 0 }, { duration: calma ? 0.01 : 0.35 }).then(() => el.remove())
+  }
+  el.addEventListener('pointerdown', sair)
+  setTimeout(sair, calma ? 1200 : 2300)
+}
