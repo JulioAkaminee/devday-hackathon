@@ -60,16 +60,16 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
 
 ## Lote 3 — baixo (se sobrar tempo)
 
-- [x] C10 `touch-action: manipulation` em `button`; ignorar segundo toque < 300 ms no diagnóstico
-- [x] C11 Avisar quando um código de QR fica guardado ("Você vai encontrar X ao começar a Missão")
-- [x] C12 `sessionStorage` em try (iOS com cookies bloqueados)
-- [x] C13 Modal do Escanear: não abrir dois; "Fechar" com 44 px
-- [x] C14 Foco volta ao primeiro botão do cartão após `render()`; `aria-pressed` nos seletores
-- [x] C15 `.rotulo span` com contraste AA (`#157a33`)
-- [ ] C16 `retrato()` não guarda imagem de contexto perdido; `/demo` com `.catch`
-- [x] C17 `minlength="2"` nos nomes
-- [x] S9 `app.disable('x-powered-by')`; rota curinga não devolve `index.html` para arquivo com ponto
-- [x] S10 Dockerfile: `CMD ["node", "--import", "tsx", "src/server/index.ts"]` (SIGTERM chega ao
+- [x] `47a80db` C10 `touch-action: manipulation` em `button`; ignorar segundo toque < 300 ms no diagnóstico
+- [x] `aaa0985` C11 Avisar quando um código de QR fica guardado ("Você vai encontrar X ao começar a Missão")
+- [x] `85fe5e8` C12 `sessionStorage` em try (iOS com cookies bloqueados)
+- [x] `88c5347` C13 Modal do Escanear: não abrir dois; "Fechar" com 44 px
+- [x] `8691177` C14 Foco volta ao primeiro botão do cartão após `render()`; `aria-pressed` nos seletores
+- [x] `b841523` C15 `.rotulo span` com contraste AA (`#157a33`)
+- [ ] C16 (pendente: mexe em `retrato()` no pet.ts, que o Julio está trocando) `retrato()` não guarda imagem de contexto perdido; `/demo` com `.catch`
+- [x] `fbc105a` C17 `minlength="2"` nos nomes
+- [x] `2ec2cd7` S9 `app.disable('x-powered-by')`; rota curinga não devolve `index.html` para arquivo com ponto
+- [x] `95367b1` S10 Dockerfile: `CMD ["node", "--import", "tsx", "src/server/index.ts"]` (SIGTERM chega ao
       salvamento) e `HEALTHCHECK` em `/health`
 
 ## Decisões abertas (não implementar sem o Miguel)
