@@ -178,6 +178,7 @@ let mapaChave = '' // selos, contatos nas ilhas e cena final só remontam quando
 let escolhaLocal: number | null = null
 // Academia (desafio nº 4)
 let diagRespostas: number[] = []
+let diagFalhou = false // envio deu erro: as 5 respostas ficam guardadas para tentar de novo
 let atividadeAberta: string | null = null
 let resultado: { acertou: boolean; explicacao: string } | null = null
 let medidas = { ampla: 0, profunda: 0 }
@@ -194,7 +195,11 @@ const questao = (q: Questao, attr: string, rotulo: string) =>
 /** Diagnóstico: 5 situações, uma por vez. */
 function diagnostico() {
   const i = diagRespostas.length
-  if (i >= DIAGNOSTICO.length) return '<p class="texto">Montando sua trilha…</p>'
+  if (i >= DIAGNOSTICO.length) {
+    return diagFalhou
+      ? `<p class="texto">Não deu para enviar suas respostas.</p><button class="principal" data-acao="reenviar-diag">Tentar de novo ${ICONE.seta}</button>`
+      : '<p class="texto">Montando sua trilha…</p>'
+  }
   return `<p class="texto">Cinco situações rápidas. Suas respostas montam sua trilha na Academia.</p>
     ${questao(DIAGNOSTICO[i], 'data-diag', `${i + 1}/${DIAGNOSTICO.length}`)}`
 }
@@ -272,13 +277,24 @@ async function iniciarJogo() {
   }, 2000)
 }
 
-async function acao(rota: string, corpo: object = {}) {
+/** true quando o servidor aceitou a ação. */
+async function acao(rota: string, corpo: object = {}): Promise<boolean> {
   versao++
-  try { visao = await api(rota, corpo); render() } catch (err) {
+  try { visao = await api(rota, corpo); render(); return true } catch (err) {
     // 409 = a ação já aconteceu (clique duplo, outra aba): só sincroniza, sem mensagem técnica
-    if ((err as { status?: number }).status === 409) { visao = await api('eu').catch(() => visao); render(); return }
+    if ((err as { status?: number }).status === 409) { visao = await api('eu').catch(() => visao); render(); return false }
     aviso((err as Error).message)
+    return false
   }
+}
+
+function enviarDiagnostico() {
+  diagFalhou = false
+  acao('diagnostico', { respostas: diagRespostas }).then((ok) => {
+    if (ok) diagRespostas = []
+    else diagFalhou = true
+    render()
+  })
 }
 
 /** Atualiza o mundo 3D a partir do estado. Só mexe no que mudou. */
@@ -398,7 +414,7 @@ function render() {
   const v = visao!
   const e = v.estado
   const k = `${e.cap}|${e.fase}|${v.amigo?.id}|${v.conhecidos.length}|${v.sugestoes.length}|${v.capitulosSalvos.join()}|${aba}` +
-    `|${diagRespostas.length}|${!!v.academia.diagnostico}|${Object.keys(v.academia.feitas).length}|${atividadeAberta}|${!!resultado}`
+    `|${diagRespostas.length}|${diagFalhou}|${!!v.academia.diagnostico}|${Object.keys(v.academia.feitas).length}|${atividadeAberta}|${!!resultado}`
   if (k === chave) return
   chave = k
   sincronizarMundo(v)
@@ -468,10 +484,10 @@ ui.addEventListener('click', (ev) => {
   else if (d.retomar) { capMontado = -1; aba = 'mapa'; acao('retomar', { cap: Number(d.retomar) }) }
   else if (d.diag !== undefined) {
     diagRespostas.push(Number(d.diag))
-    if (diagRespostas.length === DIAGNOSTICO.length) {
-      const respostas = diagRespostas
-      acao('diagnostico', { respostas }).then(() => { diagRespostas = []; render() })
-    }
+    if (diagRespostas.length === DIAGNOSTICO.length) enviarDiagnostico()
+    render()
+  } else if (d.acao === 'reenviar-diag') {
+    enviarDiagnostico()
     render()
   } else if (d.atividade) { atividadeAberta = d.atividade; resultado = null; render() }
   else if (d.resposta !== undefined) {
