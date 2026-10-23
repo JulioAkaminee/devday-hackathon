@@ -154,7 +154,16 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
   88% { transform: translate(calc(var(--lado) * -1px), 0) rotate(calc(var(--lado) * -2deg)); }
   94% { transform: none; }
 }
-@media (prefers-reduced-motion: reduce) { .marca .metade { animation: none; } }
+.marca .lasca { transform-box: fill-box; transform-origin: center; opacity: 0; animation: lasca 6s ease-out infinite; }
+.marca .um { --dx: -7px; --dy: -14px; }
+.marca .dois { --dx: 8px; --dy: -12px; }
+@keyframes lasca {
+  0%, 64% { opacity: 0; transform: none; }
+  68% { opacity: 1; }
+  84% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(45deg); }
+  100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .marca .metade, .marca .lasca { animation: none; } }
 .medidor.ampla em { background: var(--verde); }
 .medidor.profunda em { background: var(--tinta); }
 

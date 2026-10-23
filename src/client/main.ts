@@ -52,10 +52,15 @@ const ICONE = {
 const olhar = { x: 0, y: 0 }
 const MARCA = () => {
   const t = `style="transform: translate(${olhar.x}px, ${olhar.y}px)"`
-  const olho = (x: number, y: number) => `<g transform="rotate(-8 ${x} ${y})"><ellipse class="olho" ${t} cx="${x}" cy="${y}" rx="4.2" ry="6" fill="none" stroke="var(--tinta)" stroke-width="3.6"/></g>`
-  // as duas metades se separam pela rachadura em zigue-zague e voltam (animação no CSS, .marca .metade)
-  const costura = 'M50 8 45 18 54 27 46 37 50 50'
-  return `<svg class="marca" viewBox="0 0 100 100" data-amp="3.2" aria-hidden="true"><g stroke="var(--tinta)" stroke-width="3" stroke-linejoin="round"><g class="metade esq"><path d="${costura} 12 29z" fill="#dff3e6"/><path d="M12 29 50 50 50 93 12 72z" fill="var(--verde)"/>${olho(25, 58)}${olho(38, 65)}</g><g class="metade dir"><path d="${costura} 88 29z" fill="#dff3e6"/><path d="M88 29 50 50 50 93 88 72z" fill="#178a39"/></g></g></svg>`
+  // olhos desenhados no plano da face esquerda (matrix = inclinação isométrica)
+  const olho = (x: number) => `<ellipse class="olho" ${t} cx="${x}" cy="39" rx="5" ry="7.2"/>`
+  // as duas metades se separam pela rachadura e voltam; duas lascas saltam (animação no CSS)
+  const costura = 'M50 10 44 19 53 27 45 36 50 46'
+  return `<svg class="marca" viewBox="0 0 100 100" data-amp="3.2" aria-hidden="true"><g stroke="var(--tinta)" stroke-width="3.2" stroke-linejoin="round">` +
+    `<g class="metade esq"><path d="${costura} 14 28z" fill="#e8f7ed"/><path d="M14 28 50 46 50 92 14 72z" fill="var(--verde)"/>` +
+    `<g transform="matrix(1 .5 0 1 0 0)" fill="none" stroke-width="3.6">${olho(25)}${olho(39)}</g></g>` +
+    `<g class="metade dir"><path d="${costura} 86 28z" fill="#e8f7ed"/><path d="M86 28 50 46 50 92 86 72z" fill="#178a39"/></g>` +
+    `<path class="lasca um" d="M44 2 49 4.5 44 7 39 4.5z" fill="#e8f7ed" stroke-width="2"/><path class="lasca dois" d="M57 0 61 2 57 4 53 2z" fill="var(--verde)" stroke-width="2"/></g></svg>`
 }
 const LOGO = () => `<span class="logo">${MARCA()}<span>Quebra-Gelo</span></span>`
 const EVENTO = '<span class="evento"><span>DevDay</span><span>Community Hackathon</span><span>São Paulo</span></span>'
