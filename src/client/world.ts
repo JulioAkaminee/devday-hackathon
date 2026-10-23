@@ -434,7 +434,10 @@ export class Mundo {
     this.camera.updateProjectionMatrix()
     const r = w / h
     // na criação o formulário ocupa a esquerda: o pet fica no centro do espaço livre
-    if (this.modo === 'vitrine' && w > 760) this.camera.setViewOffset(w, h, -Math.min(520, w) / 2, 0, w, h)
+    // painel à esquerda (formulário da criação, cartão da missão): o foco vai para o centro do espaço livre
+    const r0 = w / h
+    const painel = w <= 760 ? 0 : this.modo === 'vitrine' ? Math.min(520, w) : this.modo === 'final' || r0 < 1.1 ? 464 : 0
+    if (painel) this.camera.setViewOffset(w, h, -painel / 2, 0, w, h)
     else this.camera.clearViewOffset()
     if (this.modo === 'vitrine') {
       // enquadra pelo tamanho real do pet: no máximo 45% da altura e 55% da largura livre, qualquer espécie
