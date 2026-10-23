@@ -153,8 +153,11 @@ const eu = (req: express.Request) => {
 function visao(p: Pet) {
   const pub = (id: string | null) => (id && pets.has(id) ? publico(pets.get(id)!) : null)
   // caps. 1 e 3: gente nova de outra área; cap. 2: quem oferece o que você procura; cap. 4: seus contatos
+  // gente real esperando encontro primeiro, depois gente real, pets de exemplo por último
+  const peso = (x: Pet) => (x.demo ? 2 : x.estado.fase === 'aguardando' ? 0 : 1)
   const novos = (f: (x: Pet) => boolean) =>
-    [...pets.values()].filter((x) => x.id !== p.id && !p.estado.conhecidos.includes(x.id) && f(x)).slice(0, 3).map(publico)
+    [...pets.values()].filter((x) => x.id !== p.id && !p.estado.conhecidos.includes(x.id) && f(x))
+      .sort((a, b) => peso(a) - peso(b)).slice(0, 3).map(publico)
   const cap = p.estado.cap
   const sugestoes = cap === 1 || cap === 3 ? novos((x) => x.area !== p.area)
     : cap === 2 ? novos((x) => x.oferece === p.procura)

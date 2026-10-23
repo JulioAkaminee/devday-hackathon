@@ -38,7 +38,7 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
 
 ## Lote 2 — médio
 
-- [ ] **S6 · Sugestões mostram gente real primeiro** (`server/index.ts:153`): ordenar `demo` por último
+- [x] **S6 · Sugestões mostram gente real primeiro** (`server/index.ts:153`): ordenar `demo` por último
       e quem está `aguardando` primeiro, antes do `slice(0, 3)`.
 - [ ] **S7 · Atividade da Academia só na ordem e uma vez** (`shared/academia.ts:170`): recusar id
       diferente de `proximaAtividade`. Teste em `academia.test.ts`.
