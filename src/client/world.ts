@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import type { Opcao } from '../shared/engine.ts'
 import { animarMascote, criarPet, type DNA, type Itens } from './pet.ts'
+import astra from './astra.png'
 
 // Mapa da aventura (docs/referencias/mapa-aventura-v1.png): as 4 ilhas sempre à vista, ligadas por um
 // caminho. A escolha é feita no cartão (D8); o mundo mostra onde o pet está e o que já aconteceu.
@@ -233,6 +234,43 @@ function telao(g: THREE.Object3D, x: number, z: number) {
   }
 }
 
+// Bandeira da ilha 1: o cartão da Astra (GPT-6), ondulando ao vento. A malha tem divisões para dobrar,
+// e a cor de cada vértice escurece as dobras sem precisar de luz.
+const BANDEIRA = { w: 3.3, h: 4.15 }
+let bandeira: { malha: THREE.Mesh; base: Float32Array } | null = null
+
+function montarBandeira(g: THREE.Object3D, x: number, y: number, z: number) {
+  const geometria = new THREE.PlaneGeometry(BANDEIRA.w, BANDEIRA.h, 24, 14)
+  geometria.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(geometria.attributes.position.count * 3).fill(1), 3))
+  const t = textura(371, 467, (c) => { c.fillStyle = COR.preto; c.fillRect(0, 0, 371, 467) })
+  const img = new Image()
+  // corta a moldura arredondada do print: fica só o fundo escuro do cartão
+  img.onload = () => { (t.image as HTMLCanvasElement).getContext('2d')!.drawImage(img, 14, 14, 371, 467, 0, 0, 371, 467); t.needsUpdate = true }
+  img.src = astra
+  const malha = new THREE.Mesh(geometria, new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide, vertexColors: true }))
+  malha.position.set(x + BANDEIRA.w / 2, y, z)
+  g.add(malha)
+  bandeira = { malha, base: Float32Array.from(geometria.attributes.position.array) }
+  ventar(0)
+}
+
+function ventar(t: number) {
+  if (!bandeira) return
+  const pos = bandeira.malha.geometry.attributes.position as THREE.BufferAttribute
+  const cor = bandeira.malha.geometry.attributes.color as THREE.BufferAttribute
+  const b = bandeira.base
+  for (let i = 0; i < pos.count; i++) {
+    const x = b[i * 3], y = b[i * 3 + 1]
+    const u = (x + BANDEIRA.w / 2) / BANDEIRA.w // 0 no mastro, 1 na ponta solta
+    const fase = u * 5.4 - t * 4.2 + y * 0.5
+    pos.setXYZ(i, x - u * u * 0.14, y - u * 0.06 * (1 + Math.sin(fase * 0.5)), Math.sin(fase) * 0.34 * u + Math.sin(u * 9 - t * 6.6) * 0.05 * u)
+    const luz = 0.8 + 0.2 * Math.cos(fase)
+    cor.setXYZ(i, luz, luz, luz)
+  }
+  pos.needsUpdate = true
+  cor.needsUpdate = true
+}
+
 // ---------- ilhas ----------
 
 function montarIlha(g: THREE.Group, i: number) {
@@ -259,14 +297,10 @@ function montarIlha(g: THREE.Group, i: number) {
   caixa(g, COR.espuma, W + 1.2, 0.05, D + 1.2, 0, -3.38, 0)
 
   if (i === 0) {
-    // Novas pessoas + Credenciamento: bandeira do evento, mesa com laptops
-    caixa(g, COR.preto, 0.25, 7, 0.25, -6, 0, -3.5)
-    const bandeira = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 3.4), new THREE.MeshBasicMaterial({
-      side: THREE.DoubleSide,
-      map: textura(260, 340, (c) => { c.fillStyle = COR.verde; c.fillRect(0, 0, 260, 340); c.save(); c.beginPath(); c.rect(0, 0, 260, 340); c.clip(); bola(c, 150, 330, 230); c.restore(); c.fillStyle = COR.verde; c.fillRect(0, 0, 260, 120) }),
-    }))
-    bandeira.position.set(-4.65, 5.2, -3.5)
-    g.add(bandeira)
+    // Novas pessoas + Credenciamento: bandeira da Astra no mastro, mesa com laptops
+    caixa(g, COR.preto, 0.28, 8.4, 0.28, -6, 0, -3.5)
+    caixa(g, COR.verde, 0.5, 0.5, 0.5, -6, 8.4, -3.5)
+    montarBandeira(g, -5.9, 6.1, -3.5)
     arco(g, 0.5, -1.5, 1, 'Novas pessoas')
     mesa(g, 4.6, -3); caixa(g, '#cfd3d6', 0.7, 0.05, 0.5, 4.2, 1.13, -3); caixa(g, '#2b2b2b', 0.7, 0.45, 0.06, 4.2, 1.16, -3.25)
     banco(g, -4.5, 1.2, 2.2)
@@ -310,6 +344,10 @@ function montarIlha(g: THREE.Group, i: number) {
 
 export type Modo = 'mapa' | 'final' | 'vitrine'
 
+// confete do final: por pedaço, posição, velocidade, rotação e giro (3 números cada)
+const CORES_CONFETE = [COR.verde, COR.verdeClaro, COR.branco, COR.preto, '#ffd23f', '#8b6cff', '#ff7aa8'].map((c) => new THREE.Color(c))
+const _m = new THREE.Matrix4(), _p = new THREE.Vector3(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _s = new THREE.Vector3()
+
 export class Mundo {
   private renderer: THREE.WebGLRenderer
   private cena = new THREE.Scene()
@@ -325,6 +363,7 @@ export class Mundo {
   private figurantes: THREE.Object3D[] = [] // pets de outros participantes parados no mapa
   private tipoFinal: 'time' | 'colecionador' | 'amigo' | null = null
   private amigoAlvo = new THREE.Vector3()
+  private confete: { malha: THREE.InstancedMesh; dados: Float32Array; t: number } | null = null
   private relogio = new THREE.Clock()
   private modo: Modo = 'vitrine'
   private cap = -1
@@ -515,6 +554,7 @@ export class Mundo {
     this.marcas.visible = true
     this.cena.background = new THREE.Color(COR.ceu)
     this.extras.clear()
+    this.limparConfete()
     if (this.amigo && cap !== this.cap) { this.cena.remove(this.amigo); this.amigo = null }
     if (primeira) { this.modo = 'mapa'; this.trocarPet(dna, itens) }
     this.modo = 'mapa'
@@ -597,6 +637,65 @@ export class Mundo {
         }
       }
     }
+    this.estourarConfete()
+  }
+
+  /** Chegou na última ilha com a aventura completa: confete sai do alto das torres do telão e cai girando. */
+  private estourarConfete() {
+    this.limparConfete()
+    if (this.calmo) return
+    const N = 260
+    const malha = new THREE.InstancedMesh(new THREE.BoxGeometry(0.36, 0.035, 0.24), new THREE.MeshLambertMaterial(), N)
+    malha.frustumCulled = false
+    const c = ILHAS[3]
+    const d = new Float32Array(N * 12)
+    for (let i = 0; i < N; i++) {
+      const lado = i % 2 ? 1 : -1
+      const forca = 8 + Math.random() * 8
+      d.set([
+        c.x + lado * 5.85, 8.8, c.z - 4.1, // topo de uma das torres
+        -lado * forca * (0.2 + Math.random() * 0.55), forca * (0.75 + Math.random() * 0.6), forca * (0.15 + Math.random() * 0.55),
+        Math.random() * 6, Math.random() * 6, Math.random() * 6,
+        (Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16,
+      ], i * 12)
+      malha.setColorAt(i, CORES_CONFETE[i % CORES_CONFETE.length])
+      malha.setMatrixAt(i, _m.makeScale(0, 0, 0))
+    }
+    this.confete = { malha, dados: d, t: -0.7 } // espera a câmera chegar ao palco
+    this.cena.add(malha)
+  }
+
+  private limparConfete() {
+    if (!this.confete) return
+    this.cena.remove(this.confete.malha)
+    this.confete.malha.geometry.dispose()
+    ;(this.confete.malha.material as THREE.Material).dispose()
+    this.confete = null
+  }
+
+  private animarConfete(dt: number) {
+    const cf = this.confete!
+    cf.t += dt
+    if (cf.t < 0) return
+    if (cf.t > 9) return this.limparConfete()
+    const d = cf.dados, ilha = ILHAS[3]
+    const escala = cf.t > 7.5 ? 1 - (cf.t - 7.5) / 1.5 : 1 // some aos poucos no fim
+    for (let i = 0; i < cf.malha.count; i++) {
+      const k = i * 12
+      const caindo = d[k + 4] < 0
+      // gravidade com resistência do ar: sobe rápido e desce devagar, balançando de lado
+      d[k + 4] -= 16 * dt
+      const ar = Math.exp(-dt * (caindo ? 5 : 1.8))
+      d[k + 3] *= ar; d[k + 4] *= ar; d[k + 5] *= ar
+      d[k] += (d[k + 3] + (caindo ? Math.sin(cf.t * 3.2 + i) * 0.9 : 0)) * dt
+      d[k + 1] += d[k + 4] * dt
+      d[k + 2] += d[k + 5] * dt
+      const chao = Math.abs(d[k] - ilha.x) < 7.5 && Math.abs(d[k + 2] - ilha.z) < 5.5 ? 0.04 : -3.36
+      if (d[k + 1] <= chao) { d[k + 1] = chao; d[k + 3] = d[k + 4] = d[k + 5] = 0; d[k + 9] = d[k + 10] = d[k + 11] = 0 }
+      d[k + 6] += d[k + 9] * dt; d[k + 7] += d[k + 10] * dt; d[k + 8] += d[k + 11] * dt
+      cf.malha.setMatrixAt(i, _m.compose(_p.set(d[k], d[k + 1], d[k + 2]), _q.setFromEuler(_e.set(d[k + 6], d[k + 7], d[k + 8])), _s.setScalar(escala)))
+    }
+    cf.malha.instanceMatrix.needsUpdate = true
   }
 
   // ---------- arrastar ----------
@@ -733,7 +832,9 @@ export class Mundo {
       if (o.userData.festa && !calmo) o.userData.corpo.position.y = Math.abs(Math.sin(t * 6 + o.position.x)) * 0.15
       if (!calmo) animarMascote(o, t + o.position.x, o.userData.festa ? 'comemorar' : 'parado')
     }
+    if (this.confete) this.animarConfete(dt)
     if (!calmo) {
+      if (this.mapa.visible) ventar(t)
       for (const o of this.marcas.children) animarMascote(o, t + o.position.x * 0.37, 'parado')
       if (this.mapa.visible) for (const o of this.figurantes) animarMascote(o, t + o.position.x * 0.37, 'parado')
       if (pet) {
