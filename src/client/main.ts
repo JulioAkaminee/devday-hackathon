@@ -264,6 +264,9 @@ async function iniciarJogo() {
   }
   document.body.className = 'jogando'
   render()
+  // QR lido fora de hora: o código espera a próxima missão, e a pessoa precisa saber disso
+  const pendente = sessao.get('qg-c')
+  if (pendente && visao!.estado.fase !== 'aguardando') aviso(`Código ${pendente} guardado: o encontro acontece quando a próxima missão começar.`, 'ok')
   clearInterval(sondagem)
   sondagem = setInterval(async () => {
     if (sondando || document.hidden) return
