@@ -20,11 +20,10 @@ Cada bloco cabe numa tela de celular: no máximo 3 frases.
 
 ## Prólogo
 
-Oi! Eu sou **{pet}**. Acabei de nascer no meio de um hackathon e todo mundo aqui já tem time, ideia e
-café. Eu só tenho você.
+Oi, eu sou **{pet}**. Nasci agora, no meio de um hackathon onde todo mundo já tem time, ideia e café.
 
-Até o pitch, a gente precisa montar o time da jornada final. Problema: eu não conheço ninguém.
-Solução: você vai me apresentar.
+Até o pitch a gente precisa montar um time para a jornada final, e eu não conheço ninguém, então você
+vai me apresentar.
 
 ---
 

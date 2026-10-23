@@ -38,8 +38,8 @@ export const NOMES_ACESSORIO: Record<Acessorio, string> = {
 }
 
 export const PROLOGO =
-  'Oi! Eu sou {pet}. Acabei de nascer no meio de um hackathon e todo mundo aqui já tem time, ideia e café. Eu só tenho você. ' +
-  'Até o pitch, a gente precisa montar o time da jornada final. Problema: eu não conheço ninguém. Solução: você vai me apresentar.'
+  'Oi, eu sou {pet}. Nasci agora, no meio de um hackathon onde todo mundo já tem time, ideia e café. ' +
+  'Até o pitch a gente precisa montar um time para a jornada final, e eu não conheço ninguém, então você vai me apresentar.'
 
 export interface Capitulo {
   titulo: string
