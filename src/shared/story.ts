@@ -7,7 +7,7 @@ export const ESPECIES = [
 ] as const
 // Todo pet já usa a mochila com a logo da OpenAI; o acessório é um extra por cima.
 export const ACESSORIOS = ['nenhum', 'oculos', 'boina'] as const
-export const TEMAS = ['front', 'back', 'mobile', 'dados', 'design', 'produto', 'carreira'] as const
+export const TEMAS = ['front', 'back', 'fullstack', 'mobile', 'dados', 'design', 'produto', 'carreira'] as const
 
 export type Especie = (typeof ESPECIES)[number]
 export type Acessorio = (typeof ACESSORIOS)[number]

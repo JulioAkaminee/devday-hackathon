@@ -28,7 +28,7 @@ interface Visao {
 type Aba = 'mapa' | 'academia' | 'contatos' | 'conexoes' | 'finais'
 
 const NOMES_TEMA: Record<Tema, string> = {
-  front: 'front-end', back: 'back-end', mobile: 'mobile', dados: 'dados', design: 'design', produto: 'produto', carreira: 'carreira',
+  front: 'front-end', back: 'back-end', fullstack: 'fullstack', mobile: 'mobile', dados: 'dados', design: 'design', produto: 'produto', carreira: 'carreira',
 }
 const SUGESTOES_NOME = ['Xícaro', 'Bolacha', 'Pipoca', 'Tampinha', 'Biscoito', 'Faísca', 'Pudim', 'Teco', 'Bug', 'Cometa']
 
