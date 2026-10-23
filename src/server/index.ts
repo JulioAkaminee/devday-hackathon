@@ -9,7 +9,7 @@ import {
   habilidadeFraca, novaAcademia, progresso, proximaAtividade, responderAtividade, responderDiagnostico, type Academia,
 } from '../shared/academia.ts'
 import { ACESSORIOS, COR_ESPECIE, ESPECIES, TEMAS, type Acessorio, type Especie, type Tema } from '../shared/story.ts'
-import { ErroHttp, Limite, alvoDoEncontro, completar, lerSnapshot } from './regras.ts'
+import { ErroHttp, Limite, alvoDoEncontro, completar, lerSnapshot, linkedinDe } from './regras.ts'
 import { telao } from './telao.ts'
 import QRCode from 'qrcode'
 
@@ -19,6 +19,7 @@ interface Pet {
   codigo: string
   nome: string
   dono: string
+  linkedin?: string // só vai para quem já encontrou este pet (visao)
   especie: Especie
   cor: string
   acessorio: Acessorio
@@ -125,6 +126,7 @@ app.post('/api/pets', (req, res) => {
     codigo: novoCodigo(),
     nome,
     dono,
+    linkedin: linkedinDe(b.linkedin),
     especie: um(b.especie, ESPECIES, 'especie'),
     cor: COR_ESPECIE[b.especie as Especie],
     acessorio: um(b.acessorio, ACESSORIOS, 'acessorio'),
@@ -152,11 +154,14 @@ app.get('/api/demo', (_req, res) => {
 function estatisticas() {
   const reais = [...pets.values()].filter((p) => !p.demo)
   const pares = new Set<string>()
+  const trocas = new Set<string>() // encontros em que os dois deixaram o LinkedIn
   for (const p of reais) {
     for (const id of p.estado.conhecidos) {
       const outro = pets.get(id)
       if (!outro || outro.demo) continue
-      pares.add([p.id, outro.id].sort().join('|'))
+      const par = [p.id, outro.id].sort().join('|')
+      pares.add(par)
+      if (p.linkedin && outro.linkedin) trocas.add(par)
     }
   }
   const top = reais
@@ -169,6 +174,7 @@ function estatisticas() {
   return {
     pessoas: reais.length,
     encontros: pares.size,
+    linkedins: trocas.size,
     jogando: reais.filter((p) => p.estado.fase !== 'prologo').length,
     finais: reais.filter((p) => p.estado.fase === 'final').length,
     top,
@@ -193,7 +199,12 @@ const eu = (req: express.Request) => {
 }
 
 function visao(p: Pet) {
-  const pub = (id: string | null) => (id && pets.has(id) ? publico(pets.get(id)!) : null)
+  // o LinkedIn só sai para quem já se encontrou: é a prova da conversa, não uma lista aberta
+  const pub = (id: string | null) => {
+    const x = id ? pets.get(id) : undefined
+    if (!x) return null
+    return p.estado.conhecidos.includes(x.id) && x.linkedin ? { ...publico(x), linkedin: x.linkedin } : publico(x)
+  }
   // caps. 1 e 3: gente nova de outra área; cap. 2: quem oferece o que você procura; cap. 4: seus contatos
   // gente real esperando encontro primeiro, depois gente real, pets de exemplo por último
   const peso = (x: Pet) => (x.demo ? 2 : x.estado.fase === 'aguardando' ? 0 : 1)
@@ -203,7 +214,7 @@ function visao(p: Pet) {
   const cap = p.estado.cap
   const sugestoes = cap === 1 || cap === 3 ? novos((x) => x.area !== p.area)
     : cap === 2 ? novos((x) => x.oferece === p.procura)
-    : cap === 4 ? p.estado.conhecidos.filter((id) => pets.has(id)).map((id) => publico(pets.get(id)!)) : []
+    : cap === 4 ? p.estado.conhecidos.map(pub).filter((x) => x !== null) : []
   return {
     pet: publico(p),
     estado: p.estado,

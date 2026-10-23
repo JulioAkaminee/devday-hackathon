@@ -14,7 +14,7 @@ import { Mundo } from './world.ts'
 import './style.css'
 
 interface PetPublico extends DNA {
-  id: string; codigo: string; nome: string; dono: string; area: Tema; procura: Tema; oferece: Tema; demo: boolean
+  id: string; codigo: string; nome: string; dono: string; linkedin?: string; area: Tema; procura: Tema; oferece: Tema; demo: boolean
 }
 interface Visao {
   pet: PetPublico
@@ -79,6 +79,11 @@ const sessao = armazem(() => sessionStorage)
 let token = guardado.get('qg-token')
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
+// o servidor só manda o LinkedIn de quem você já encontrou, e só letras, números e hífen
+const IN = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="4" fill="currentColor"/><text x="12" y="16.6" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--papel)" font-family="Inter Tight, sans-serif">in</text></svg>'
+const linkedin = (c: { linkedin?: string; dono: string }, classe: string, rotulo = '') => c.linkedin
+  ? `<a class="${classe}" href="https://www.linkedin.com/in/${encodeURIComponent(c.linkedin)}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn de ${esc(c.dono)}">${IN}${rotulo}</a>`
+  : ''
 const h = (html: string) => { ui.innerHTML = html }
 const foto = (p: DNA, cls = 'foto') => `<img class="${cls}" src="${retrato(p)}" alt="">`
 
@@ -113,7 +118,7 @@ async function api<T = Visao>(rota: string, corpo?: object): Promise<T> {
 
 // ---------- Criação do pet (D1: uma tela, sem IA, sem foto) ----------
 
-interface Stats { pessoas: number; encontros: number; jogando: number; finais: number }
+interface Stats { pessoas: number; encontros: number; linkedins: number; jogando: number; finais: number }
 
 /** Prova social da sala: some se a rede falhar, nunca atrapalha a criação. */
 function mostrarStats() {
@@ -140,9 +145,9 @@ function telaCriar() {
     `<svg class="marca bola-criar" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="var(--verde)"/><ellipse class="olho" cx="24" cy="26" rx="6" ry="8.2" fill="none" stroke="var(--tinta)" stroke-width="3.4"/><ellipse class="olho" cx="52" cy="24" rx="6" ry="8.2" fill="none" stroke="var(--tinta)" stroke-width="3.4"/></svg>`)
   const dna: DNA = { especie: 'xicara', cor: COR_ESPECIE.xicara, acessorio: 'nenhum' }
   // procura começa diferente da área: o par procura/oferece é o que cruza as pessoas na Missão 2
-  type Campo = 'nome' | 'dono' | 'area' | 'procura' | 'oferece'
+  type Campo = 'nome' | 'dono' | 'linkedin' | 'area' | 'procura' | 'oferece'
   const perfil: Record<Campo, string> = {
-    nome: SUGESTOES_NOME[Math.floor(Math.random() * SUGESTOES_NOME.length)], dono: '', area: 'front', procura: 'back', oferece: 'front',
+    nome: SUGESTOES_NOME[Math.floor(Math.random() * SUGESTOES_NOME.length)], dono: '', linkedin: '', area: 'front', procura: 'back', oferece: 'front',
   }
   let passo = 0
   mundo.mostrarVitrine(dna)
@@ -171,7 +176,8 @@ function telaCriar() {
       ${progresso()}<h2>Como vocês se chamam?</h2>
       <label>Seu primeiro nome<input name="dono" minlength="2" maxlength="16" required placeholder="Ana" autocomplete="given-name" value="${esc(perfil.dono)}"></label>
       <label>Nome do pet<span class="com-botao"><input name="nome" minlength="2" maxlength="16" required value="${esc(perfil.nome)}"><button type="button" data-sortear aria-label="Sortear outro nome">${ICONE.dado}</button></span></label>
-      <p class="dica">Quem encontrar seu pet vê esses dois nomes.</p>
+      <label>Seu LinkedIn (opcional)<input name="linkedin" maxlength="140" placeholder="linkedin.com/in/ana" inputmode="url" autocomplete="url" spellcheck="false" value="${esc(perfil.linkedin)}"></label>
+      <p class="dica">Quem encontrar seu pet vê esses dois nomes. O LinkedIn só aparece para quem te encontrar no evento.</p>
       <div class="navegacao">${voltar(0)}<button class="principal">Continuar ${ICONE.seta}</button></div>`
     return `
       ${progresso()}<h2>O que você busca hoje?</h2>
@@ -235,7 +241,7 @@ function telaCriar() {
       botao.disabled = true // clique duplo criava dois pets
       try {
         const r = await api<{ token: string }>('pets', {
-          ...dna, nome: perfil.nome.trim(), dono: perfil.dono.trim(), area: perfil.area, procura: perfil.procura, oferece: perfil.oferece,
+          ...dna, nome: perfil.nome.trim(), dono: perfil.dono.trim(), linkedin: perfil.linkedin.trim(), area: perfil.area, procura: perfil.procura, oferece: perfil.oferece,
         })
         token = r.token
         guardado.set('qg-token', token)
@@ -457,6 +463,7 @@ function cartaoMissao(v: Visao) {
     const a = v.amigo!
     return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}
       <div class="encontro">${foto(a, 'mini')}<p class="texto">${esc(preencher(cap.encontro, vars))}</p></div>
+      ${linkedin(a, 'botao-linkedin', `Conectar com ${esc(a.dono)} no LinkedIn`)}
       <p class="pergunta">${esc(cap.pergunta)}</p>${escolhas(true)}`
   }
   if (e.fase === 'consequencia') {
@@ -481,7 +488,7 @@ function painelAba(v: Visao) {
   const e = v.estado
   if (aba === 'contatos') {
     const lista = v.conhecidos.length
-      ? `<ul class="lista">${v.conhecidos.map((c) => `<li>${foto(c, 'mini')}<div><b>${esc(c.nome)}</b> · ${esc(c.dono)}<small>${NOMES_TEMA[c.area]} · ajuda com ${NOMES_TEMA[c.oferece]}</small></div><code>${c.codigo}</code></li>`).join('')}</ul>`
+      ? `<ul class="lista">${v.conhecidos.map((c) => `<li>${foto(c, 'mini')}<div><b>${esc(c.nome)}</b> · ${esc(c.dono)}<small>${NOMES_TEMA[c.area]} · ajuda com ${NOMES_TEMA[c.oferece]}</small></div>${linkedin(c, 'linkedin')}<code>${c.codigo}</code></li>`).join('')}</ul>`
       : '<p class="texto">Ninguém ainda. Escaneie um pet para começar.</p>'
     return `<div class="cartao-topo"><span>${v.conhecidos.length} ${v.conhecidos.length === 1 ? 'pessoa' : 'pessoas'}</span></div><h2>Quem eu conheci</h2>${lista}`
   }

@@ -53,3 +53,14 @@ export function lerSnapshot(arquivo: string, agora = new Date()): unknown[] {
 /** Pet de um snapshot antigo ganha os campos que faltam. */
 export const completar = <P extends { historico?: Estado[]; estado?: Partial<Estado>; academia?: Academia }>(p: P) =>
   ({ ...p, historico: p.historico ?? [], estado: { ...novoEstado(), ...p.estado }, academia: p.academia ?? novaAcademia() })
+
+// LinkedIn opcional: aceita o endereço inteiro ou só o identificador; guarda só o identificador
+// (o link é montado a partir dele, então só letras, números e hífen chegam no href)
+export function linkedinDe(v: unknown): string | undefined {
+  if (v === undefined || v === null || v === '') return undefined
+  if (typeof v !== 'string') throw new ErroHttp(400, 'LinkedIn inválido')
+  const id = v.trim().replace(/^(https?:\/\/)?([a-z]{2,3}\.)?linkedin\.com\/in\//i, '').replace(/[/?#].*$/, '')
+  if (!id) return undefined
+  if (!/^[\p{L}\p{N}-]{3,100}$/u.test(id)) throw new ErroHttp(400, 'LinkedIn inválido: use linkedin.com/in/seu-nome')
+  return id
+}

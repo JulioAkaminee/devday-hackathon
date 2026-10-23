@@ -186,6 +186,13 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .codigo-dela .principal { width: auto; }
 .cartao .escanear, .cartao [data-acao="comecar"], .cartao [data-acao="avancar"] { position: sticky; bottom: 0; box-shadow: 0 -12px 0 var(--papel), 0 20px 0 var(--papel); }
 .encontro { display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: start; }
+/* LinkedIn de quem você encontrou: botão no encontro, ícone na lista de contatos */
+.botao-linkedin { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 10px 14px; border: 1.5px solid var(--tinta); border-radius: var(--raio); color: var(--tinta); font-weight: 600; text-decoration: none; }
+.botao-linkedin:hover { background: var(--tinta); color: var(--papel); }
+.botao-linkedin:hover svg text { fill: var(--tinta); }
+.lista a.linkedin { display: grid; place-items: center; width: 44px; height: 44px; flex: none; color: var(--tinta); }
+.lista a.linkedin svg { width: 24px; height: 24px; }
+.lista a.linkedin:hover { color: var(--verde); }
 .consequencia { border-left: 4px solid var(--verde); padding-left: 12px; margin-bottom: 16px; line-height: 1.45; display: grid; gap: 4px; }
 .consequencia.profunda { border-color: var(--tinta); }
 .sugestoes { display: grid; gap: 6px; margin-bottom: 10px; }

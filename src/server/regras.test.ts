@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import assert from 'node:assert/strict'
 import { ErroDeFase, comecar, novoEstado } from '../shared/engine.ts'
-import { ErroHttp, Limite, alvoDoEncontro, completar, lerSnapshot } from './regras.ts'
+import { ErroHttp, Limite, alvoDoEncontro, completar, lerSnapshot, linkedinDe } from './regras.ts'
 
 test('S1: fora de aguardando, código real e inexistente dão o mesmo erro', () => {
   const achar = (c: string) => (c === 'REAL' ? { id: 'x' } : undefined)
@@ -39,4 +39,13 @@ test('S4: snapshot ruim vira .bad e o servidor sobe vazio; pet antigo ganha os c
   assert.deepEqual(lerSnapshot(arquivo), [{ id: 'a' }])
   const p = completar({ id: 'a', estado: { cap: 2 } })
   assert.deepEqual([p.historico, p.estado.cap, p.estado.fase, p.estado.conhecidos, p.academia.diagnostico], [[], 2, 'prologo', [], null])
+})
+
+test('LinkedIn: aceita endereço ou identificador, recusa o que não é perfil', () => {
+  assert.equal(linkedinDe('https://www.linkedin.com/in/ana-souza/?trk=x'), 'ana-souza')
+  assert.equal(linkedinDe('linkedin.com/in/joão-123'), 'joão-123')
+  assert.equal(linkedinDe('  ana-souza '), 'ana-souza')
+  assert.equal(linkedinDe(''), undefined)
+  assert.equal(linkedinDe(undefined), undefined)
+  for (const ruim of ['javascript:alert(1)', 'ana souza', 'a"><b', 'ab', 42]) assert.throws(() => linkedinDe(ruim), ErroHttp)
 })

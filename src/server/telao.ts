@@ -42,6 +42,7 @@ const roteiro = `
   const desenhar = (d) => {
     $('pessoas').textContent = d.pessoas;
     $('encontros').textContent = d.encontros;
+    $('linkedins').textContent = d.linkedins ? ' · ' + d.linkedins + (d.linkedins === 1 ? ' trocou' : ' trocaram') + ' LinkedIn' : '';
     $('finais').textContent = d.finais;
     const lista = $('topo');
     lista.innerHTML = '';
@@ -88,7 +89,7 @@ export function telao(qr: string, url: string) {
   <main>
     <div class="numeros">
       <div class="num"><b id="pessoas">0</b><small>pessoas com pet</small></div>
-      <div class="num verde"><b id="encontros">0</b><small>encontros entre gente de verdade</small></div>
+      <div class="num verde"><b id="encontros">0</b><small>encontros entre gente de verdade<span id="linkedins"></span></small></div>
       <div class="num"><b id="finais">0</b><small>chegaram a um final</small></div>
     </div>
     <div class="lado">
