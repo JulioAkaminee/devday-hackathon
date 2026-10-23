@@ -37,6 +37,9 @@ const ESTACOES = [
 // mais perto que 0,55 os pets estouram o quadro; mais longe que 1,7 o mapa vira miniatura.
 const ZOOM_MIN = 0.55
 const ZOOM_MAX = 1.7
+// e a distância real da câmera fica entre estes valores, em qualquer tela (o retrato já parte mais longe)
+const DIST_MIN = 16
+const DIST_MAX = 120
 
 const geo = new THREE.BoxGeometry(1, 1, 1)
 const mats = new Map<string, THREE.MeshLambertMaterial>()
@@ -338,7 +341,7 @@ export class Mundo {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
     this.cena.background = new THREE.Color(COR.ceu)
-    this.cena.fog = new THREE.Fog(COR.ceu, 70, 170)
+    this.cena.fog = new THREE.Fog(COR.ceu, DIST_MAX - 10, DIST_MAX + 110)
     this.cena.add(new THREE.HemisphereLight('#ffffff', '#c9bfa8', 2.4))
     const sol = new THREE.DirectionalLight('#ffffff', 1.4)
     sol.position.set(-8, 14, 10)
@@ -351,7 +354,7 @@ export class Mundo {
     canvas.addEventListener('wheel', (e) => {
       if (this.modo === 'vitrine') return
       e.preventDefault()
-      this.zoomAlvo = THREE.MathUtils.clamp(this.zoomAlvo * Math.exp(e.deltaY * 0.0015), ZOOM_MIN, ZOOM_MAX)
+      this.zoomAlvo = this.limitarZoom(this.zoomAlvo * Math.exp(e.deltaY * 0.0015))
     }, { passive: false })
     this.ajustar()
     this.base.copy(this.camPos)
@@ -423,6 +426,7 @@ export class Mundo {
   // ---------- câmera ----------
 
   private ajustar() {
+    queueMicrotask(() => { this.zoomAlvo = this.limitarZoom(this.zoomAlvo) })
     const w = innerWidth, h = innerHeight
     this.renderer.setSize(w, h, false)
     this.camera.aspect = w / h
@@ -583,6 +587,11 @@ export class Mundo {
     this.arrasto = { x: e.clientX, y: e.clientY, t: performance.now() }
   }
 
+  private limitarZoom(z: number) {
+    const d = this.camPos.distanceTo(this.camOlhar)
+    return THREE.MathUtils.clamp(z, Math.max(ZOOM_MIN, DIST_MIN / d), Math.min(ZOOM_MAX, DIST_MAX / d))
+  }
+
   private distDedos() {
     const [a, b] = [...this.dedos.values()]
     return Math.hypot(a.x - b.x, a.y - b.y) || 1
@@ -591,7 +600,7 @@ export class Mundo {
   private arrastar(e: PointerEvent) {
     if (this.dedos.has(e.pointerId)) this.dedos.set(e.pointerId, { x: e.clientX, y: e.clientY })
     if (this.pinca && this.dedos.size === 2) {
-      this.zoomAlvo = THREE.MathUtils.clamp((this.pinca.zoom * this.pinca.dist) / this.distDedos(), ZOOM_MIN, ZOOM_MAX)
+      this.zoomAlvo = this.limitarZoom((this.pinca.zoom * this.pinca.dist) / this.distDedos())
       return
     }
     const a = this.arrasto
