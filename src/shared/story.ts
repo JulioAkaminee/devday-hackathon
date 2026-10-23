@@ -34,7 +34,7 @@ export const COR_ESPECIE: Record<Especie, string> = {
   coracao: '#ff3d8b', globinho: '#2f7bf5', estrelinha: '#ffd60a', conezinho: '#ff4d3d', nuvem: '#3d8bff',
 }
 export const NOMES_ACESSORIO: Record<Acessorio, string> = {
-  nenhum: 'Nada', mochila: 'Mochila', oculos: 'Óculos escuros', boina: 'Boina',
+  nenhum: 'Nada', mochila: 'Mochila', oculos: 'Óculos', boina: 'Boina',
 }
 
 export const PROLOGO =
