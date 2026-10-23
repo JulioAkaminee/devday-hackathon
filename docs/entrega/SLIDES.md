@@ -8,10 +8,10 @@ Texto de cada slide para colar no Canva. Notas do apresentador em itálico.
 
 O networking do DevDay, jogável.
 
-- Miguel e Julio Akamine · Trilha Educação e inclusão
+- Miguel Vaz e Julio Akamine · Trilha Educação e inclusão
 - quebra-gelo.julioakamine.com
 
-_Somos Miguel e Julio. Quebra-Gelo transforma o networking do evento em um jogo no celular._
+_Somos Miguel Vaz e Julio Akamine. Quebra-Gelo transforma o networking do evento em um jogo no celular._
 
 ## 02. Problema
 
