@@ -6,6 +6,7 @@
   --papel: #ffffff;
   --verde: #22b04b;
   --verde-escuro: #178a39;
+  --verde-texto: #157a33; /* verde com contraste AA em texto pequeno sobre o papel */
   --cinza: #6e6e6e;
   --linha: #141414;
   --fio: #e4e4e0;
@@ -61,7 +62,7 @@ label { font-size: 0.8rem; color: var(--cinza); display: grid; gap: 4px; }
 .texto { font-size: 0.95rem; line-height: 1.45; color: #2c2c2c; margin-bottom: 14px; }
 .nota { font-size: 0.85rem; line-height: 1.4; color: var(--cinza); margin-bottom: 12px; padding-left: 12px; border-left: 3px solid var(--verde); }
 .rotulo { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--cinza); margin-bottom: 8px; display: flex; gap: 10px; }
-.rotulo span { color: var(--verde-escuro); }
+.rotulo span { color: var(--verde-texto); }
 
 /* ---------- criação ---------- */
 body.criando { background: var(--papel); }
