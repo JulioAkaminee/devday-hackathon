@@ -49,7 +49,7 @@ Fonte: guia do participante (openaihackathon.com.br).
 2. **Monta o pet numa tela só** (D1): espécie (6 opções), cor (8), acessório (4) e nome (sugestão
    sorteada, editável). Prévia ao vivo do pet.
 3. Responde três perguntas com um toque cada:
-   - **Minha área:** front, back, mobile, dados, design, produto, outra.
+   - **Minha área:** front, back, fullstack, mobile, dados, design, produto, carreira.
    - **O que eu procuro hoje:** time, mentoria, emprego, contratar, aprender algo novo.
    - **O que eu ofereço:** uma ou duas áreas em que pode ajudar.
 4. *(Opcional)* LinkedIn ou GitHub. Só aparece para quem virar amigo.
