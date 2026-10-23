@@ -70,7 +70,7 @@ body.criando::after {
   content: ''; position: fixed; z-index: 0; width: 78vh; height: 78vh; right: -12vh; bottom: -34vh; border-radius: 50%;
   background: var(--verde) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23141414' stroke-width='3.4'%3E%3Cellipse cx='24' cy='26' rx='6' ry='8.2'/%3E%3Cellipse cx='52' cy='24' rx='6' ry='8.2'/%3E%3C/g%3E%3C/svg%3E") center / 100% 100% no-repeat;
 }
-.criar { width: min(520px, 100%); height: 100%; overflow: auto; background: var(--papel); padding: 28px 32px 32px; display: grid; align-content: start; gap: 22px; border-right: 1.5px solid var(--linha); }
+.criar { width: min(520px, 100%); height: 100%; overflow: auto; background: var(--papel); padding: max(28px, env(safe-area-inset-top)) 32px 32px; display: grid; align-content: start; gap: 22px; border-right: 1.5px solid var(--linha); }
 .criar-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .chamada { font-size: 1.9rem; font-weight: 600; letter-spacing: -0.035em; line-height: 1.05; }
 fieldset { border: 0; border-top: 1.5px solid var(--linha); padding: 12px 0 0; margin: 0; display: grid; gap: 10px; }
@@ -191,7 +191,7 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 body.demo { overflow: auto; background: var(--papel); }
 body.demo #cena { display: none; }
 body.demo #ui { position: static; }
-.demo-lista { padding: 28px 32px; display: grid; gap: 12px; }
+.demo-lista { padding: max(28px, env(safe-area-inset-top)) 32px 28px; display: grid; gap: 12px; }
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0; border-top: 1.5px solid var(--linha); border-left: 1.5px solid var(--linha); }
 .card { border-right: 1.5px solid var(--linha); border-bottom: 1.5px solid var(--linha); padding: 14px; display: grid; gap: 4px; }
 .card small { color: var(--cinza); }
@@ -205,7 +205,7 @@ body.demo #ui { position: static; }
   .abas button { padding: 8px 16px; }
 }
 @media (max-width: 760px) {
-  .criar { padding: 18px 16px 24px; border-right: 0; }
+  .criar { padding: max(18px, env(safe-area-inset-top)) 16px 24px; border-right: 0; }
   .chamada { font-size: 1.45rem; }
   body.criando #cena { display: none; }
   .topo { flex-wrap: wrap; padding: max(8px, env(safe-area-inset-top)) 12px 8px; row-gap: 8px; }
@@ -216,7 +216,7 @@ body.demo #ui { position: static; }
   .avatar { width: 40px; height: 40px; }
   .medidores { order: 3; width: 100%; margin: 0; padding: 0; border-left: 0 !important; gap: 14px; }
   .medidor { flex: 1; grid-template-columns: auto auto 1fr; }
-  .cartao { left: 8px; right: 8px; width: auto; bottom: 74px; max-height: 52vh; padding: 16px; }
+  .cartao { left: 8px; right: 8px; width: auto; bottom: calc(max(8px, env(safe-area-inset-bottom)) + 66px); max-height: 52vh; padding: 16px; }
   .escolhas { grid-template-columns: 1fr 1fr; }
   .abas { left: 8px; right: 8px; transform: none; bottom: max(8px, env(safe-area-inset-bottom)); }
   .abas button { flex: 1; justify-content: center; padding: 8px 4px; }

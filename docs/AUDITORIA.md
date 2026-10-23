@@ -43,7 +43,7 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
 - [x] **S7 · Atividade da Academia só na ordem e uma vez** (`shared/academia.ts:170`): recusar id
       diferente de `proximaAtividade`. Teste em `academia.test.ts`.
 - [x] **S8 · Diagnóstico só aceita números** (`server/index.ts:218`).
-- [ ] **C5 · Safe-area do iPhone**: `.cartao` no celular com `bottom: calc(max(8px,
+- [x] **C5 · Safe-area do iPhone**: `.cartao` no celular com `bottom: calc(max(8px,
       env(safe-area-inset-bottom)) + 66px)`; topo de `.criar` e `.demo-lista` com
       `env(safe-area-inset-top)`.
 - [ ] **C6 · Sem rede**: `fetch` com `AbortSignal.timeout(8000)` e mensagem "sem conexão, tente de
