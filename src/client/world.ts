@@ -361,7 +361,7 @@ export class Mundo {
     canvas.addEventListener('wheel', (e) => {
       if (this.modo === 'vitrine') return
       e.preventDefault()
-      this.zoomAlvo = this.limitarZoom(this.zoomAlvo * Math.exp(e.deltaY * 0.0015))
+      this.zoomAlvo = this.limitarZoom(this.zoomAlvo * Math.exp(e.deltaY * 0.003))
     }, { passive: false })
     this.ajustar()
     this.base.copy(this.camPos)
@@ -624,7 +624,8 @@ export class Mundo {
   private arrastar(e: PointerEvent) {
     if (this.dedos.has(e.pointerId)) this.dedos.set(e.pointerId, { x: e.clientX, y: e.clientY })
     if (this.pinca && this.dedos.size === 2) {
-      this.zoomAlvo = this.limitarZoom((this.pinca.zoom * this.pinca.dist) / this.distDedos())
+      // o expoente 2 dobra a resposta ao gesto: mesmo afastar de dedos, o dobro de zoom
+      this.zoomAlvo = this.limitarZoom(this.pinca.zoom * Math.pow(this.pinca.dist / this.distDedos(), 2))
       return
     }
     const a = this.arrasto
