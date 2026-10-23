@@ -116,14 +116,17 @@ function numero(n: string, lado = 1.5) {
   return s
 }
 
-/** Selo de concluída: círculo verde com ✓ em traço preto. */
+/** Selo de concluída: círculo verde com ✓ em traço preto. Material único: o mapa remonta os selos. */
+let materialSelo: THREE.SpriteMaterial | null = null
 function selo() {
-  const t = textura(160, 160, (c) => {
-    c.fillStyle = COR.verde; c.beginPath(); c.arc(80, 80, 76, 0, Math.PI * 2); c.fill()
-    c.strokeStyle = COR.preto; c.lineWidth = 14; c.lineCap = 'square'
-    c.beginPath(); c.moveTo(46, 82); c.lineTo(70, 106); c.lineTo(116, 56); c.stroke()
+  materialSelo ??= new THREE.SpriteMaterial({
+    map: textura(160, 160, (c) => {
+      c.fillStyle = COR.verde; c.beginPath(); c.arc(80, 80, 76, 0, Math.PI * 2); c.fill()
+      c.strokeStyle = COR.preto; c.lineWidth = 14; c.lineCap = 'square'
+      c.beginPath(); c.moveTo(46, 82); c.lineTo(70, 106); c.lineTo(116, 56); c.stroke()
+    }),
   })
-  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t }))
+  const s = new THREE.Sprite(materialSelo)
   s.scale.set(1.4, 1.4, 1)
   return s
 }

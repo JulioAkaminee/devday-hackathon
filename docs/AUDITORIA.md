@@ -48,7 +48,7 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
       `env(safe-area-inset-top)`.
 - [x] **C6 · Sem rede**: `fetch` com `AbortSignal.timeout(8000)` e mensagem "sem conexão, tente de
       novo" (hoje aparece "Failed to fetch"); boot que falha tenta de novo em 3 s.
-- [ ] **C7 · Vazamento de GPU**: `atualizarMapa`, `cenaFinal` e `trocarPet` recriam texturas,
+- [x] **C7 · Vazamento de GPU**: `atualizarMapa`, `cenaFinal` e `trocarPet` recriam texturas,
       geometrias e materiais sem `dispose`. Textura do selo e sombra do pet como constantes do módulo;
       só remontar quando `cap|fase|encontros.length` mudar (inclui a cena final, que hoje reseta ao
       trocar de aba). **Pets e sombra do pet já resolvidos** em `pet.ts`: cada pet é cópia de um

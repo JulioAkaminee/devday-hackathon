@@ -174,6 +174,7 @@ let aba: Aba = 'mapa'
 let chave = ''
 let capMontado = -1
 let itensChave = ''
+let mapaChave = '' // selos, contatos nas ilhas e cena final só remontam quando o progresso muda
 let escolhaLocal: number | null = null
 // Academia (desafio nº 4)
 let diagRespostas: number[] = []
@@ -302,11 +303,14 @@ function sincronizarMundo(v: Visao) {
     const p = v.conhecidos.find((c) => c.id === id)
     return p ? dnaDe(p) : null
   })
-  mundo.atualizarMapa(e.fase === 'final' ? 5 : e.cap, e.escolhas, porIlha)
+  const mk = `${e.cap}|${e.fase}|${e.encontros.length}`
+  const remontar = mk !== mapaChave
+  mapaChave = mk
+  if (remontar) mundo.atualizarMapa(e.fase === 'final' ? 5 : e.cap, e.escolhas, porIlha)
 
   if ((e.fase === 'encontro' || e.fase === 'consequencia') && v.amigo) mundo.chegarAmigo(dnaDe(v.amigo))
   if (e.fase === 'consequencia' && escolhaLocal === e.cap) { mundo.consequencia(e.escolhas.at(-1)!); escolhaLocal = null }
-  if (e.fase === 'final') mundo.cenaFinal(finalDe(e), v.conhecidos.map(dnaDe))
+  if (e.fase === 'final' && remontar) mundo.cenaFinal(finalDe(e), v.conhecidos.map(dnaDe))
 }
 
 function cartaoMissao(v: Visao) {
