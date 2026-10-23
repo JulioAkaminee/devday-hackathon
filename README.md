@@ -74,8 +74,9 @@ escrevemos o nosso, sobre networking em eventos: [`docs/ACADEMIA.md`](docs/ACADE
 
 ### Como jogar
 
-1. Crie o pet em três passos: o bicho e o acessório, os nomes (com sorteio) e o que você busca hoje
-   em chips. A aventura começa sozinha com o aviso "X nasceu!".
+1. Crie o pet em cinco telas curtas: o bicho e o acessório, os nomes (com sorteio), com o que você
+   trabalha, com o que quer ajuda hoje e com o que pode ajudar. A aventura começa sozinha com o aviso
+   "X nasceu!".
 2. Em cada Missão, encontre alguém: o cartão mostra o **seu código de 4 letras e o QR** e tem o campo
    **"Código da outra pessoa"**. O cartão também sugere quem procurar.
 3. Escolha como conversar. A consequência aparece na história e nas barras.

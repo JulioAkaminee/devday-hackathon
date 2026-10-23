@@ -12,7 +12,7 @@ Ordem: deploy no ar → ensaio → gravação → formulário.
 Rodar na URL pública, não no localhost.
 
 - [ ] `https://…/health` responde `ok`
-- [ ] Notebook (Chrome, tela cheia): criar o pet nos **3 passos**, Missão 1 por sugestão do cartão
+- [ ] Notebook (Chrome, tela cheia): criar o pet nas **5 telas** (pet, nomes, área, procura, oferta), Missão 1 por sugestão do cartão
 - [ ] Celular (Android ou iPhone): criar o pet e ler o QR do pet do notebook com a câmera nativa
 - [ ] **Diagnóstico é opcional** (mudou): a aba Academia ganha um ponto verde até ser feito; é lá que ele
       vive. Se o vídeo mostrar o desafio nº 4, entrar pela aba, não pelo caminho da aventura
@@ -35,7 +35,7 @@ Gravação de tela do notebook + um corte curto do celular lendo o QR. Fala em o
 | Tempo | Tela | Fala |
 |---|---|---|
 | 0:00–0:12 | Telão em `/tela`: QR grande e contadores | "Isto é o que a sala inteira vê: quantas pessoas têm pet, quantos encontros aconteceram e quem mais conectou. O jogo é o networking do evento." |
-| 0:12–0:30 | Criação em 3 passos | "Em 30 segundos: escolhe o bichinho, o nome e o que você busca hoje. Os chips definem quem o pet vai te apresentar." |
+| 0:12–0:30 | Criação em 5 telas curtas | "Cinco telas de cinco segundos: o bichinho, o nome, sua área, o que você procura e o que oferece. É isso que faz o pet te apresentar alguém." |
 | 0:30–0:55 | Missão 1: código + QR no cartão, campo "Código da outra pessoa"; corte do celular lendo o QR | "Cada missão só abre com uma pessoa de verdade. Seu código fica à mostra; a outra pessoa digita ou aponta a câmera." |
 | 0:55–1:20 | Encontro, escolha e consequência; barras no topo | "Depois do encontro, você escolhe: papo rápido soma Alcance, ir a fundo soma Profundidade. A consequência aparece na história." |
 | 1:20–1:45 | Aba Academia: ponto verde, 5 perguntas, trilha com a mais fraca primeiro | "A Academia treina o que falta: cinco perguntas medem abordar, escutar e conectar, e a trilha começa pela habilidade mais fraca. Esse é o desafio 4." |
