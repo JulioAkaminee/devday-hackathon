@@ -69,7 +69,7 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
 - [ ] C16 `retrato()` não guarda imagem de contexto perdido; `/demo` com `.catch`
 - [x] C17 `minlength="2"` nos nomes
 - [x] S9 `app.disable('x-powered-by')`; rota curinga não devolve `index.html` para arquivo com ponto
-- [ ] S10 Dockerfile: `CMD ["node", "--import", "tsx", "src/server/index.ts"]` (SIGTERM chega ao
+- [x] S10 Dockerfile: `CMD ["node", "--import", "tsx", "src/server/index.ts"]` (SIGTERM chega ao
       salvamento) e `HEALTHCHECK` em `/health`
 
 ## Decisões abertas (não implementar sem o Miguel)

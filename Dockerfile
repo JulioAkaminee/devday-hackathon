@@ -14,4 +14,6 @@ COPY --from=build /app/dist dist
 COPY src src
 EXPOSE 3000
 VOLUME /data
-CMD ["npx", "tsx", "src/server/index.ts"]
+HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://localhost:${PORT}/health || exit 1
+# node direto (sem npx) recebe o SIGTERM do deploy e salva o snapshot antes de sair
+CMD ["node", "--import", "tsx", "src/server/index.ts"]
