@@ -230,7 +230,9 @@ const errosAcademia = (f: () => void) => {
 }
 app.post('/api/diagnostico', (req, res) => {
   const p = eu(req)
-  const respostas = Array.isArray(req.body?.respostas) ? req.body.respostas.map(Number) : []
+  const respostas: unknown = req.body?.respostas
+  // Number(null) e Number('1') viravam resposta válida
+  if (!Array.isArray(respostas) || !respostas.every((r) => typeof r === 'number')) throw new ErroHttp(400, 'respostas inválidas')
   errosAcademia(() => { p.academia = responderDiagnostico(p.academia, respostas) })
   sujo = true
   res.json(visao(p))
