@@ -432,9 +432,18 @@ export class Mundo {
     this.camera.aspect = w / h
     this.camera.updateProjectionMatrix()
     const r = w / h
+    // na criação o formulário ocupa a esquerda: o pet fica no centro do espaço livre
+    if (this.modo === 'vitrine' && w > 760) this.camera.setViewOffset(w, h, -Math.min(520, w) / 2, 0, w, h)
+    else this.camera.clearViewOffset()
     if (this.modo === 'vitrine') {
-      this.camPos.set(0, 1.5, 4.6)
-      this.camOlhar.set(0, 0.55, 0)
+      // enquadra pelo tamanho real do pet: no máximo 45% da altura e 55% da largura livre, qualquer espécie
+      const t = this.pet ? new THREE.Box3().setFromObject(this.pet).getSize(new THREE.Vector3()) : new THREE.Vector3(1, 1.2, 1)
+      const alt = t.y
+      const livre = w > 760 ? (w - Math.min(520, w)) / w : 1
+      const meia = 2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2))
+      const dist = Math.max(alt / 0.45, Math.max(t.x, t.z) / (0.55 * livre * r)) / meia
+      this.camPos.set(0, alt * 0.75, dist)
+      this.camOlhar.set(0, alt * 0.5, 0)
     } else if (this.modo === 'final') {
       const c = ILHAS[3]
       const d = Math.max(1, 1.5 / r)
@@ -479,6 +488,7 @@ export class Mundo {
     if (pos) this.pet.position.copy(pos)
     this.pet.rotation.y = rot
     this.cena.add(this.pet)
+    if (this.modo === 'vitrine') this.ajustar()
   }
 
   /** Leva o pet até a estação do capítulo, andando pelo caminho. */
@@ -665,7 +675,8 @@ export class Mundo {
         corpo.scale.y = 1
         pet.rotation.y = this.modo === 'vitrine' ? 0.5 : 0
       } else if (this.modo === 'vitrine') {
-        pet.rotation.y += dt * 0.8
+        // balança mostrando a frente e os lados; girar inteiro deixava o pet de costas metade do tempo
+        pet.rotation.y = Math.sin(t * 0.7) * 0.75
         corpo.position.y = Math.abs(Math.sin(t * 3)) * 0.05
       } else if (this.viagem) {
         const v = this.viagem
