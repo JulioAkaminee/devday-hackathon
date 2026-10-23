@@ -338,7 +338,7 @@ export class Mundo {
   calmo = false
 
   constructor(canvas: HTMLCanvasElement) {
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
     this.cena.background = new THREE.Color(COR.ceu)
     this.cena.fog = new THREE.Fog(COR.ceu, DIST_MAX - 10, DIST_MAX + 110)
@@ -468,6 +468,7 @@ export class Mundo {
   /** Tela de criação: só o pet girando, de perto. */
   mostrarVitrine(dna: DNA) {
     this.modo = 'vitrine'
+    this.cena.background = null // a página desenha o fundo da criação (bola do banner)
     this.mapa.visible = false
     this.marcas.visible = false
     this.trocarPet(dna)
@@ -496,6 +497,7 @@ export class Mundo {
     const primeira = this.modo === 'vitrine' || !this.pet
     this.mapa.visible = true
     this.marcas.visible = true
+    this.cena.background = new THREE.Color(COR.ceu)
     this.extras.clear()
     if (this.amigo && cap !== this.cap) { this.cena.remove(this.amigo); this.amigo = null }
     if (primeira) { this.modo = 'mapa'; this.trocarPet(dna, itens) }

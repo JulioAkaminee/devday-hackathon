@@ -62,7 +62,14 @@ label { font-size: 0.8rem; color: var(--cinza); display: grid; gap: 4px; }
 .rotulo span { color: var(--verde-escuro); }
 
 /* ---------- criação ---------- */
+body.criando { background: var(--papel); }
 body.criando #ui { display: flex; }
+body.criando #cena { z-index: 1; }
+/* a bola verde do banner, cortada no canto, atrás do pet */
+body.criando::after {
+  content: ''; position: fixed; z-index: 0; width: 78vh; height: 78vh; right: -12vh; bottom: -34vh; border-radius: 50%;
+  background: var(--verde) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23141414' stroke-width='3.4'%3E%3Cellipse cx='24' cy='26' rx='6' ry='8.2'/%3E%3Cellipse cx='52' cy='24' rx='6' ry='8.2'/%3E%3C/g%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
 .criar { width: min(520px, 100%); height: 100%; overflow: auto; background: var(--papel); padding: 28px 32px 32px; display: grid; align-content: start; gap: 22px; border-right: 1.5px solid var(--linha); }
 .criar-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .chamada { font-size: 1.9rem; font-weight: 600; letter-spacing: -0.035em; line-height: 1.05; }
