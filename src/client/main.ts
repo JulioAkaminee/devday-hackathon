@@ -306,7 +306,7 @@ function cartaoMissao(v: Visao) {
   }
   if (e.fase === 'aguardando') {
     const sug = v.sugestoes.length
-      ? `<div class="sugestoes"><p class="rotulo">Oferecem ${NOMES_TEMA[v.pet.procura]}</p>${v.sugestoes.map((s) => `<button data-codigo="${s.codigo}">${foto(s, 'mini')}<span><b>${esc(s.nome)}</b> · ${esc(s.dono)}</span><code>${s.codigo}</code></button>`).join('')}</div>`
+      ? `<div class="sugestoes"><p class="rotulo">${e.cap === 4 ? 'Seus contatos' : `Oferecem ${NOMES_TEMA[v.pet.procura]}`}</p>${v.sugestoes.map((s) => `<button data-codigo="${s.codigo}">${foto(s, 'mini')}<span><b>${esc(s.nome)}</b> · ${esc(s.dono)}</span><code>${s.codigo}</code></button>`).join('')}</div>`
       : ''
     const f = v.academia.fraca
     const treino = f && CAPITULO_SUGERIDO[f] === e.cap ? `<p class="nota">Aqui você treina <b>${NOMES_HABILIDADE[f]}</b>, sua habilidade mais fraca.</p>` : ''
