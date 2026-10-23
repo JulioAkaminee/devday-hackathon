@@ -40,7 +40,7 @@ p { margin: 0; }
 b { font-weight: 600; }
 code { font-family: inherit; font-weight: 600; letter-spacing: 0.12em; font-size: 0.8rem; }
 
-button { font: inherit; color: var(--tinta); cursor: pointer; background: var(--papel); border: 1.5px solid var(--linha); border-radius: var(--raio); padding: 10px 14px; min-height: 44px; display: inline-flex; align-items: center; gap: 10px; text-align: left; font-weight: 500; letter-spacing: -0.01em; }
+button { font: inherit; color: var(--tinta); cursor: pointer; background: var(--papel); border: 1.5px solid var(--linha); border-radius: var(--raio); padding: 10px 14px; min-height: 44px; display: inline-flex; align-items: center; gap: 10px; text-align: left; font-weight: 500; letter-spacing: -0.01em; touch-action: manipulation; }
 button:hover:not(:disabled) { background: var(--suave); }
 button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--verde); outline-offset: 2px; }
 button:disabled { cursor: default; }

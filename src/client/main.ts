@@ -178,6 +178,7 @@ let mapaChave = '' // selos, contatos nas ilhas e cena final só remontam quando
 let escolhaLocal: number | null = null
 // Academia (desafio nº 4)
 let diagRespostas: number[] = []
+let ultimoToqueDiag = 0 // toque duplo respondia duas situações de uma vez
 let diagFalhou = false // envio deu erro: as 5 respostas ficam guardadas para tentar de novo
 let atividadeAberta: string | null = null
 let resultado: { acertou: boolean; explicacao: string } | null = null
@@ -483,6 +484,8 @@ ui.addEventListener('click', (ev) => {
   else if (d.codigo) acao('encontro', { codigo: d.codigo })
   else if (d.retomar) { capMontado = -1; aba = 'mapa'; acao('retomar', { cap: Number(d.retomar) }) }
   else if (d.diag !== undefined) {
+    if (ev.timeStamp - ultimoToqueDiag < 300) return
+    ultimoToqueDiag = ev.timeStamp
     diagRespostas.push(Number(d.diag))
     if (diagRespostas.length === DIAGNOSTICO.length) enviarDiagnostico()
     render()
