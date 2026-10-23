@@ -212,7 +212,7 @@ function academia(v: Visao) {
       const feita = q.id in a.feitas
       const atual = q.id === a.proxima
       const cls = feita ? (a.feitas[q.id] ? 'certa' : 'errada') : atual ? 'atual' : 'bloqueada'
-      return `<button class="bolinha ${cls}" ${feita || atual ? `data-atividade="${q.id}"` : 'disabled'} aria-label="Atividade ${i + 1}: ${cls}">${i + 1}</button>`
+      return `<button class="bolinha ${cls}" ${atual ? `data-atividade="${q.id}"` : 'disabled'} aria-label="Atividade ${i + 1}: ${cls}">${i + 1}</button>`
     }).join('<i class="elo"></i>')
     return `<div class="habilidade"><div class="hab-topo"><b>${NOMES_HABILIDADE[hb]}</b><span>${p.feitas}/${p.total}</span></div><div class="bolinhas">${bolinhas}</div></div>`
   }).join('')

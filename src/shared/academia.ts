@@ -171,6 +171,7 @@ export function responderAtividade(a: Academia, id: string, opcao: number): { ac
   if (!a.diagnostico) throw new Error('faça o diagnóstico antes das atividades')
   const q = HABILIDADES.flatMap((h) => ATIVIDADES[h]).find((x) => x.id === id)
   if (!q) throw new Error(`atividade desconhecida: ${id}`)
+  if (id !== proximaAtividade(a)?.id) throw new Error(id in a.feitas ? 'atividade já feita' : 'faça as atividades na ordem da trilha')
   if (!opcaoValida(q, opcao)) throw new Error(`opção inválida: ${opcao}`)
   const acertou = opcao === q.correta
   return { academia: { ...a, feitas: { ...a.feitas, [id]: acertou } }, acertou, explicacao: q.explicacao }

@@ -68,3 +68,10 @@ test('proximaAtividade segue a trilha e progresso conta certo', () => {
   assert.equal(a.feitas['conectar-1'], false)
   assert.equal(proximaAtividade(a), null)
 })
+
+test('atividade só na ordem da trilha e uma vez', () => {
+  const a = responderDiagnostico(novaAcademia(), errando('conectar'))
+  assert.throws(() => responderAtividade(a, 'abordar-1', 0), /ordem/)
+  const { academia } = responderAtividade(a, 'conectar-1', 1)
+  assert.throws(() => responderAtividade(academia, 'conectar-1', 1), /já feita/)
+})

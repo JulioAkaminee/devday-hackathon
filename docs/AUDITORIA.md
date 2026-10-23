@@ -40,7 +40,7 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
 
 - [x] **S6 · Sugestões mostram gente real primeiro** (`server/index.ts:153`): ordenar `demo` por último
       e quem está `aguardando` primeiro, antes do `slice(0, 3)`.
-- [ ] **S7 · Atividade da Academia só na ordem e uma vez** (`shared/academia.ts:170`): recusar id
+- [x] **S7 · Atividade da Academia só na ordem e uma vez** (`shared/academia.ts:170`): recusar id
       diferente de `proximaAtividade`. Teste em `academia.test.ts`.
 - [ ] **S8 · Diagnóstico só aceita números** (`server/index.ts:218`).
 - [ ] **C5 · Safe-area do iPhone**: `.cartao` no celular com `bottom: calc(max(8px,
