@@ -26,6 +26,7 @@ toda escolha nasce de um encontro.
 | D2 | A narrativa é reforçada: cada missão é um **capítulo com texto**, e a consequência é **contada na história**, não só mostrada na barra |
 | D3 | A demo não depende do público: **a dupla do time basta**, com pets de exemplo e partida salva (seção 7) |
 | D4 | O critério é **complexidade, não tempo**: trabalho dividido em módulos com contrato, tocados em paralelo por duas pessoas e vários agentes (seção 9) |
+| D5 | A aventura acontece num **mundo 3D em Three.js, no estilo Overcooked / Moving Out**: fases pequenas com câmera fixa, o pet anda livre dentro da fase e **as decisões são lugares para onde ele caminha** (seção 3A) |
 
 ## 2. Regras oficiais do evento
 
@@ -71,6 +72,47 @@ Fonte: guia do participante (openaihackathon.com.br).
 Cada capítulo tem: **abertura** (o pet narra), **encontro**, **escolha** e **consequência narrada**
 (um texto por opção, com o nome do pet do outro). 4 capítulos × 2 consequências + 3 finais: todo o
 texto é fixo, escrito antes, com marcadores como `{petAmigo}`.
+
+### 3A. O mundo 3D (D5)
+
+Referência visual e de controle: **Overcooked** e **Moving Out**. Fases compactas, vistas de cima na
+diagonal, cores saturadas, móveis gordinhos e personagens que quicam.
+
+**Estrutura:** um mapa da "ilha do DevDay" liga as fases. Cada capítulo é **uma fase**, e cada fase é um
+ambiente do evento:
+
+| Fase | Ambiente | Zona ampla | Zona profunda |
+|---|---|---|---|
+| Prólogo | credenciamento (tutorial de movimento) | — | — |
+| Cap. 1 | mesas do hackathon | roda de conversa em pé | banquinho para dois |
+| Cap. 2 | balcão de mentoria | fila do "pergunta rápida" | mesa de trabalho em dupla |
+| Cap. 3 | duas ilhas de mesas separadas por um vão | ponte (apresentar) | máquina de café (marcar café) |
+| Cap. 4 | auditório antes do pitch | corredor cheio de gente | primeira fila |
+| Final | palco | — | — |
+
+**Como uma fase funciona:**
+1. A fase abre com o pet do dono e uma **porta fechada**: o pet do outro "ainda não chegou". O balão
+   mostra a abertura do capítulo (`HISTORIA.md`).
+2. O dono escaneia o QR de alguém. **O pet da outra pessoa entra pela porta** e o balão do encontro
+   aparece.
+3. Duas zonas acendem no chão, uma ampla e uma profunda. **Andar até uma zona = escolher.** O pet do
+   outro acompanha.
+4. A consequência acontece no mundo: a ponte se monta, aparece a xícara, chegam crachás, o pet muda.
+   O balão conta a consequência; as barras sobem.
+5. O pet sai pela porta do fundo para o mapa, e o progresso é salvo.
+
+**Controle:** tocar no chão e o pet anda até lá (celular); WASD ou setas (notebook). Sem joystick
+virtual.
+
+**O que não entra:** física de verdade (colisão é por caixas simples), câmera livre, mundo contínuo e
+co-op em tempo real dentro da fase. O pet do outro é **personagem animado** na sua fase, não controlado
+pelo outro jogador.
+
+**Desempenho no celular:**
+- fases pequenas, com os blocos estáticos de cada fase agrupados num único objeto 3D;
+- uma luz direcional e uma luz ambiente, sem sombra real (círculo escuro embaixo dos personagens);
+- `pixelRatio` limitado a 1,5 e renderização pausada com a aba escondida;
+- meta de 30 fps num Android intermediário.
 
 ### As duas características
 - **Alcance:** quantas pessoas você conheceu.
@@ -180,12 +222,15 @@ Módulos com contrato definido antes do código, para que cada um seja tocado em
 |---|---|---|
 | **Motor da história** | `story.json` (textos) + função pura `(estado, ação) → estado` + regra dos finais + teste de todos os caminhos | nada |
 | **Servidor** | API HTTP: criar pet, encontro por QR/código, escolha, salvar/retomar, sugestões do capítulo 2, semente de demo | motor |
-| **Celular** | montar pet, perfil, QR e código, cenas dos capítulos, barras, final, "Quem eu conheci" | contrato da API |
-| **Pet visual** | sprite 16×16 em canvas: espécie × cor × acessório + itens das barras | nada |
+| **Mundo 3D** | Three.js: mapa, 6 fases, zonas de escolha, portas, animações de consequência, câmera fixa, controle por toque/teclado | motor (estado), pet 3D |
+| **Pet 3D** | pet em voxels: espécie × cor × acessório + itens das barras; animações de andar, quicar e comemorar | nada |
+| **Celular (telas)** | montar pet (com o pet 3D girando), perfil, QR e código, balões, barras, "Quem eu conheci" | contrato da API, mundo 3D |
 | **Telão** *(extra)* | mapa de conexões, placar, feed (polling a cada 2 s) | contrato da API |
 | **IA** *(extra)* | pergunta quebra-gelo e epílogo, com fallback | servidor |
 
 Peças:
+- **3D:** Three.js. Origem dos modelos (móveis, cenário) **ABERTA**: montados em código com cubos, ou
+  pacotes low-poly gratuitos (licença CC0, ex.: Kenney).
 - **Front:** Vite + TypeScript. Páginas: celular (`/`), encontro (`/a/:codigo`), telão (`/telao`),
   demo (`/demo`).
 - **Servidor:** Node 22 + Express, **uma instância**, só HTTP. **Sem Socket.IO.**
