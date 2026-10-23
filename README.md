@@ -60,7 +60,7 @@ atividades com explicação), e a Aventura põe em prática com gente de verdade
 sozinho: roda no navegador do celular sem instalar nada, tem caminho sem câmera (digitar o código) e
 respeita a preferência do sistema por menos movimento.
 
-**Demo:** _URL pública (Dokploy)_ · _link do vídeo_
+**Demo:** <https://quebra-gelo.julioakamine.com> · pets de exemplo em `/demo` · telão do evento em `/tela`
 
 ### Desafios que o projeto cumpre
 
@@ -81,7 +81,9 @@ escrevemos o nosso, sobre networking em eventos: [`docs/ACADEMIA.md`](docs/ACADE
 4. Escolha como conversar. A consequência aparece na história e nas barras.
 5. Na Missão 4, reencontre um contato. As suas escolhas decidem o final no Palco DevDay.
 
-Sem ninguém por perto, `/demo` mostra pets de exemplo com código e QR.
+Sem ninguém por perto, `/demo` mostra pets de exemplo com código e QR. O telão em `/tela` traz o QR
+de entrada e os números da sala ao vivo: pessoas com pet, encontros entre gente de verdade e quantos
+chegaram a um final.
 
 ### Tecnologia
 
@@ -105,10 +107,13 @@ npm test             # os 3 finais da Aventura e as trilhas da Academia
 
 ```
 .
-├── README.md        este arquivo
-├── docs/            decisões, pesquisa, roteiro do pitch
-├── src/             código do protótipo
-└── .env.example     modelo de variáveis (sem segredos)
+├── README.md          este arquivo
+├── docs/              ideia, história, Academia, plano, auditoria e entrega
+├── assets/pets/       os 10 pets em voxel: espécies, malha, galeria e PNGs
+├── src/shared/        motores puros da Aventura e da Academia (com testes)
+├── src/client/        telas, mundo 3D, pets, estilo
+├── src/server/        API, snapshot, telão
+└── .env.example       modelo de variáveis (sem segredos)
 ```
 
 Regras do repo: **nada de segredo comitado** (`.env`, chaves, tokens), commits pequenos e mensagem no
