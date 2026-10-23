@@ -219,4 +219,6 @@ body.demo #ui { position: static; }
   .escolhas { grid-template-columns: 1fr 1fr; }
   .abas { left: 8px; right: 8px; transform: none; bottom: max(8px, env(safe-area-inset-bottom)); }
   .abas button { flex: 1; justify-content: center; padding: 8px 4px; }
+  /* o cabeçalho tem duas linhas aqui: o aviso desce para não cobrir as barras */
+  .aviso { top: calc(env(safe-area-inset-top) + 124px); width: max-content; max-width: calc(100% - 32px); }
 }
