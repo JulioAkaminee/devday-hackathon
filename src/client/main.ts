@@ -111,6 +111,9 @@ async function api<T = Visao>(rota: string, corpo?: object): Promise<T> {
 
 function telaCriar() {
   document.body.className = 'criando'
+  // a bola do banner fica atrás do canvas (fora do #ui) e olha o ponteiro como a marca do topo
+  if (!document.querySelector('.bola-criar')) document.body.insertAdjacentHTML('beforeend',
+    `<svg class="marca bola-criar" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="var(--verde)"/><ellipse class="olho" cx="24" cy="26" rx="6" ry="8.2" fill="none" stroke="var(--tinta)" stroke-width="3.4"/><ellipse class="olho" cx="52" cy="24" rx="6" ry="8.2" fill="none" stroke="var(--tinta)" stroke-width="3.4"/></svg>`)
   const dna: DNA = { especie: 'xicara', cor: COR_ESPECIE.xicara, acessorio: 'nenhum' }
   mundo.mostrarVitrine(dna)
   // procura começa diferente da área: o par procura/oferece é o que cruza as pessoas na Missão 2
@@ -484,16 +487,18 @@ function render() {
 }
 
 addEventListener('pointermove', (ev) => {
-  const m = document.querySelector('.marca')
-  if (!m) return
-  const r = m.getBoundingClientRect()
-  const dx = ev.clientX - (r.left + r.width / 2)
-  const dy = ev.clientY - (r.top + r.height / 2)
-  const d = Math.hypot(dx, dy) || 1
-  const k = Math.min(1, d / 160) * 2.6
-  olhar.x = (dx / d) * k
-  olhar.y = (dy / d) * k
-  animate(document.querySelectorAll('.marca .olho'), { x: olhar.x, y: olhar.y }, { type: 'spring', stiffness: 220, damping: 16, mass: 0.6 })
+  // cada marca olha a partir do próprio centro; o deslocamento segue a escala do viewBox de cada uma
+  document.querySelectorAll<SVGSVGElement>('.marca').forEach((m, i) => {
+    const r = m.getBoundingClientRect()
+    if (!r.width) return
+    const dx = ev.clientX - (r.left + r.width / 2)
+    const dy = ev.clientY - (r.top + r.height / 2)
+    const d = Math.hypot(dx, dy) || 1
+    const k = Math.min(1, d / Math.max(160, r.width)) * 2.6 * (m.viewBox.baseVal.width / 40)
+    const x = (dx / d) * k, y = (dy / d) * k
+    if (i === 0) { olhar.x = x; olhar.y = y }
+    animate(m.querySelectorAll('.olho'), { x, y }, { type: 'spring', stiffness: 220, damping: 16, mass: 0.6 })
+  })
 })
 // piscada de vez em quando
 setInterval(() => calmo.matches || animate(document.querySelectorAll('.marca .olho'), { scaleY: [1, 0.12, 1] }, { duration: 0.22 }), 4800)
