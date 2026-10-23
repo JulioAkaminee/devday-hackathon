@@ -109,6 +109,25 @@ async function api<T = Visao>(rota: string, corpo?: object): Promise<T> {
 
 // ---------- Criação do pet (D1: uma tela, sem IA, sem foto) ----------
 
+interface Stats { pessoas: number; encontros: number; jogando: number; finais: number }
+
+/** Prova social da sala: some se a rede falhar, nunca atrapalha a criação. */
+function mostrarStats() {
+  const alvo = ui.querySelector<HTMLElement>('[data-stats]')
+  if (!alvo) return
+  fetch('/api/stats', { signal: AbortSignal.timeout(4000) })
+    .then((r) => (r.ok ? (r.json() as Promise<Stats>) : null))
+    .then((s) => {
+      if (!s || !alvo.isConnected) return
+      alvo.hidden = false
+      alvo.innerHTML = s.pessoas
+        ? `<b>${s.pessoas}</b> ${s.pessoas === 1 ? 'pessoa com pet' : 'pessoas com pet'} · <b>${s.encontros}</b> ${s.encontros === 1 ? 'encontro' : 'encontros'} entre gente de verdade` +
+          (s.finais ? ` · <b>${s.finais}</b> ${s.finais === 1 ? 'final' : 'finais'}` : '')
+        : 'Seja o primeiro a criar um pet hoje.'
+    })
+    .catch(() => {})
+}
+
 function telaCriar() {
   document.body.className = 'criando'
   // a bola do banner fica atrás do canvas (fora do #ui) e olha o ponteiro como a marca do topo
@@ -123,8 +142,16 @@ function telaCriar() {
   h(`
     <form class="criar">
       <header class="criar-topo">${LOGO()}${EVENTO}</header>
-      <p class="chamada">Seu pet só avança quando você conversa com alguém de verdade.</p>
-      <p class="subchamada">Monte seu pet em um minuto. Cada pessoa que você encontrar no evento vira um capítulo da história.</p>
+      <div class="hero">
+        <p class="chamada">Seu pet só cresce quando você conversa com alguém de verdade.</p>
+        <p class="subchamada">O Quebra-Gelo é o networking do evento, jogável: cada pessoa que você encontra vira um capítulo da história — e no fim do dia você leva a lista de quem conheceu.</p>
+        <ol class="passos-rapidos">
+          <li><b>Monte seu pet</b><span>30 segundos, sem foto e sem cadastro</span></li>
+          <li><b>Encontre alguém de verdade</b><span>QR ou o código de 4 letras do pet da pessoa</span></li>
+          <li><b>Escolha o caminho</b><span>papo rápido (+Alcance) ou conversa funda (+Profundidade), até um dos 3 finais</span></li>
+        </ol>
+        <p class="prova" data-stats hidden></p>
+      </div>
       <fieldset><legend><i>01</i> Pet</legend>
         <div class="pets" data-campo="especie">${ESPECIES.map((e, i) => `<button type="button" class="${i ? '' : 'sel'}" aria-pressed="${!i}" data-v="${e}" aria-label="${NOMES_ESPECIE[e]}">${foto({ especie: e, cor: '', acessorio: 'nenhum' })}<span>${NOMES_ESPECIE[e]}</span></button>`).join('')}</div>
         <p class="personalidade">${PERSONALIDADE.xicara}</p>
@@ -139,9 +166,9 @@ function telaCriar() {
         </div>
         <p class="dica">Quem encontrar seu pet vê estes dois nomes.</p>
       </fieldset>
-      <fieldset><legend><i>04</i> No evento hoje</legend>
+      <fieldset><legend><i>04</i> O que você busca hoje</legend>
         <div class="linha">${select('area', 'Minha área')}${select('procura', 'Procuro ajuda com', 'back')}${select('oferece', 'Posso ajudar com')}</div>
-        <p class="dica">Com isso o jogo sugere quem você deve procurar em cada missão.</p>
+        <p class="dica">Com isso o jogo sugere quem você deve procurar em cada missão — e puxa o primeiro assunto do encontro.</p>
       </fieldset>
       <button class="principal">Criar meu pet ${ICONE.seta}</button>
     </form>
@@ -156,6 +183,7 @@ function telaCriar() {
   }
   legenda()
   form.querySelector('input[name=nome]')!.addEventListener('input', legenda)
+  mostrarStats()
   animate(form.querySelectorAll('.criar > *'), { opacity: [0, 1], y: [14, 0] }, { delay: stagger(0.05), duration: 0.45, ease: [0.2, 0.8, 0.2, 1] })
   form.querySelectorAll<HTMLDivElement>('[data-campo]').forEach((grupo) => {
     grupo.addEventListener('click', (e) => {
@@ -400,7 +428,11 @@ function cartaoMissao(v: Visao) {
       <button class="principal" data-acao="avancar">${e.cap < TOTAL_CAPITULOS ? `Seguir para a Missão ${e.cap + 1}` : 'Subir ao palco'} ${ICONE.seta}</button>`
   }
   const tipo: Final = finalDe(e)
-  return `${topo('Final', FINAIS[tipo].titulo)}<p class="texto">${esc(preencher(FINAIS[tipo].texto, vars))}</p>${retomar(v)}`
+  // o que a pessoa leva embora: a lista é o produto, não um detalhe de aba
+  const leva = v.conhecidos.length
+    ? `<div class="leva"><p class="rotulo">O que você leva</p><b>${v.conhecidos.length} ${v.conhecidos.length === 1 ? 'pessoa conhecida' : 'pessoas conhecidas'}</b><div class="leva-pets">${v.conhecidos.slice(0, 6).map((c) => foto(c, 'mini')).join('')}</div><button data-aba="contatos">Ver quem eu conheci ${ICONE.seta}</button></div>`
+    : ''
+  return `${topo('Final', FINAIS[tipo].titulo)}<p class="texto">${esc(preencher(FINAIS[tipo].texto, vars))}</p>${leva}${retomar(v)}`
 }
 
 const retomar = (v: Visao) => v.capitulosSalvos.length

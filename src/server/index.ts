@@ -10,6 +10,8 @@ import {
 } from '../shared/academia.ts'
 import { ACESSORIOS, COR_ESPECIE, ESPECIES, TEMAS, type Acessorio, type Especie, type Tema } from '../shared/story.ts'
 import { ErroHttp, Limite, alvoDoEncontro, completar, lerSnapshot } from './regras.ts'
+import { telao } from './telao.ts'
+import QRCode from 'qrcode'
 
 interface Pet {
   id: string
@@ -141,6 +143,45 @@ app.post('/api/pets', (req, res) => {
 
 app.get('/api/demo', (_req, res) => {
   res.json([...pets.values()].filter((p) => p.demo).map(publico))
+})
+
+/**
+ * Números públicos do evento: a faixa da tela de criação e o telão. Sempre ao vivo, sem dado inflado.
+ * Encontro = par único de pets reais que já se conheceram (o mesmo par conta uma vez).
+ */
+function estatisticas() {
+  const reais = [...pets.values()].filter((p) => !p.demo)
+  const pares = new Set<string>()
+  for (const p of reais) {
+    for (const id of p.estado.conhecidos) {
+      const outro = pets.get(id)
+      if (!outro || outro.demo) continue
+      pares.add([p.id, outro.id].sort().join('|'))
+    }
+  }
+  const top = reais
+    .map((p) => ({
+      nome: p.nome, dono: p.dono,
+      conhecidos: p.estado.conhecidos.filter((id) => pets.has(id) && !pets.get(id)!.demo).length,
+    }))
+    .sort((a, b) => b.conhecidos - a.conhecidos || a.nome.localeCompare(b.nome))
+    .slice(0, 6)
+  return {
+    pessoas: reais.length,
+    encontros: pares.size,
+    jogando: reais.filter((p) => p.estado.fase !== 'prologo').length,
+    finais: reais.filter((p) => p.estado.fase === 'final').length,
+    top,
+  }
+}
+
+app.get('/api/stats', (_req, res) => { res.json(estatisticas()) })
+
+// Telão do evento: QR para entrar e os números ao vivo. Página própria, sem passar pelo SPA.
+app.get('/tela', async (req, res) => {
+  const url = process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`
+  const qr = await QRCode.toDataURL(url.replace(/\/$/, '') + '/', { margin: 1, width: 520, color: { dark: '#141414', light: '#ffffff' } })
+  res.type('html').send(telao(qr, url.replace(/\/$/, '')))
 })
 
 // Rotas abaixo exigem o token do celular

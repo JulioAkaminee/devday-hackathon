@@ -74,6 +74,16 @@ body:not(.criando) .bola-criar { display: none; }
 .criar { width: min(520px, 100%); height: 100%; overflow: auto; background: var(--papel); padding: max(28px, env(safe-area-inset-top)) 32px 32px; display: grid; align-content: start; gap: 22px; border-right: 1.5px solid var(--linha); }
 .criar-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .chamada { font-size: 1.9rem; font-weight: 600; letter-spacing: -0.035em; line-height: 1.05; }
+/* o que é isso, em dez segundos: promessa, três passos e a sala ao vivo */
+.hero { display: grid; gap: 14px; }
+.visao { font-size: 0.95rem; line-height: 1.45; color: #2c2c2c; max-width: 48ch; }
+.passos-rapidos { list-style: none; margin: 0; padding: 12px 0 0; display: grid; gap: 9px; counter-reset: passo; border-top: 1.5px solid var(--fio); }
+.passos-rapidos li { display: grid; grid-template-columns: 24px 1fr; column-gap: 8px; align-items: baseline; }
+.passos-rapidos li::before { counter-increment: passo; content: counter(passo); font-size: 0.78rem; font-weight: 600; color: var(--verde-texto); font-variant-numeric: tabular-nums; }
+.passos-rapidos b { font-size: 0.95rem; }
+.passos-rapidos span { grid-column: 2; font-size: 0.85rem; line-height: 1.35; color: var(--cinza); }
+.prova { font-size: 0.85rem; line-height: 1.4; color: var(--cinza); padding-left: 12px; border-left: 3px solid var(--verde); }
+.prova b { color: var(--tinta); font-variant-numeric: tabular-nums; }
 fieldset { border: 0; border-top: 1.5px solid var(--linha); padding: 12px 0 0; margin: 0; display: grid; gap: 10px; }
 legend { float: left; width: 100%; font-weight: 600; font-size: 0.95rem; margin-bottom: 10px; }
 legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-right: 8px; font-variant-numeric: tabular-nums; }
@@ -143,6 +153,12 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .sugestoes button { border-color: var(--fio); padding: 4px 10px 4px 4px; }
 .sugestoes code { margin-left: auto; }
 .mini { width: 44px; height: 44px; border-radius: 50%; background: var(--suave); flex: none; }
+/* o que a pessoa leva embora, no cartão do final */
+.leva { display: grid; gap: 10px; margin: 4px 0 14px; padding-top: 14px; border-top: 1.5px solid var(--fio); }
+.leva b { font-size: 1rem; }
+.leva-pets { display: flex; gap: 6px; }
+.leva-pets .mini { width: 38px; height: 38px; }
+.leva button { justify-content: space-between; width: 100%; }
 .salvos { display: flex; gap: 8px; flex-wrap: wrap; }
 .lista, .finais, .conexoes { list-style: none; padding: 0; margin: 0; display: grid; }
 .lista li, .conexoes li { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--fio); }
