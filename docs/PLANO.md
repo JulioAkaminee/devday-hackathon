@@ -135,7 +135,9 @@ paralelo (inclusive por agentes). Marcar `[x]` com o hash do commit.
 - [x] **K3 · Rotas e persistência** — Miguel · K2 · `/api/diagnostico`, `/api/atividade`; progresso
       salvo com o pet; **separado** de Alcance e Profundidade
 - [x] **K4 · Diagnóstico no credenciamento** — Miguel · K3 · na primeira entrada, o pet-recepcionista
-      faz as 5 perguntas na fase do prólogo
+      faz as 5 perguntas na fase do prólogo. *Ajuste (Julio): o onboarding ficou em 3 passos
+      (pet → nomes → o que busca) e a Missão 1 começa sozinha; as 5 perguntas saíram do caminho
+      obrigatório e ficam na aba Academia, marcada com um ponto verde até serem feitas*
 - [x] **K5 · Tela da trilha** — Miguel + Julio (V5) · K3 · caminho de bolinhas, cadeados, atividade
       com explicação, barras por habilidade *(funciona; Julio pode refinar o visual)*
 - [x] **K6 · Ligação com a Aventura** — Miguel · K5 · a trilha sugere o capítulo da habilidade fraca

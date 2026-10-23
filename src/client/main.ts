@@ -45,6 +45,7 @@ const ICONE = {
   aprofundar: svg('<circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M3 20c0-3 2.2-5 5-5 1.6 0 3 .6 4 1.7 1-1.1 2.4-1.7 4-1.7 2.8 0 5 2 5 5"/>'),
   seta: svg('<path d="M5 12h14M13 6l6 6-6 6"/>'),
   voltar: svg('<path d="M19 12H5M11 6l-6 6 6 6"/>'),
+  dado: svg('<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h.01M15 15h.01M15 9h.01M9 15h.01M12 12h.01" stroke-width="2.6"/>'),
 }
 // Marca: a bola verde com olhos de anel do banner do evento
 // Os olhos seguem o ponteiro (spring do motion); o render reaproveita a última posição
@@ -128,90 +129,121 @@ function mostrarStats() {
     .catch(() => {})
 }
 
+/** Criação em três passos curtos: o pet, os nomes e o que a pessoa busca hoje. */
 function telaCriar() {
   document.body.className = 'criando'
   // a bola do banner fica atrás do canvas (fora do #ui) e olha o ponteiro como a marca do topo
   if (!document.querySelector('.bola-criar')) document.body.insertAdjacentHTML('beforeend',
     `<svg class="marca bola-criar" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="var(--verde)"/><ellipse class="olho" cx="24" cy="26" rx="6" ry="8.2" fill="none" stroke="var(--tinta)" stroke-width="3.4"/><ellipse class="olho" cx="52" cy="24" rx="6" ry="8.2" fill="none" stroke="var(--tinta)" stroke-width="3.4"/></svg>`)
   const dna: DNA = { especie: 'xicara', cor: COR_ESPECIE.xicara, acessorio: 'nenhum' }
-  mundo.mostrarVitrine(dna)
   // procura começa diferente da área: o par procura/oferece é o que cruza as pessoas na Missão 2
-  const select = (nome: string, rotulo: string, padrao: Tema = 'front') =>
-    `<label>${rotulo}<select name="${nome}">${TEMAS.map((t) => `<option value="${t}" ${t === padrao ? 'selected' : ''}>${NOMES_TEMA[t]}</option>`).join('')}</select></label>`
+  type Campo = 'nome' | 'dono' | 'area' | 'procura' | 'oferece'
+  const perfil: Record<Campo, string> = {
+    nome: SUGESTOES_NOME[Math.floor(Math.random() * SUGESTOES_NOME.length)], dono: '', area: 'front', procura: 'back', oferece: 'front',
+  }
+  let passo = 0
+  mundo.mostrarVitrine(dna)
 
-  h(`
-    <form class="criar">
-      <header class="criar-topo">${LOGO()}${EVENTO}</header>
+  const progresso = () =>
+    `<div class="progresso" aria-label="Passo ${passo + 1} de 3">${[0, 1, 2].map((i) => `<i class="${i < passo ? 'feito' : i === passo ? 'atual' : ''}"></i>`).join('')}<span>${passo + 1} de 3</span></div>`
+  const opcao = (grupo: string, v: string, rotulo: string, sel: boolean, extra = '') =>
+    `<button type="button" class="${sel ? 'sel' : ''}" aria-pressed="${sel}" data-v="${v}" ${grupo === 'especie' ? `aria-label="${rotulo}"` : ''}>${extra}${grupo === 'especie' ? `<span>${rotulo}</span>` : rotulo}</button>`
+  const chips = (campo: 'area' | 'procura' | 'oferece', rotulo: string) =>
+    `<div class="pergunta-chips"><p class="rotulo">${rotulo}</p><div class="chips" data-perfil="${campo}">${TEMAS.map((t) => opcao(campo, t, NOMES_TEMA[t], perfil[campo] === t)).join('')}</div></div>`
+  const voltar = (para: number) => `<button type="button" class="discreto" data-ir="${para}">${ICONE.voltar} Voltar</button>`
+
+  const conteudo = () => {
+    if (passo === 0) return `
       <div class="hero">
         <p class="chamada">Seu pet só cresce quando você conversa com alguém de verdade.</p>
-        <p class="subchamada">O Quebra-Gelo é o networking do evento, jogável: cada pessoa que você encontra vira um capítulo da história — e no fim do dia você leva a lista de quem conheceu.</p>
-        <ol class="passos-rapidos">
-          <li><b>Monte seu pet</b><span>30 segundos, sem foto e sem cadastro</span></li>
-          <li><b>Encontre alguém de verdade</b><span>QR ou o código de 4 letras do pet da pessoa</span></li>
-          <li><b>Escolha o caminho</b><span>papo rápido (+Alcance) ou conversa funda (+Profundidade), até um dos 3 finais</span></li>
-        </ol>
+        <p class="subchamada">Monte o seu em 30 segundos e encontre gente de verdade pelo evento.</p>
         <p class="prova" data-stats hidden></p>
       </div>
-      <fieldset><legend><i>01</i> Pet</legend>
-        <div class="pets" data-campo="especie">${ESPECIES.map((e, i) => `<button type="button" class="${i ? '' : 'sel'}" aria-pressed="${!i}" data-v="${e}" aria-label="${NOMES_ESPECIE[e]}">${foto({ especie: e, cor: '', acessorio: 'nenhum' })}<span>${NOMES_ESPECIE[e]}</span></button>`).join('')}</div>
-        <p class="personalidade">${PERSONALIDADE.xicara}</p>
-      </fieldset>
-      <fieldset><legend><i>02</i> Acessório</legend>
-        <div class="segmentos" data-campo="acessorio">${ACESSORIOS.map((a, i) => `<button type="button" class="${i ? '' : 'sel'}" aria-pressed="${!i}" data-v="${a}">${NOMES_ACESSORIO[a]}</button>`).join('')}</div>
-      </fieldset>
-      <fieldset><legend><i>03</i> Nomes</legend>
-        <div class="linha">
-          <label>Do pet<input name="nome" minlength="2" maxlength="16" required value="${SUGESTOES_NOME[Math.floor(Math.random() * SUGESTOES_NOME.length)]}"></label>
-          <label>Seu primeiro nome<input name="dono" minlength="2" maxlength="16" required placeholder="Ana" autocomplete="given-name"></label>
-        </div>
-        <p class="dica">Quem encontrar seu pet vê estes dois nomes.</p>
-      </fieldset>
-      <fieldset><legend><i>04</i> O que você busca hoje</legend>
-        <div class="linha">${select('area', 'Minha área')}${select('procura', 'Procuro ajuda com', 'back')}${select('oferece', 'Posso ajudar com')}</div>
-        <p class="dica">Com isso o jogo sugere quem você deve procurar em cada missão — e puxa o primeiro assunto do encontro.</p>
-      </fieldset>
-      <button class="principal">Criar meu pet ${ICONE.seta}</button>
-    </form>
-    <div class="legenda-pet" aria-live="polite"><b></b><span></span></div>`)
-
-  const form = ui.querySelector('form')!
-  // legenda do palco: nome digitado, espécie e personalidade do pet escolhido
-  const legenda = () => {
-    const nome = (form.querySelector<HTMLInputElement>('input[name=nome]')!.value.trim() || NOMES_ESPECIE[dna.especie])
-    ui.querySelector('.legenda-pet b')!.textContent = nome
-    ui.querySelector('.legenda-pet span')!.textContent = `${NOMES_ESPECIE[dna.especie]} · ${PERSONALIDADE[dna.especie]}`
+      ${progresso()}<h2>Escolha seu pet</h2>
+      <div class="pets" data-campo="especie">${ESPECIES.map((e) => opcao('especie', e, NOMES_ESPECIE[e], dna.especie === e, foto({ especie: e, cor: '', acessorio: 'nenhum' }))).join('')}</div>
+      <p class="personalidade">${PERSONALIDADE[dna.especie]}</p>
+      <div class="acessorio"><span>Acessório</span><div class="segmentos" data-campo="acessorio">${ACESSORIOS.map((a) => opcao('acessorio', a, NOMES_ACESSORIO[a], dna.acessorio === a)).join('')}</div></div>
+      <button class="principal">Continuar ${ICONE.seta}</button>`
+    if (passo === 1) return `
+      ${progresso()}<h2>Como vocês se chamam?</h2>
+      <label>Seu primeiro nome<input name="dono" minlength="2" maxlength="16" required placeholder="Ana" autocomplete="given-name" value="${esc(perfil.dono)}"></label>
+      <label>Nome do pet<span class="com-botao"><input name="nome" minlength="2" maxlength="16" required value="${esc(perfil.nome)}"><button type="button" data-sortear aria-label="Sortear outro nome">${ICONE.dado}</button></span></label>
+      <p class="dica">Quem encontrar seu pet vê esses dois nomes.</p>
+      <div class="navegacao">${voltar(0)}<button class="principal">Continuar ${ICONE.seta}</button></div>`
+    return `
+      ${progresso()}<h2>O que você busca hoje?</h2>
+      <p class="dica">É assim que o jogo sugere com quem conversar em cada missão.</p>
+      ${chips('area', 'Eu trabalho com')}${chips('procura', 'Quero ajuda com')}${chips('oferece', 'Posso ajudar com')}
+      <div class="navegacao">${voltar(1)}<button class="principal">Criar meu pet ${ICONE.seta}</button></div>`
   }
-  legenda()
-  form.querySelector('input[name=nome]')!.addEventListener('input', legenda)
-  mostrarStats()
-  animate(form.querySelectorAll('.criar > *'), { opacity: [0, 1], y: [14, 0] }, { delay: stagger(0.05), duration: 0.45, ease: [0.2, 0.8, 0.2, 1] })
-  form.querySelectorAll<HTMLDivElement>('[data-campo]').forEach((grupo) => {
-    grupo.addEventListener('click', (e) => {
+
+  const desenhar = () => {
+    h(`<form class="criar"><header class="criar-topo">${LOGO()}${EVENTO}</header>${conteudo()}</form>
+      <div class="legenda-pet" aria-live="polite"><b></b><span></span></div>`)
+    const form = ui.querySelector<HTMLFormElement>('form.criar')!
+    // legenda do palco: nome do pet, espécie e personalidade
+    const legenda = () => {
+      ui.querySelector('.legenda-pet b')!.textContent = perfil.nome.trim() || NOMES_ESPECIE[dna.especie]
+      ui.querySelector('.legenda-pet span')!.textContent = `${NOMES_ESPECIE[dna.especie]} · ${PERSONALIDADE[dna.especie]}`
+    }
+    legenda()
+    if (passo === 0) mostrarStats()
+    animate(form.querySelectorAll(':scope > :not(.criar-topo)'), { opacity: [0, 1], y: [10, 0] }, { delay: stagger(0.04), duration: 0.35, ease: [0.2, 0.8, 0.2, 1] })
+    // foco no que se faz agora: o campo do nome ou o título do passo (leitor de tela anuncia a troca)
+    if (passo === 1 && !perfil.dono) form.querySelector<HTMLInputElement>('input[name=dono]')!.focus({ preventScroll: true })
+    else {
+      const titulo = form.querySelector<HTMLElement>('h2')!
+      titulo.tabIndex = -1
+      titulo.focus({ preventScroll: true })
+    }
+
+    form.addEventListener('input', (e) => {
+      const input = e.target as HTMLInputElement
+      perfil[input.name as Campo] = input.value
+      if (input.name === 'nome') legenda()
+    })
+    form.addEventListener('click', (e) => {
       const b = (e.target as HTMLElement).closest('button')
       if (!b) return
+      if (b.dataset.ir) { passo = Number(b.dataset.ir); desenhar(); return }
+      if (b.hasAttribute('data-sortear')) {
+        const outros = SUGESTOES_NOME.filter((n) => n !== perfil.nome)
+        perfil.nome = outros[Math.floor(Math.random() * outros.length)]
+        form.querySelector<HTMLInputElement>('input[name=nome]')!.value = perfil.nome
+        legenda()
+        return
+      }
+      const grupo = b.closest<HTMLElement>('[data-campo], [data-perfil]')
+      if (!grupo || !b.dataset.v) return
       grupo.querySelectorAll('button').forEach((x) => { x.classList.toggle('sel', x === b); x.setAttribute('aria-pressed', String(x === b)) })
-      ;(dna as unknown as Record<string, string>)[grupo.dataset.campo!] = b.dataset.v!
+      if (grupo.dataset.perfil) { perfil[grupo.dataset.perfil as Campo] = b.dataset.v; return }
+      ;(dna as unknown as Record<string, string>)[grupo.dataset.campo!] = b.dataset.v
       dna.cor = COR_ESPECIE[dna.especie]
       form.querySelector('.personalidade')!.textContent = PERSONALIDADE[dna.especie]
       legenda()
       mundo.trocarPet(dna)
     })
-  })
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault()
-    const botao = form.querySelector<HTMLButtonElement>('button.principal')!
-    if (botao.disabled) return
-    botao.disabled = true // clique duplo criava dois pets
-    const f = new FormData(form)
-    try {
-      const r = await api<{ token: string }>('pets', {
-        ...dna, nome: f.get('nome'), dono: f.get('dono'), area: f.get('area'), procura: f.get('procura'), oferece: f.get('oferece'),
-      })
-      token = r.token
-      guardado.set('qg-token', token)
-      iniciarJogo()
-    } catch (err) { aviso((err as Error).message); botao.disabled = false }
-  })
+    // Enter e o botão principal avançam; no último passo, criam o pet
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      if (passo < 2) { passo++; desenhar(); return }
+      const botao = form.querySelector<HTMLButtonElement>('.navegacao .principal')!
+      if (botao.disabled) return
+      botao.disabled = true // clique duplo criava dois pets
+      try {
+        const r = await api<{ token: string }>('pets', {
+          ...dna, nome: perfil.nome.trim(), dono: perfil.dono.trim(), area: perfil.area, procura: perfil.procura, oferece: perfil.oferece,
+        })
+        token = r.token
+        guardado.set('qg-token', token)
+        iniciarJogo(true)
+      } catch (err) {
+        aviso((err as Error).message)
+        botao.disabled = false
+      }
+    })
+  }
+  desenhar()
 }
 
 // ---------- Jogo ----------
@@ -223,6 +255,7 @@ let capMontado = -1
 let itensChave = ''
 let mapaChave = '' // selos, contatos nas ilhas e cena final só remontam quando o progresso muda
 let escolhaLocal: number | null = null
+let qrMeu = '' // QR do próprio pet, mostrado no cartão da missão
 // Academia (desafio nº 4)
 let diagRespostas: number[] = []
 let ultimoToqueDiag = 0 // toque duplo respondia duas situações de uma vez
@@ -297,17 +330,22 @@ function variaveis(v: Visao) {
   }
 }
 
-async function iniciarJogo() {
+async function iniciarJogo(acabouDeNascer = false) {
   try {
     visao = await api('eu')
   } catch (err) {
     if ((err as { status?: number }).status === 401) { token = null; guardado.set('qg-token', null); return telaCriar() }
     aviso((err as Error).message)
-    setTimeout(iniciarJogo, 3000) // Wi-Fi do evento caiu na abertura: tenta de novo sozinho
+    setTimeout(() => iniciarJogo(acabouDeNascer), 3000) // Wi-Fi do evento caiu na abertura: tenta de novo sozinho
     return
   }
+  // o cartão da missão mostra o QR do pet: quem está na frente lê com a câmera do celular
+  qrMeu = await QRCode.toDataURL(`${location.origin}/?c=${visao!.pet.codigo}`, { margin: 1, width: 240, color: { dark: '#141414', light: '#ffffff' } }).catch(() => '')
+  // sem tela de prólogo: o pet nasce e a Missão 1 já começa (o diagnóstico fica na aba Academia)
+  if (visao!.estado.fase === 'prologo') visao = await api('comecar', {}).catch(() => visao)
   document.body.className = 'jogando'
   render()
+  if (acabouDeNascer) aviso(`${visao!.pet.nome} nasceu! Agora encontre alguém de verdade.`, 'ok')
   // QR lido fora de hora: o código espera a próxima missão, e a pessoa precisa saber disso
   const pendente = sessao.get('qg-c')
   if (pendente && visao!.estado.fase !== 'aguardando') aviso(`Código ${pendente} guardado: o encontro acontece quando a próxima missão começar.`, 'ok')
@@ -387,7 +425,6 @@ function cartaoMissao(v: Visao) {
   const pontos = Array.from({ length: TOTAL_CAPITULOS }, (_, i) =>
     `<i class="${i < e.cap - 1 || e.fase === 'final' ? 'feito' : i === e.cap - 1 ? 'atual' : ''}"></i>`).join('')
   const topo = (rotulo: string, titulo: string) => `<div class="cartao-topo"><span>${rotulo}</span><span class="pontos" aria-hidden="true">${pontos}</span></div><h2>${esc(titulo)}</h2>`
-  const escanear = `<button class="escanear" data-acao="escanear">${ICONE.escanear} Escanear pet</button>`
   const escolhas = (ativas: boolean) => {
     const op = (o: Opcao, icone: string, efeito: string) =>
       `<button class="escolha ${o}" ${ativas ? `data-op="${o}"` : 'disabled'}>${icone}<span>${esc(preencher(cap[o].opcao, vars))}<small>${efeito}</small></span></button>`
@@ -395,16 +432,8 @@ function cartaoMissao(v: Visao) {
   }
 
   if (e.fase === 'prologo') {
-    // Credenciamento: o diagnóstico da Academia vem antes da aventura (K4)
-    if (!v.academia.diagnostico) return `${topo('Credenciamento', 'Antes de entrar')}${diagnostico()}`
-    const fraca = v.academia.fraca!
-    return `${topo('Credenciamento', 'Boas-vindas ao DevDay')}<p class="texto">${esc(preencher(PROLOGO, vars))}</p>
-      <ol class="passos">
-        <li><span><b>Encontre alguém de verdade.</b> Digite o código ou leia o QR do pet da pessoa.</span></li>
-        <li><span><b>Escolha como conversar.</b> Papo rápido soma Alcance; ir a fundo soma Profundidade.</span></li>
-        <li><span><b>Chegue a um dos 3 finais</b> no Palco DevDay. Suas escolhas decidem qual.</span></li>
-      </ol>
-      <p class="nota">Sua trilha na Academia começa por <b>${NOMES_HABILIDADE[fraca]}</b>.</p>
+    // só aparece se o começo automático falhou (rede): um botão e pronto
+    return `${topo('Credenciamento', 'Tudo pronto')}<p class="texto">${esc(preencher(PROLOGO, vars))}</p>
       <button class="principal" data-acao="comecar">Começar a aventura ${ICONE.seta}</button>`
   }
   if (e.fase === 'aguardando') {
@@ -413,7 +442,13 @@ function cartaoMissao(v: Visao) {
       : ''
     const f = v.academia.fraca
     const treino = f && CAPITULO_SUGERIDO[f] === e.cap ? `<p class="nota">Aqui você treina <b>${NOMES_HABILIDADE[f]}</b>, sua habilidade mais fraca.</p>` : ''
-    return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}<p class="texto">${esc(preencher(cap.abertura, vars))}</p>${treino}<p class="rotulo">Depois do encontro, você escolhe</p>${escolhas(false)}${sug}${escanear}`
+    // o encontro acontece aqui mesmo: o seu código à mostra e o campo para o código da outra pessoa
+    return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}<p class="texto">${esc(preencher(cap.abertura, vars))}</p>${treino}
+      <div class="encontrar">
+        <div class="meu-qr">${qrMeu ? `<img src="${qrMeu}" alt="QR do seu pet">` : ''}<div><p class="rotulo">Seu código</p><p class="grande">${v.pet.codigo}</p><small>Mostre para a pessoa: ela digita o código ou lê o QR com a câmera do celular.</small></div></div>
+        <form class="codigo-dela" data-encontro><label class="rotulo" for="codigo-dela">Código da outra pessoa</label><div><input id="codigo-dela" name="codigo" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="principal">Encontrar</button></div></form>
+      </div>${sug}
+      <p class="dica">Depois do encontro, você escolhe: papo rápido (+2 Alcance) ou conversa funda (+2 Profundidade).</p>`
   }
   if (e.fase === 'encontro') {
     const a = v.amigo!
@@ -490,8 +525,9 @@ function render() {
 
   const medidor = (nome: string, valor: number, cls: string) =>
     `<div class="medidor ${cls}" title="${cls === 'ampla' ? 'Quanta gente você conheceu' : 'Até onde você levou cada conversa'}"><span>${nome}</span><b>${valor}</b><i><em data-alvo="${Math.min(100, (valor / 12) * 100)}" style="width:${Math.min(100, (medidas[cls as keyof typeof medidas] / 12) * 100)}%"></em></i></div>`
+  // a Academia ganha um ponto verde enquanto o diagnóstico (5 perguntas) não foi feito
   const abaBtn = (id: Aba, nome: string) =>
-    `<button class="${aba === id ? 'ativa' : ''}" data-aba="${id}" aria-label="${nome}" ${aba === id ? 'aria-current="page"' : ''}>${ICONE[id]}<span>${nome}</span></button>`
+    `<button class="${aba === id ? 'ativa' : ''}" data-aba="${id}" aria-label="${nome}" ${aba === id ? 'aria-current="page"' : ''}>${ICONE[id]}<span>${nome}</span>${id === 'academia' && !v.academia.diagnostico ? '<i class="novo" aria-hidden="true"></i>' : ''}</button>`
 
   h(`
     <header class="topo">
@@ -604,6 +640,16 @@ ui.addEventListener('click', (ev) => {
     aba = d.aba as Aba
     render()
   }
+})
+
+// código digitado direto no cartão da missão
+ui.addEventListener('submit', (ev) => {
+  const f = (ev.target as HTMLElement).closest<HTMLFormElement>('[data-encontro]')
+  if (!f || !visao) return
+  ev.preventDefault()
+  const codigo = String(new FormData(f).get('codigo') ?? '').trim().toUpperCase()
+  if (codigo.length === 4) acao('encontro', { codigo })
+  else aviso('O código do pet tem 4 letras.')
 })
 
 /** Escanear: o celular lê o QR com a câmera nativa; no computador, digita o código. */

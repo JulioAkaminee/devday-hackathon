@@ -77,11 +77,6 @@ body:not(.criando) .bola-criar { display: none; }
 /* o que é isso, em dez segundos: promessa, três passos e a sala ao vivo */
 .hero { display: grid; gap: 14px; }
 .visao { font-size: 0.95rem; line-height: 1.45; color: #2c2c2c; max-width: 48ch; }
-.passos-rapidos { list-style: none; margin: 0; padding: 12px 0 0; display: grid; gap: 9px; counter-reset: passo; border-top: 1.5px solid var(--fio); }
-.passos-rapidos li { display: grid; grid-template-columns: 24px 1fr; column-gap: 8px; align-items: baseline; }
-.passos-rapidos li::before { counter-increment: passo; content: counter(passo); font-size: 0.78rem; font-weight: 600; color: var(--verde-texto); font-variant-numeric: tabular-nums; }
-.passos-rapidos b { font-size: 0.95rem; }
-.passos-rapidos span { grid-column: 2; font-size: 0.85rem; line-height: 1.35; color: var(--cinza); }
 .prova { font-size: 0.85rem; line-height: 1.4; color: var(--cinza); padding-left: 12px; border-left: 3px solid var(--verde); }
 .prova b { color: var(--tinta); font-variant-numeric: tabular-nums; }
 fieldset { border: 0; border-top: 1.5px solid var(--linha); padding: 12px 0 0; margin: 0; display: grid; gap: 10px; }
@@ -92,7 +87,24 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .pets button img { width: 100%; max-width: 64px; aspect-ratio: 1; }
 .pets button.sel { border-color: var(--linha); background: var(--suave); box-shadow: inset 0 -4px 0 var(--verde); }
 .personalidade { font-size: 0.9rem; color: var(--cinza); }
-.criar > .principal { position: sticky; bottom: 0; box-shadow: 0 -16px 0 var(--papel), 0 32px 0 var(--papel); }
+.criar > .principal, .criar > .navegacao { position: sticky; bottom: 0; box-shadow: 0 -16px 0 var(--papel), 0 32px 0 var(--papel); }
+.criar > .navegacao { background: var(--papel); }
+/* um passo por vez: barrinhas de progresso, título e só o que importa naquele passo */
+.progresso { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--cinza); font-variant-numeric: tabular-nums; border-top: 1.5px solid var(--linha); padding-top: 14px; }
+.progresso i { width: 22px; height: 5px; border-radius: 5px; background: var(--fio); }
+.progresso i.feito { background: var(--tinta); }
+.progresso i.atual { background: var(--verde); width: 36px; }
+.progresso span { margin-left: 6px; }
+.criar h2 { margin: -12px 0 0; font-size: 1.6rem; outline: none; }
+.acessorio { display: grid; gap: 6px; }
+.acessorio > span { font-size: 0.8rem; color: var(--cinza); }
+.com-botao { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.com-botao button { justify-content: center; padding: 0 12px; }
+.pergunta-chips { display: grid; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { border-color: var(--fio); padding: 8px 12px; font-size: 0.9rem; }
+.chips button.sel { background: var(--tinta); border-color: var(--tinta); color: var(--papel); }
+.navegacao { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
 .subchamada { margin-top: -10px; color: var(--cinza); font-size: 0.98rem; line-height: 1.4; }
 .dica { margin-top: 8px; font-size: 0.8rem; color: var(--cinza); }
 /* legenda no palco da criação: o pet ganha nome e jeito antes de nascer */
@@ -145,6 +157,15 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .escolha:disabled { opacity: 0.38; }
 .escanear { width: 100%; justify-content: center; background: var(--tinta); color: var(--papel); font-weight: 600; font-size: 1.05rem; min-height: 54px; }
 .escanear:hover { background: #2a2a2a !important; }
+/* encontro direto no cartão: o seu código à mostra e o campo do código da outra pessoa */
+.encontrar { display: grid; gap: 12px; margin-bottom: 12px; padding-top: 12px; border-top: 1.5px solid var(--fio); }
+.meu-qr { display: flex; gap: 14px; align-items: center; }
+.meu-qr img { width: 96px; height: 96px; flex: none; }
+.meu-qr .grande { font-size: 2rem; line-height: 1.1; }
+.meu-qr small { display: block; margin-top: 2px; color: var(--cinza); font-size: 0.8rem; line-height: 1.35; }
+.codigo-dela > div { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.codigo-dela input { text-transform: uppercase; letter-spacing: 0.3em; font-weight: 600; font-size: 1.15rem; }
+.codigo-dela .principal { width: auto; }
 .cartao .escanear, .cartao [data-acao="comecar"], .cartao [data-acao="avancar"] { position: sticky; bottom: 0; box-shadow: 0 -12px 0 var(--papel), 0 20px 0 var(--papel); }
 .encontro { display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: start; }
 .consequencia { border-left: 4px solid var(--verde); padding-left: 12px; margin-bottom: 16px; line-height: 1.45; display: grid; gap: 4px; }
@@ -202,6 +223,7 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .abas button + button { border-left: 1px solid var(--fio); }
 .abas button.ativa { color: var(--tinta); font-weight: 600; box-shadow: inset 0 -4px 0 var(--verde); }
 .abas button.ativa svg { color: var(--verde-escuro); }
+.abas .novo { width: 8px; height: 8px; border-radius: 50%; background: var(--verde); align-self: flex-start; margin: 4px 0 0 -6px; }
 
 /* ---------- modal, avisos ---------- */
 .modal { position: fixed; inset: 0; background: rgb(20 20 20 / 0.4); display: grid; place-items: center; z-index: 10; padding: 16px; }
@@ -214,7 +236,8 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .meu-codigo { display: flex; gap: 16px; align-items: center; border-top: 1.5px solid var(--linha); padding-top: 14px; }
 .meu-codigo img { width: 132px; height: 132px; }
 .grande { font-size: 2.4rem; font-weight: 600; letter-spacing: 0.08em; }
-.aviso { position: fixed; top: 84px; left: 50%; transform: translateX(-50%); padding: 12px 18px; font-weight: 600; z-index: 20; border: 1.5px solid var(--linha); background: var(--papel); }
+/* centrado por margem: a animação de entrada usa transform e apagava o translateX */
+.aviso { position: fixed; top: 84px; left: 0; right: 0; margin-inline: auto; width: max-content; max-width: calc(100% - 32px); padding: 12px 18px; font-weight: 600; z-index: 20; border: 1.5px solid var(--linha); background: var(--papel); }
 .aviso.ok { background: var(--verde); border-color: var(--verde); }
 
 /* ---------- /demo ---------- */
@@ -248,14 +271,11 @@ body.demo #ui { position: static; }
   .medidor { flex: 1; grid-template-columns: auto auto 1fr; }
   .cartao { left: 8px; right: 8px; width: auto; bottom: calc(max(8px, env(safe-area-inset-bottom)) + 66px); max-height: 52vh; padding: 16px; }
   .escolhas { grid-template-columns: 1fr 1fr; }
+  .meu-qr img { width: 80px; height: 80px; }
+  .criar h2 { font-size: 1.35rem; }
   .abas { left: 8px; right: 8px; transform: none; bottom: max(8px, env(safe-area-inset-bottom)); }
   .abas button { flex: 1; justify-content: center; padding: 8px 4px; }
   /* o cabeçalho tem duas linhas aqui: o aviso desce para não cobrir as barras */
-  .aviso { top: calc(env(safe-area-inset-top) + 124px); width: max-content; max-width: calc(100% - 32px); }
+  .aviso { top: calc(env(safe-area-inset-top) + 124px); }
 }
 
-/* passos do Credenciamento: numeração no grid, como no banner */
-.passos { list-style: none; counter-reset: passo; padding: 0; margin: 0 0 14px; display: grid; gap: 8px; }
-.passos li { counter-increment: passo; display: grid; grid-template-columns: 28px 1fr; gap: 10px; font-size: 0.9rem; line-height: 1.4; padding-top: 8px; border-top: 1px solid var(--fio); }
-.passos li::before { content: counter(passo, decimal-leading-zero); color: var(--cinza); font-variant-numeric: tabular-nums; }
-.passos b { display: block; }
