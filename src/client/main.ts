@@ -102,8 +102,9 @@ function telaCriar() {
   document.body.className = 'criando'
   const dna: DNA = { especie: 'xicara', cor: COR_ESPECIE.xicara, acessorio: 'nenhum' }
   mundo.mostrarVitrine(dna)
-  const select = (nome: string, rotulo: string) =>
-    `<label>${rotulo}<select name="${nome}">${TEMAS.map((t) => `<option value="${t}">${NOMES_TEMA[t]}</option>`).join('')}</select></label>`
+  // procura começa diferente da área: o par procura/oferece é o que cruza as pessoas na Missão 2
+  const select = (nome: string, rotulo: string, padrao: Tema = 'front') =>
+    `<label>${rotulo}<select name="${nome}">${TEMAS.map((t) => `<option value="${t}" ${t === padrao ? 'selected' : ''}>${NOMES_TEMA[t]}</option>`).join('')}</select></label>`
 
   h(`
     <form class="criar">
@@ -123,7 +124,7 @@ function telaCriar() {
         </div>
       </fieldset>
       <fieldset><legend><i>04</i> Hoje</legend>
-        <div class="linha">${select('area', 'Minha área')}${select('procura', 'Procuro ajuda com')}${select('oferece', 'Posso ajudar com')}</div>
+        <div class="linha">${select('area', 'Minha área')}${select('procura', 'Procuro ajuda com', 'back')}${select('oferece', 'Posso ajudar com')}</div>
       </fieldset>
       <button class="principal">Criar meu pet ${ICONE.seta}</button>
     </form>`)
