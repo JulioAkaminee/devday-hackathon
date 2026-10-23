@@ -17,16 +17,16 @@ export const NOMES_ESPECIE: Record<Especie, string> = {
   coracao: 'Coração', globinho: 'Globinho', estrelinha: 'Estrelinha', conezinho: 'Conezinho', nuvem: 'Nuvem',
 }
 export const PERSONALIDADE: Record<Especie, string> = {
-  xicara: 'Curioso e sempre puxa assunto.',
-  caderninho: 'Organizado e adora trocar ideias.',
-  laptopinho: 'Criativo e sempre tem um projeto.',
-  plantinha: 'Tranquila e faz conexões inesperadas.',
-  lampada: 'Cheio de ideias e energia.',
-  coracao: 'Empático e sempre escuta de verdade.',
-  globinho: 'Adora gente de todas as áreas.',
-  estrelinha: 'Animado e sempre incentiva os outros.',
-  conezinho: 'Direto e ajuda a focar no objetivo.',
-  nuvem: 'Observador e sempre vê o lado diferente.',
+  xicara: 'Curioso, puxa assunto com qualquer um.',
+  caderninho: 'Organizado, anota tudo e adora trocar ideias.',
+  laptopinho: 'Criativo, tem um projeto novo por semana.',
+  plantinha: 'Tranquila, junta pessoas que ninguém juntaria.',
+  lampada: 'Cheio de ideias, fala rápido e anima a mesa.',
+  coracao: 'Empático, escuta até o fim antes de falar.',
+  globinho: 'Faz amizade com gente de todas as áreas.',
+  estrelinha: 'Animado, é o primeiro a aplaudir os outros.',
+  conezinho: 'Direto, ajuda o time a focar no objetivo.',
+  nuvem: 'Observador, vê o problema por outro ângulo.',
 }
 /** Cor principal de cada pet (avatar, rótulos). A cor não é escolhida: vem do pet. */
 export const COR_ESPECIE: Record<Especie, string> = {
