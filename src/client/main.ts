@@ -130,8 +130,8 @@ function telaCriar() {
       </fieldset>
       <fieldset><legend><i>03</i> Nomes</legend>
         <div class="linha">
-          <label>Do pet<input name="nome" maxlength="16" required value="${SUGESTOES_NOME[Math.floor(Math.random() * SUGESTOES_NOME.length)]}"></label>
-          <label>Seu primeiro nome<input name="dono" maxlength="16" required placeholder="Ana" autocomplete="given-name"></label>
+          <label>Do pet<input name="nome" minlength="2" maxlength="16" required value="${SUGESTOES_NOME[Math.floor(Math.random() * SUGESTOES_NOME.length)]}"></label>
+          <label>Seu primeiro nome<input name="dono" minlength="2" maxlength="16" required placeholder="Ana" autocomplete="given-name"></label>
         </div>
       </fieldset>
       <fieldset><legend><i>04</i> Hoje</legend>
