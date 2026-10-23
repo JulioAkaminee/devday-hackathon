@@ -206,13 +206,7 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .medidor.profunda em { background: var(--tinta); }
 
 /* ---------- cartão ---------- */
-.cartao { position: absolute; left: 24px; bottom: max(20px, env(safe-area-inset-bottom)); width: min(480px, calc(100% - 48px)); max-height: calc(100% - 120px); overflow: auto; background: var(--papel); border: 1.5px solid var(--linha); border-radius: var(--raio); padding: 24px 26px; }
-/* desktop: o cartão desce até o rodapé e ganha corpo; as abas vão para o meio do mapa livre, ao lado dele */
-@media (min-width: 761px) {
-  .cartao h2 { font-size: 1.75rem; }
-  .cartao .texto, .cartao .consequencia { font-size: 1.05rem; }
-  .cartao .dica { font-size: 0.86rem; }
-}
+.cartao { position: absolute; left: 24px; bottom: 100px; width: min(440px, calc(100% - 48px)); max-height: calc(100% - 200px); overflow: auto; background: var(--papel); border: 1.5px solid var(--linha); border-radius: var(--raio); padding: 20px; }
 .cartao-topo { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: 500; margin-bottom: 6px; }
 .pontos { display: flex; gap: 5px; }
 .pontos i { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid var(--linha); }
@@ -246,6 +240,20 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .lista a.linkedin { display: grid; place-items: center; width: 44px; height: 44px; flex: none; color: var(--tinta); }
 .lista a.linkedin svg { width: 24px; height: 24px; }
 .lista a.linkedin:hover { color: var(--verde); }
+/* trilha da missão: em que passo do ciclo a pessoa está (encontrar, conversar, resultado) */
+.etapas { list-style: none; margin: 4px 0 14px; padding: 0; display: flex; gap: 6px; font-size: 0.78rem; font-weight: 500; color: var(--cinza); }
+.etapas li { display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border: 1.5px solid var(--fio); border-radius: 20px; }
+.etapas li i { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--fio); color: var(--tinta); font-style: normal; font-size: 0.7rem; font-weight: 600; }
+.etapas li.feito i { background: var(--verde); color: var(--papel); }
+.etapas li.atual { border-color: var(--tinta); color: var(--tinta); }
+.etapas li.atual i { background: var(--tinta); color: var(--papel); }
+/* resultado da escolha: o ponto ganho em destaque, com o total e o que ele mede */
+.ganho { display: flex; align-items: center; gap: 14px; padding: 12px 16px; margin-bottom: 14px; border-radius: var(--raio); background: #e8f7ed; color: var(--tinta); }
+.ganho.profunda { background: var(--suave); }
+.ganho > b { color: var(--verde-texto); font-size: 2.4rem; line-height: 1; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+.ganho span { display: grid; font-weight: 600; font-size: 1.05rem; }
+.ganho.profunda > b { color: var(--tinta); }
+.ganho small { font-weight: 500; font-size: 0.82rem; color: var(--cinza); }
 .consequencia { border-left: 4px solid var(--verde); padding-left: 12px; margin-bottom: 16px; line-height: 1.45; display: grid; gap: 4px; }
 .consequencia.profunda { border-color: var(--tinta); }
 .sugestoes { display: grid; gap: 6px; margin-bottom: 10px; }
@@ -364,5 +372,3 @@ body.demo #ui { position: static; }
   /* o cabeçalho tem duas linhas aqui: o aviso desce para não cobrir as barras */
   .aviso { top: calc(env(safe-area-inset-top) + 124px); }
 }
-/* desktop: as abas ficam no meio do mapa livre, ao lado do cartão (vem depois da regra base das abas) */
-@media (min-width: 761px) { body.jogando .abas { left: calc(528px + (100% - 528px) / 2); } }

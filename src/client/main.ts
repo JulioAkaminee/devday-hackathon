@@ -551,6 +551,10 @@ function cartaoMissao(v: Visao) {
   const pontos = Array.from({ length: TOTAL_CAPITULOS }, (_, i) =>
     `<i class="${i < e.cap - 1 || e.fase === 'final' ? 'feito' : i === e.cap - 1 ? 'atual' : ''}"></i>`).join('')
   const topo = (rotulo: string, titulo: string) => `<div class="cartao-topo"><span>${rotulo}</span><span class="pontos" aria-hidden="true">${pontos}</span></div><h2>${esc(titulo)}</h2>`
+  // cada missão é o mesmo ciclo: encontrar alguém, escolher a conversa, ver o resultado
+  const passoAtual = { aguardando: 0, encontro: 1, consequencia: 2 }[e.fase as string] ?? -1
+  const etapas = passoAtual < 0 ? '' : `<ol class="etapas" aria-label="Passo ${passoAtual + 1} de 3 da missão">${['Encontrar', 'Conversar', 'Resultado'].map((n, i) =>
+    `<li class="${i < passoAtual ? 'feito' : i === passoAtual ? 'atual' : ''}"><i>${i < passoAtual ? '✓' : i + 1}</i>${n}</li>`).join('')}</ol>`
   const escolhas = (ativas: boolean) => {
     const op = (o: Opcao, icone: string, efeito: string) =>
       `<button class="escolha ${o}" ${ativas ? `data-op="${o}"` : 'disabled'}>${icone}<span>${esc(preencher(cap[o].opcao, vars))}<small>${efeito}</small></span></button>`
@@ -573,7 +577,7 @@ function cartaoMissao(v: Visao) {
     const treino = f && CAPITULO_SUGERIDO[f] === e.cap ? `<p class="nota">Aqui você treina <b>${NOMES_HABILIDADE[f]}</b>, sua habilidade mais fraca.</p>` : ''
     // o encontro acontece aqui mesmo: o seu código à mostra e o campo para o código da outra pessoa
     const como = e.cap === 1 ? '<p class="nota"><b>Como funciona:</b> são 4 missões. Cada uma começa quando você encontra uma pessoa aqui no evento. No fim, o jeito como você conversou decide o seu final.</p>' : ''
-    return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}${como}<p class="texto">${esc(preencher(cap.abertura, vars))}</p>${treino}
+    return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}${etapas}${como}<p class="texto">${esc(preencher(cap.abertura, vars))}</p>${treino}
       <div class="encontrar">
         <div class="meu-qr">${qrMeu ? `<img src="${qrMeu}" alt="QR do seu pet">` : ''}<div><p class="rotulo">Seu código</p><p class="grande">${v.pet.codigo}</p><small>Mostre para a pessoa: ela digita o código ou lê o QR com a câmera do celular.</small></div></div>
         <form class="codigo-dela" data-encontro><label class="rotulo" for="codigo-dela">Código da outra pessoa</label><div><input id="codigo-dela" name="codigo" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="principal">Encontrar</button></div></form>
@@ -582,7 +586,7 @@ function cartaoMissao(v: Visao) {
   }
   if (e.fase === 'encontro') {
     const a = v.amigo!
-    return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}
+    return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}${etapas}
       <div class="encontro">${foto(a, 'mini')}<p class="texto">${esc(preencher(cap.encontro, vars))}</p></div>
       ${linkedin(a, 'botao-linkedin', `Conectar com ${esc(a.dono)} no LinkedIn`)}
       <p class="pergunta">${esc(cap.pergunta)}</p>${escolhas(true)}
@@ -590,8 +594,10 @@ function cartaoMissao(v: Visao) {
   }
   if (e.fase === 'consequencia') {
     const o = e.escolhas.at(-1)!
-    return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}
-      <p class="consequencia ${o}"><b>${o === 'ampla' ? '+2 Alcance' : '+2 Profundidade'}</b>${esc(preencher(cap[o].consequencia, vars))}</p>
+    const total = o === 'ampla' ? e.alcance : e.profundidade
+    return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}${etapas}
+      <div class="ganho ${o}"><b>+2</b><span>${o === 'ampla' ? 'Alcance' : 'Profundidade'}<small>Agora ${total}: ${o === 'ampla' ? 'gente que você conheceu' : 'conversas que foram fundo'}</small></span></div>
+      <p class="consequencia ${o}">${esc(preencher(cap[o].consequencia, vars))}</p>
       <button class="principal" data-acao="avancar">${e.cap < TOTAL_CAPITULOS ? `Seguir para a Missão ${e.cap + 1}` : 'Subir ao palco'} ${ICONE.seta}</button>`
   }
   const tipo: Final = finalDe(e)
