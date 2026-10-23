@@ -82,7 +82,7 @@ paralelo (inclusive por agentes). Marcar `[x]` com o hash do commit.
 
 ### F — Fundação
 
-- [ ] **F1 · Juntar o trabalho na `main`** — Miguel · — · `mvp` e `docs/planejamento` na `main`; a
+- [x] **F1 · Juntar o trabalho na `main`** *(`e3e7cc7`: `mvp` + `docs/planejamento`; `main` = `mvp`)* — Miguel · — · `mvp` e `docs/planejamento` na `main`; a
       partir daí, branch curta por tarefa e merge na `main`
 - [ ] **F2 · Deploy no Dokploy com HTTPS** — Miguel · F1 · app no ar numa URL `https://`, deploy
       automático da `main`, volume `/data`, healthcheck `/health` respondendo. HTTPS é obrigatório:
@@ -148,10 +148,10 @@ paralelo (inclusive por agentes). Marcar `[x]` com o hash do commit.
 
 ### E — Entrega (regras oficiais: até 16h)
 
-- [ ] **E1 · Ensaio de ponta a ponta** — os dois · F2 · matriz da seção 4 com os dois desafios
-- [ ] **E2 · Vídeo de 3 min** — os dois · E1 · roteiro: problema → Academia (dois perfis) →
+- [ ] **E1 · Ensaio de ponta a ponta** *(checklist em [`ENTREGA.md`](ENTREGA.md))* — os dois · F2 · matriz da seção 4 com os dois desafios
+- [ ] **E2 · Vídeo de 3 min** *(roteiro com tempos em [`ENTREGA.md`](ENTREGA.md))* — os dois · E1 · roteiro: problema → Academia (dois perfis) →
       Aventura (dois caminhos) → por que agora → o que vem depois
-- [ ] **E3 · README final** — Miguel · E1 · problema, solução, link, como rodar, banco de questões
+- [~] **E3 · README final** *(`04055bc`; faltam URL pública e link do vídeo)* — Miguel · E1 · problema, solução, link, como rodar, banco de questões
       próprio declarado
 - [ ] **E4 · Formulário enviado** — Miguel · E2, E3 · antes das 16h
 
