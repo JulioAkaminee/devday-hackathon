@@ -29,6 +29,11 @@ const estilos = `
   footer{border-top:2px solid var(--tinta);padding:20px 40px;display:flex;align-items:baseline;gap:18px}
   footer p{margin:0;font-size:clamp(18px,2vw,34px);font-weight:600;letter-spacing:-.03em}
   footer span{margin-left:auto;color:var(--cinza);font-size:.95rem}
+  footer .ao-vivo{margin-left:16px}
+  .online{display:flex;align-items:center;gap:9px;color:var(--tinta);font-size:clamp(15px,1.4vw,22px);font-weight:600;letter-spacing:-.01em}
+  .online i{width:10px;height:10px;border-radius:50%;background:var(--verde);animation:pulso 2.2s ease-in-out infinite}
+  .online b{font-variant-numeric:tabular-nums}
+  @keyframes pulso{50%{opacity:.3}}
   #topo{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:clamp(13px,1.1vw,18px)}
   #topo li{display:flex;gap:10px;align-items:baseline;color:var(--cinza)}
   #topo b{color:var(--tinta);font-weight:600}
@@ -68,6 +73,20 @@ const roteiro = `
   const puxar = () => fetch('/api/stats', { cache: 'no-store' }).then((r) => r.json()).then(desenhar).catch(() => {});
   puxar();
   setInterval(puxar, 3000);
+
+  // quantas pessoas estão com o app aberto agora: se a rota falhar ou vier zero, o bloco some
+  const online = $('online');
+  const onlineN = $('onlineN');
+  const puxarOnline = () => fetch('/api/online', { cache: 'no-store' })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((d) => {
+      const n = d && typeof d.total === 'number' ? d.total : 0;
+      onlineN.textContent = n;
+      online.hidden = n <= 0;
+    })
+    .catch(() => { online.hidden = true; });
+  puxarOnline();
+  setInterval(puxarOnline, 5000);
 `
 
 export function telao(qr: string, url: string) {
@@ -103,7 +122,8 @@ export function telao(qr: string, url: string) {
   </main>
   <footer>
     <p>Seu pet só cresce quando você conversa com alguém de verdade.</p>
-    <span>ao vivo</span>
+    <span class="online" id="online" hidden><i></i><b id="onlineN">0</b> online agora</span>
+    <span class="ao-vivo">ao vivo</span>
   </footer>
 </div>
 <script>${roteiro}</script>
