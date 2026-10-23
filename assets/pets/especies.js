@@ -486,15 +486,16 @@ export const PETS = [
     animacao: 'parado',
     encaixes: { olhos: { x: 8.5, y: 10.5, dist: 5, larg: 2 }, topo: { x: 9.5, y: 18, z: 6.5, raio: 4.5 }, peito: { x: 8.5, y: 7, sep: 4 } },
     construir(m) {
-      m.parte('corpo', { pivo: [8.5, 4, 6.5] });
+      m.parte('corpo', { pivo: [8.5, 3, 6.5] });
       for (const [x, y, z, r] of [[8.5, 9.8, 6.5, 5.6], [3.9, 8.4, 6.5, 3.9], [13.1, 8.4, 6.5, 3.9], [10.2, 13.2, 6.5, 4.3], [5.9, 12.4, 6.5, 3.4]]) {
         m.esfera(x, y, z, r, C.azulCeu);
       }
       m.elipsoide(8.5, 9.5, 9.3, 4.6, 3.6, 3.2, C.azulCeu); // rosto mais cheio e plano
-      m.regiao(-3, 21, -3, 4, -3, 16, null, null);
+      m.bloco(3.5, 13.5, 3, 5.5, 3, 10, 2.5, C.azulCeu); // base reta, apoiada nas pernas
+      m.regiao(-3, 21, -3, 3, -3, 16, null, null);
       m.pintar((x, y, z, cor, i, j, k) => {
         if (y >= 12.5 && !m.ocupado(i, j + 1, k)) return C.azulCeuClaro;
-        if (y < 5.5) return C.azulCeuEscuro;
+        if (y < 4) return C.azulCeuEscuro;
       });
       par(m, OLHO_OVAL, 5, 10, 11);
       // boina (acessório)
@@ -502,7 +503,7 @@ export const PETS = [
       m.elipsoide(9.6, 17.2, 6.5, 5.6, 1.5, 4.9, C.tinta, { giroZ: -0.14 });
       m.esfera(9.3, 19, 6.3, 0.75, C.tinta);
       mochila(m, { x0: 5, x1: 11, y0: 5, y1: 13, zFrente: 1, zTras: -2 });
-      pernas(m, { xE: 5, xD: 10, altura: 4, z: 5, prof: 3, cor: C.azulCeuEscuro });
+      pernas(m, { xE: 5, xD: 10, altura: 3, z: 5, prof: 3, cor: C.azulCeuEscuro });
       m.ancora('cabeca', [9.5, 19.5, 6.5]).ancora('rosto', [8.5, 10, 12]).ancora('costas', [8.5, 9, -2]);
     },
   },

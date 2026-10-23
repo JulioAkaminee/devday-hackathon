@@ -279,6 +279,9 @@ export function animarPet(pet, t, animacao = 'parado') {
     g.rotation.set(0, 0, 0);
     g.scale.set(1, 1, 1);
   }
+  // balanços inclinam o modelo inteiro (com as pernas), para o corpo não descolar das pernas
+  const modelo = grupos.raiz;
+  modelo.rotation.set(0, 0, 0);
   const S = dados.escala ?? 1; // deslocamentos abaixo estão em unidades do projeto
   const lista = Object.values(partes);
   const bracos = lista.filter((p) => p.tipo === 'braco');
@@ -303,7 +306,7 @@ export function animarPet(pet, t, animacao = 'parado') {
       for (const p of pernas) grupos[p.nome].rotation.x = s * 0.6 * sinal(p);
       for (const b of bracos) grupos[b.nome].rotation.x = -s * 0.5 * sinal(b);
       corpo.position.y += Math.abs(Math.cos(f)) * 0.7 * S;
-      corpo.rotation.z = s * 0.05;
+      modelo.rotation.z = s * 0.05;
       break;
     }
     case 'pular': {
@@ -325,8 +328,7 @@ export function animarPet(pet, t, animacao = 'parado') {
       const b = bracos.find((q) => q.lado === 'D') ?? bracos[0];
       const levantar = b?.levantar ?? 2.4;
       if (b) grupos[b.nome].rotation.z = sinal(b) * (levantar + Math.sin(t * 9) * Math.min(0.32, levantar * 0.45));
-      else corpo.rotation.z = Math.sin(t * 6) * 0.12;
-      corpo.rotation.z += Math.sin(t * 3) * 0.035;
+      modelo.rotation.z = b ? Math.sin(t * 3) * 0.035 : Math.sin(t * 6) * 0.1; // sem braço, o pet todo balança
       corpo.position.y += Math.sin(t * 2.2) * 0.15 * S;
       break;
     }
@@ -335,7 +337,7 @@ export function animarPet(pet, t, animacao = 'parado') {
       subir(q * 2.6);
       esticar(1 + (q - 0.5) * 0.08);
       for (const b of bracos) grupos[b.nome].rotation.z = sinal(b) * ((b.levantar ?? 2.4) * 1.05 + Math.sin(t * 14) * 0.22);
-      corpo.rotation.y = Math.sin(t * 5) * 0.18;
+      modelo.rotation.y = Math.sin(t * 5) * 0.18;
       break;
     }
     default: {

@@ -22,7 +22,7 @@ O estilo segue a referência:
 | <img src="png/globinho.png" width="72"> | **07 Globinho** | Adora gente de todas as áreas. | 1.264 | 17 × 17 × 14 |
 | <img src="png/estrelinha.png" width="72"> | **08 Estrelinha** | Animado e sempre incentiva os outros. | 871 | 17 × 20 × 9 |
 | <img src="png/conezinho.png" width="72"> | **09 Conezinho** | Direto e ajuda a focar no objetivo. | 1.293 | 15 × 21 × 15 |
-| <img src="png/nuvem.png" width="72"> | **10 Nuvem** | Observador e sempre vê o lado diferente. | 1.529 | 17 × 20 × 15 |
+| <img src="png/nuvem.png" width="72"> | **10 Nuvem** | Observador e sempre vê o lado diferente. | 1.640 | 17 × 20 × 15 |
 
 ## Arquivos
 
