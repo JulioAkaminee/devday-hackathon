@@ -168,7 +168,7 @@ function selo() {
 }
 
 /** Balão de fala de um pet do mapa: retângulo branco com rabicho, símbolo desenhado. */
-function balao(tipo: 'reticencias' | 'oi' | 'brilho') {
+function balao(tipo: 'reticencias' | 'oi' | 'coracao') {
   const t = textura(160, 150, (c) => {
     c.fillStyle = COR.branco
     c.fillRect(8, 8, 144, 104)
@@ -176,7 +176,8 @@ function balao(tipo: 'reticencias' | 'oi' | 'brilho') {
     c.fillStyle = COR.preto; c.strokeStyle = COR.preto
     if (tipo === 'reticencias') for (const x of [52, 80, 108]) { c.beginPath(); c.arc(x, 60, 9, 0, Math.PI * 2); c.fill() }
     else if (tipo === 'oi') { c.font = `600 60px ${FONTE}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('oi!', 80, 62) }
-    else { c.lineWidth = 9; for (let i = 0; i < 6; i++) { const a = (i * Math.PI) / 3; c.beginPath(); c.moveTo(80 + Math.cos(a) * 16, 60 + Math.sin(a) * 16); c.lineTo(80 + Math.cos(a) * 36, 60 + Math.sin(a) * 36); c.stroke() } }
+    // coração verde (os raios de "brilho" pareciam um ícone de carregando)
+    else { c.fillStyle = COR.verde; c.beginPath(); c.moveTo(80, 94); c.bezierCurveTo(34, 64, 46, 22, 80, 42); c.bezierCurveTo(114, 22, 126, 64, 80, 94); c.fill() }
   })
   const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t }))
   s.scale.set(1.5, 1.4, 1)
@@ -281,16 +282,17 @@ function telao(g: THREE.Object3D, x: number, z: number) {
 
 // Bandeira da ilha 1: o cartão da Astra (GPT-6), ondulando ao vento. A malha tem divisões para dobrar,
 // e a cor de cada vértice escurece as dobras sem precisar de luz.
-const BANDEIRA = { w: 3.3, h: 4.15 }
+const BANDEIRA = { w: 4.3, h: 5.3 }
 let bandeira: { malha: THREE.Mesh; base: Float32Array } | null = null
 
 function montarBandeira(g: THREE.Object3D, x: number, y: number, z: number) {
   const geometria = new THREE.PlaneGeometry(BANDEIRA.w, BANDEIRA.h, 24, 14)
   geometria.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(geometria.attributes.position.count * 3).fill(1), 3))
-  const t = textura(371, 467, (c) => { c.fillStyle = COR.preto; c.fillRect(0, 0, 371, 467) })
+  // borda branca em volta: de longe o cartão escuro lê como bandeira, não como placa preta
+  const t = textura(399, 495, (c) => { c.fillStyle = COR.branco; c.fillRect(0, 0, 399, 495); c.fillStyle = COR.preto; c.fillRect(14, 14, 371, 467) })
   const img = new Image()
   // corta a moldura arredondada do print: fica só o fundo escuro do cartão
-  img.onload = () => { (t.image as HTMLCanvasElement).getContext('2d')!.drawImage(img, 14, 14, 371, 467, 0, 0, 371, 467); t.needsUpdate = true }
+  img.onload = () => { (t.image as HTMLCanvasElement).getContext('2d')!.drawImage(img, 14, 14, 371, 467, 14, 14, 371, 467); t.needsUpdate = true }
   img.src = astra
   const malha = new THREE.Mesh(geometria, new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide, vertexColors: true }))
   malha.position.set(x + BANDEIRA.w / 2, y, z)
@@ -355,9 +357,9 @@ function montarIlha(g: THREE.Group, i: number) {
 
   if (i === 0) {
     // Novas pessoas + Credenciamento: bandeira da Astra no mastro, mesa com laptops
-    caixa(g, COR.preto, 0.28, 8.4, 0.28, -6, 0, -3.5)
-    caixa(g, COR.verde, 0.5, 0.5, 0.5, -6, 8.4, -3.5)
-    montarBandeira(g, -5.9, 6.1, -3.5)
+    caixa(g, COR.preto, 0.3, 10, 0.3, -6.6, 0, -3.5)
+    caixa(g, COR.verde, 0.55, 0.55, 0.55, -6.6, 10, -3.5)
+    montarBandeira(g, -6.5, 10 - 0.25 - BANDEIRA.h / 2, -3.5)
     arco(g, 0.5, -1.5, 1, 'Novas pessoas')
     mesa(g, 4.6, -3); caixa(g, '#cfd3d6', 0.7, 0.05, 0.5, 4.2, 1.13, -3); caixa(g, '#2b2b2b', 0.7, 0.45, 0.06, 4.2, 1.16, -3.25)
     banco(g, -4.5, 1.2, 2.2)
@@ -517,11 +519,11 @@ export class Mundo {
     }
     fundir(this.mapa) // cubos boiando, caminho e pilares
     // outros participantes no mapa, com balões (como na referência)
-    const figurantes: [DNA, number, number, 'reticencias' | 'oi' | 'brilho' | null][] = [
+    const figurantes: [DNA, number, number, 'reticencias' | 'oi' | 'coracao' | null][] = [
       [{ especie: 'nuvem', cor: '', acessorio: 'boina' }, -13.5, 9.5, 'oi'],
       [{ especie: 'lampada', cor: '', acessorio: 'oculos' }, 12.5, -2.5, 'reticencias'],
       [{ especie: 'plantinha', cor: '', acessorio: 'oculos' }, 33, -1.5, null],
-      [{ especie: 'coracao', cor: '', acessorio: 'oculos' }, 35.2, -2.3, 'brilho'],
+      [{ especie: 'coracao', cor: '', acessorio: 'oculos' }, 35.2, -2.3, 'coracao'],
     ]
     for (const [dna, x, z, b] of figurantes) {
       const p = criarPet(dna)
