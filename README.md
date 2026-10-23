@@ -4,10 +4,11 @@
 
 ![Quebra-Gelo: um pet virtual que só avança na história quando você conversa com alguém de verdade](docs/entrega/capa.png)
 
-**Desafio 10 · Aventura com escolhas e consequências** · **Desafio 4 · Trilha de estudo personalizada**
-Trilha do evento: **Educação e inclusão**
-
-Demo: <https://quebra-gelo.julioakamine.com> · Telão do evento: `/tela` · Pets de exemplo: `/demo`
+| | |
+|---|---|
+| **Desafios** | nº 10 · Aventura com escolhas e consequências &nbsp;·&nbsp; nº 4 · Trilha de estudo personalizada |
+| **Trilha do evento** | Educação e inclusão |
+| **Demo** | <https://quebra-gelo.julioakamine.com> · telão do evento em `/tela` · pets de exemplo em `/demo` |
 
 ---
 
