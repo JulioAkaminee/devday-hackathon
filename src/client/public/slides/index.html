@@ -18,6 +18,11 @@
 html, body { height: 100%; background: var(--suave); color: var(--tinta); font-family: var(--fonte); overflow: hidden; -webkit-font-smoothing: antialiased; }
 /* palco 16:9 que escala para caber na janela */
 .palco { position: fixed; left: 50%; top: 50%; width: 1600px; height: 900px; transform-origin: 0 0; background: var(--papel); border: 2px solid var(--tinta); overflow: hidden; }
+/* chão de gelo: grade isométrica bem leve */
+.palco::before { content: ''; position: absolute; inset: 0; background-image:
+  linear-gradient(30deg, transparent 49.4%, #eef3ef 49.6%, #eef3ef 50.4%, transparent 50.6%),
+  linear-gradient(150deg, transparent 49.4%, #eef3ef 49.6%, #eef3ef 50.4%, transparent 50.6%);
+  background-size: 120px 69.28px; opacity: .9; pointer-events: none; }
 
 .slide { position: absolute; inset: 0; padding: 88px 104px 96px; display: flex; flex-direction: column; visibility: hidden; }
 .slide.ativo { visibility: visible; }
@@ -57,10 +62,14 @@ h2 em, h1 em { font-style: normal; }
 @keyframes lasca { 0%, 64% { opacity: 0; transform: none; } 68% { opacity: 1; } 84% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(45deg); } 100% { opacity: 0; } }
 
 
+/* cubinhos de voxel flutuando ao fundo */
+.voxel { position: absolute; width: var(--t); aspect-ratio: 1; animation: boia var(--dur, 7s) ease-in-out infinite; animation-delay: var(--atraso, 0s); pointer-events: none; }
+@keyframes boia { 0%, 100% { translate: 0 0; } 50% { translate: 0 -18px; } }
+
 /* celulares com os prints reais */
-.cel { width: 300px; border: 2px solid var(--tinta); border-radius: 34px; padding: 10px; background: var(--tinta); }
+.cel { width: 300px; border: 2px solid var(--tinta); border-radius: 34px; padding: 10px; background: var(--tinta); box-shadow: 14px 14px 0 var(--verde); }
 .cel img { display: block; width: 100%; border-radius: 24px; }
-.tela { border: 2px solid var(--tinta); background: var(--papel); }
+.tela { border: 2px solid var(--tinta); box-shadow: 14px 14px 0 var(--verde); background: var(--papel); }
 .tela img { display: block; width: 100%; }
 
 /* capa */
@@ -126,7 +135,7 @@ h2 em, h1 em { font-style: normal; }
 /* fechamento */
 .fim { display: grid; grid-template-columns: 1fr auto; gap: 80px; align-items: center; }
 .fim h2 { font-size: 112px; }
-.qr { width: 380px; padding: 28px; border: 2px solid var(--tinta); background: var(--papel); }
+.qr { width: 380px; padding: 28px; border: 2px solid var(--tinta); background: var(--papel); box-shadow: 14px 14px 0 var(--verde); }
 .qr img { display: block; width: 100%; }
 .url { font-size: 40px; font-weight: 600; color: var(--verde-texto); letter-spacing: -.02em; }
 .stack { font-size: 22px; color: var(--cinza); }
@@ -146,7 +155,8 @@ h2 em, h1 em { font-style: normal; }
 .barra-ap button[aria-pressed="true"] { color: var(--verde); }
 .barra-ap .cont { padding: 0 10px; font-variant-numeric: tabular-nums; color: #bdbdbd; }
 .barra-ap svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-body.quieto .barra-ap { opacity: 0; transform: translate(-50%, 12px); pointer-events: none; }
+/* a barra fica escondida: aparece com o mouse no pé da tela ou com H */
+body.oculta .barra-ap { opacity: 0; transform: translate(-50%, 16px); pointer-events: none; }
 body.quieto { cursor: none; }
 /* grade de slides (tecla G) */
 body.grade .palco { display: none; }
@@ -162,7 +172,7 @@ body.grade .grade-v { display: grid; }
 }
 </style>
 </head>
-<body>
+<body class="oculta">
 <div class="palco" id="palco">
 
   <!-- 1 capa -->
@@ -250,7 +260,7 @@ body.grade .grade-v { display: grid; }
   <!-- 8 telão ao vivo -->
   <section class="slide vivo">
     <span class="rotulo">Telão do evento</span>
-    <h2 style="font-size:84px"><span class="ponto"></span>A sala inteira vê <em>o gelo quebrando.</em></h2>
+    <h2 style="font-size:84px">A sala inteira vê <em>o gelo quebrando.</em></h2>
     <div class="numeros">
       <div class="numero"><b data-stat="pessoas">0</b><span>pessoas jogando agora</span></div>
       <div class="numero"><b data-stat="encontros">0</b><span>encontros de verdade</span></div>
@@ -282,6 +292,7 @@ body.grade .grade-v { display: grid; }
   <button id="prox" aria-label="Próximo"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
   <button id="bgrade" aria-label="Ver todos os slides (G)" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg></button>
   <button id="bauto" aria-label="Avançar sozinho (P)" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M7 5v14l11-7z"/></svg></button>
+  <button id="bocultar" aria-label="Esconder controles (H)"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
   <button id="btela" aria-label="Tela cheia (F)"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
 </nav>
 
@@ -296,6 +307,17 @@ const marca = `<g stroke="#141414" stroke-width="3.2" stroke-linejoin="round">` 
   `<path class="lasca um" d="M44 2 49 4.5 44 7 39 4.5z" fill="#e8f7ed" stroke-width="2"/><path class="lasca dois" d="M57 0 61 2 57 4 53 2z" fill="#22b04b" stroke-width="2"/></g>`
 document.querySelectorAll('[data-marca]').forEach((s) => { s.innerHTML = marca })
 
+
+// cubinhos de voxel espalhados pelo palco
+const palco = document.getElementById('palco')
+const cubo = (c1, c2, c3) => `<svg viewBox="0 0 100 100"><g stroke="#141414" stroke-width="4" stroke-linejoin="round"><path d="M50 8 90 28 50 48 10 28z" fill="${c1}"/><path d="M10 28 50 48 50 92 10 72z" fill="${c2}"/><path d="M90 28 50 48 50 92 90 72z" fill="${c3}"/></g></svg>`
+;[[1380, 90, 54, 0, 'v'], [1500, 640, 40, 1.2, 'g'], [70, 720, 34, 2, 'g'], [820, 40, 28, .6, 'v'], [1180, 780, 30, 1.8, 'v']].forEach(([x, y, t, a, k]) => {
+  const d = document.createElement('div')
+  d.className = 'voxel'; d.setAttribute('aria-hidden', 'true')
+  d.style.cssText = `left:${x}px;top:${y}px;--t:${t}px;--atraso:-${a}s;--dur:${6 + a}s`
+  d.innerHTML = k === 'v' ? cubo('#e8f7ed', '#22b04b', '#178a39') : cubo('#ffffff', '#e4e4e0', '#cfcfca')
+  palco.prepend(d)
+})
 
 // escala do palco
 function escalar() {
@@ -330,6 +352,7 @@ addEventListener('keydown', (e) => {
   if (e.key === 'f') telaCheia()
   if (e.key === 'g') alternarGrade()
   if (e.key === 'p') alternarAuto()
+  if (e.key === 'h') { fixa = !fixa; document.body.classList.toggle('oculta', !fixa) }
   if (e.key === 'Escape' && document.body.classList.contains('grade')) alternarGrade()
 })
 let x0 = null
@@ -365,8 +388,12 @@ document.getElementById('bgrade').onclick = alternarGrade
 document.getElementById('bauto').onclick = alternarAuto
 document.getElementById('btela').onclick = telaCheia
 // barra e cursor somem depois de 2,5 s sem mexer o mouse
-let quieto = 0
-addEventListener('pointermove', () => { document.body.classList.remove('quieto'); clearTimeout(quieto); quieto = setTimeout(() => document.body.classList.add('quieto'), 2500) })
+let quieto = 0, fixa = false
+addEventListener('pointermove', (e) => {
+  document.body.classList.remove('quieto'); clearTimeout(quieto); quieto = setTimeout(() => document.body.classList.add('quieto'), 2500)
+  if (!fixa) document.body.classList.toggle('oculta', e.clientY < innerHeight - 90)
+})
+document.getElementById('bocultar').onclick = () => { fixa = false; document.body.classList.add('oculta') }
 ir((parseInt(location.hash.slice(1)) || 1) - 1)
 
 // números reais do jogo, contando até o valor
