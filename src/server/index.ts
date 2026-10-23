@@ -264,7 +264,12 @@ if (PROD) {
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err instanceof ErroHttp) return void res.status(err.status).json({ erro: err.message })
   if (err instanceof ErroDeRegra) return void res.status(400).json({ erro: err.message })
-  if (err instanceof ErroDeFase) return void res.status(409).json({ erro: 'ação fora de hora: ' + err.message })
+  if (err instanceof ErroDeFase) return void res.status(409).json({ erro: 'essa ação não vale agora; a tela foi atualizada' })
+  // JSON inválido, corpo grande demais etc. (body-parser): culpa do pedido, sem stack no log
+  const status = (err as { status?: unknown }).status
+  if (typeof status === 'number' && status >= 400 && status < 500) {
+    return void res.status(status === 413 ? 413 : 400).json({ erro: status === 413 ? 'pedido grande demais' : 'pedido inválido' })
+  }
   console.error(err)
   res.status(500).json({ erro: 'erro interno' })
 })

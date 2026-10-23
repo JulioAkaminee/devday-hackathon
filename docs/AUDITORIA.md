@@ -26,7 +26,7 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
 - [x] **S4 · Snapshot não derruba o processo**: `salvar` em try/catch (mantém `sujo` para tentar de
       novo); `carregar` em try/catch, renomeia o arquivo ruim para `.bad-<data>` e sobe vazio; ao
       carregar, preencher `historico ?? []` e `estado: { ...novoEstado(), ...p.estado }`.
-- [ ] **S5 · Erros 4xx do Express viram 400/413**, não 500 com stack no log (JSON inválido, corpo
+- [x] **S5 · Erros 4xx do Express viram 400/413**, não 500 com stack no log (JSON inválido, corpo
       grande). Mensagem de `ErroDeFase` genérica (não expor a máquina de estados).
 - [ ] **C1 · Token velho se recupera**: 401 no polling ou em `acao` → apaga `qg-token` e recarrega.
 - [ ] **C2 · iOS não dá zoom no formulário**: `font-size: 16px` em `input, select` (`style.css:50`).
