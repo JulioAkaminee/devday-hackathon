@@ -549,7 +549,7 @@ export class Mundo {
     const painel = w <= 760 ? 0 : this.modo === 'vitrine' ? Math.min(520, w) : 464
     if (painel) this.camera.setViewOffset(w, h, -painel / 2, 0, w, h)
     // celular: o cartão ocupa a metade de baixo; o foco sobe para o espaço acima dele
-    else if (this.modo !== 'vitrine') this.camera.setViewOffset(w, h, 0, h * 0.15, w, h)
+    else if (this.modo !== 'vitrine') this.camera.setViewOffset(w, h, 0, h * 0.22, w, h)
     else this.camera.clearViewOffset()
     if (this.modo === 'vitrine') {
       // enquadra pelo tamanho real do pet: no máximo 45% da altura e 55% da largura livre, qualquer espécie

@@ -693,8 +693,9 @@ function render() {
   const medidor = (nome: string, valor: number, cls: string) =>
     `<div class="medidor ${cls}" title="${cls === 'ampla' ? 'Quanta gente você conheceu' : 'Até onde você levou cada conversa'}"><span>${nome}</span><b>${valor}</b><small>${cls === 'ampla' ? 'gente que você conheceu' : 'conversas que foram fundo'}</small><i><em data-alvo="${Math.min(100, (valor / 12) * 100)}" style="width:${Math.min(100, (medidas[cls as keyof typeof medidas] / 12) * 100)}%"></em></i></div>`
   // a Academia ganha um ponto verde enquanto o diagnóstico (5 perguntas) não foi feito
-  const abaBtn = (id: Aba, nome: string) =>
-    `<button class="${aba === id ? 'ativa' : ''}" data-aba="${id}" aria-label="${nome}" ${aba === id ? 'aria-current="page"' : ''}>${ICONE[id]}<span>${nome}</span>${id === 'academia' && !v.academia.diagnostico ? '<i class="novo" aria-hidden="true"></i>' : ''}</button>`
+  // curto: rótulo sob o ícone no celular, onde o nome inteiro não cabe
+  const abaBtn = (id: Aba, nome: string, curto = nome) =>
+    `<button class="${aba === id ? 'ativa' : ''}" data-aba="${id}" aria-label="${nome}" ${aba === id ? 'aria-current="page"' : ''}>${ICONE[id]}<span>${nome}</span><small aria-hidden="true">${curto}</small>${id === 'academia' && !v.academia.diagnostico ? '<i class="novo" aria-hidden="true"></i>' : ''}</button>`
 
   h(`
     <header class="topo">
@@ -705,7 +706,7 @@ function render() {
     </header>
     <section class="cartao">${aba === 'mapa' ? cartaoMissao(v) : painelAba(v)}</section>
     <nav class="abas" aria-label="Seções">
-      ${abaBtn('mapa', 'Mapa')}${abaBtn('academia', 'Academia')}${abaBtn('contatos', 'Quem eu conheci')}${abaBtn('conexoes', 'Minhas conexões')}${abaBtn('finais', 'Meus finais')}
+      ${abaBtn('mapa', 'Mapa')}${abaBtn('academia', 'Academia')}${abaBtn('contatos', 'Quem eu conheci', 'Conheci')}${abaBtn('conexoes', 'Minhas conexões', 'Conexões')}${abaBtn('finais', 'Meus finais', 'Finais')}
     </nav>`)
 
   for (const em of ui.querySelectorAll<HTMLElement>('.medidor em')) {
