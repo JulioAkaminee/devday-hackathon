@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import type { Opcao } from '../shared/engine.ts'
 import { animarMascote, criarPet, type DNA, type Itens } from './pet.ts'
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import astra from './astra.png'
 
 // Mapa da aventura (docs/referencias/mapa-aventura-v1.png): as 4 ilhas sempre à vista, ligadas por um
@@ -14,6 +15,8 @@ export const COR = {
   terra: '#f1ead9',
   penhasco: '#e3d8c2',
   penhascoClaro: '#ece3d0',
+  penhascoEscuro: '#d6c9ae',
+  lajota: '#ebe2cd',
   verde: '#22b04b',
   verdeEscuro: '#178a39',
   verdeClaro: '#5fd07d',
@@ -54,6 +57,38 @@ function caixa(g: THREE.Object3D, cor: string, w: number, h: number, d: number, 
   m.position.set(x, y + h / 2, z)
   g.add(m)
   return m
+}
+
+/** Junta as caixas de cada material numa malha só: são milhares de blocos e o celular desenha poucos lotes. */
+function fundir(g: THREE.Object3D) {
+  const lotes = new Map<THREE.Material, THREE.BufferGeometry[]>()
+  for (const m of [...g.children]) {
+    if (!(m instanceof THREE.Mesh) || m.geometry !== geo) continue
+    m.updateMatrix()
+    const lote = lotes.get(m.material) ?? []
+    lote.push(geo.clone().applyMatrix4(m.matrix))
+    lotes.set(m.material, lote)
+    g.remove(m)
+  }
+  for (const [material, geos] of lotes) {
+    g.add(new THREE.Mesh(mergeGeometries(geos), material))
+    for (const x of geos) x.dispose()
+  }
+}
+
+/** Longe do caminho e das estações: ali não nasce grama alta nem musgo (posição no mundo). */
+function longeDoCaminho(x: number, z: number) {
+  const p = new THREE.Vector2(x, z)
+  for (let i = 1; i < ESTACOES.length; i++) {
+    const a = new THREE.Vector2(ESTACOES[i].x, ESTACOES[i].z)
+    if (p.distanceTo(a) < 2.3) return false
+    if (i === ESTACOES.length - 1) break
+    const b = new THREE.Vector2(ESTACOES[i + 1].x, ESTACOES[i + 1].z)
+    const ab = b.clone().sub(a)
+    const t = THREE.MathUtils.clamp(p.clone().sub(a).dot(ab) / ab.lengthSq(), 0, 1)
+    if (p.distanceTo(a.clone().addScaledVector(ab, t)) < 1.7) return false
+  }
+  return true
 }
 
 // pseudo-aleatório determinístico: o mapa é igual em todo dispositivo
@@ -151,10 +186,15 @@ function balao(tipo: 'reticencias' | 'oi' | 'brilho') {
 // ---------- peças do cenário ----------
 
 function arvore(g: THREE.Object3D, x: number, z: number, a = 1) {
-  caixa(g, COR.madeira, 0.5 * a, 1.6 * a, 0.5 * a, x, 0, z)
-  caixa(g, COR.verdeEscuro, 2.2 * a, 1.3 * a, 2.2 * a, x, 1.3 * a, z)
-  caixa(g, COR.verde, 1.7 * a, 1.1 * a, 1.7 * a, x, 2.5 * a, z)
-  caixa(g, COR.verdeClaro, 1 * a, 0.8 * a, 1 * a, x, 3.5 * a, z)
+  caixa(g, COR.madeira, 0.5 * a, 1.8 * a, 0.5 * a, x, 0, z)
+  caixa(g, COR.verdeEscuro, 2.3 * a, 1.2 * a, 2.3 * a, x, 1.4 * a, z)
+  caixa(g, COR.verde, 1.9 * a, 1.1 * a, 1.9 * a, x, 2.5 * a, z)
+  caixa(g, COR.verdeClaro, 1.1 * a, 0.8 * a, 1.1 * a, x + 0.15 * a, 3.5 * a, z - 0.1 * a)
+  // cubos soltos em volta da copa: o contorno irregular das árvores da referência
+  for (let k = 0; k < 4; k++) {
+    const ang = k * 1.57 + 0.4 + rnd() * 0.6
+    caixa(g, k % 2 ? COR.verde : COR.verdeEscuro, 0.85 * a, 0.85 * a, 0.85 * a, x + Math.cos(ang) * 1.3 * a, (1.5 + rnd() * 1.3) * a, z + Math.sin(ang) * 1.3 * a)
+  }
 }
 const arbusto = (g: THREE.Object3D, x: number, z: number) => {
   caixa(g, COR.verde, 1, 0.7, 1, x, 0, z)
@@ -180,13 +220,14 @@ function poste(g: THREE.Object3D, x: number, z: number, h = 5) {
   caixa(g, COR.preto, 0.7, 0.2, 0.7, x, 0, z)
 }
 /** Varal de lâmpadas entre dois pontos (local), caindo no meio. */
+const lampada = new THREE.MeshBasicMaterial({ color: '#fff1b8' })
 function varal(g: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3) {
   const n = 12
   for (let i = 0; i <= n; i++) {
     const t = i / n
     const p = a.clone().lerp(b, t)
     p.y -= Math.sin(t * Math.PI) * 0.9
-    const l = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: '#fff1b8' }))
+    const l = new THREE.Mesh(geo, lampada)
     l.scale.setScalar(0.22)
     l.position.copy(p)
     g.add(l)
@@ -194,15 +235,19 @@ function varal(g: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3) {
 }
 /** Arco de entrada com o nome e o número da missão. */
 function arco(g: THREE.Object3D, x: number, z: number, n: number, nome: string) {
+  // pilares de blocos de pedra em dois tons, levemente desalinhados, sobre uma base mais larga
   for (const dx of [-1.9, 1.9]) {
-    for (let y = 0; y < 4; y++) caixa(g, y % 2 ? COR.penhascoClaro : COR.branco, 0.9, 1, 0.9, x + dx, y, z)
+    caixa(g, COR.penhasco, 1.25, 0.3, 1.25, x + dx, 0, z)
+    for (let y = 0; y < 4; y++) caixa(g, y % 2 ? COR.penhascoClaro : COR.branco, 0.95, 1, 0.95, x + dx + (rnd() - 0.5) * 0.12, y, z + (rnd() - 0.5) * 0.08)
   }
-  caixa(g, COR.branco, 4.8, 0.9, 1, x, 4, z)
-  caixa(g, COR.penhascoClaro, 4.8, 0.2, 1.05, x, 4.9, z)
+  caixa(g, COR.branco, 5, 0.9, 1.1, x, 4, z)
+  caixa(g, COR.penhascoClaro, 5.2, 0.2, 1.15, x, 4.9, z)
+  // coroa em degraus, como nos arcos da referência
+  caixa(g, COR.branco, 2.6, 0.5, 1, x, 5.1, z)
   const p = placa(nome, { altura: 1.25 })
   p.position.set(x, 4.45, z + 0.7)
   const num = numero(String(n))
-  num.position.set(x, 6.1, z)
+  num.position.set(x, 6.4, z)
   g.add(p, num)
 }
 
@@ -275,26 +320,38 @@ function ventar(t: number) {
 
 function montarIlha(g: THREE.Group, i: number) {
   const W = 15, D = 11
-  caixa(g, COR.terra, W, 0.5, D, 0, -0.5, 0)
+  const c = ILHAS[i]
+  // tampo de lajotas em dois tons, como o piso de pedra da referência
+  for (let x = -W / 2 + 0.5; x < W / 2; x++) {
+    for (let z = -D / 2 + 0.5; z < D / 2; z++) caixa(g, rnd() > 0.78 ? COR.lajota : COR.terra, 1, 0.5, 1, x, -0.5, z)
+  }
   caixa(g, COR.penhasco, W - 0.4, 3.6, D - 0.4, 0, -4.1, 0)
-  // borda de penhasco em blocos, com grama por cima: o aspecto voxel da referência
-  for (let x = -W / 2 + 0.5; x < W / 2; x += 1) {
-    for (const z of [-D / 2 + 0.5, D / 2 - 0.5]) {
-      const h = 2.4 + rnd() * 1.6
-      caixa(g, rnd() > 0.5 ? COR.penhasco : COR.penhascoClaro, 1, h, 1.02, x, -0.5 - h + 0.02, z + Math.sign(z) * 0.05)
-      if (rnd() > 0.45) caixa(g, rnd() > 0.5 ? COR.verde : COR.verdeEscuro, 1, 0.35 + rnd() * 0.25, 1, x, 0, z)
-      if (rnd() > 0.8) caixa(g, COR.verde, 1, 0.5, 0.3, x, -0.9 - rnd(), z + Math.sign(z) * 0.55)
+  // penhasco: colunas de blocos até a água, em três tons e levemente desalinhadas;
+  // grama na beira do tampo e musgo escorrendo, menos onde passa o caminho
+  const borda = (x: number, z: number, nx: number, nz: number) => {
+    for (const y of [-1.5, -2.5, -3.5]) {
+      const tom = rnd()
+      const fora = rnd() * 0.14
+      caixa(g, tom > 0.6 ? COR.penhascoClaro : tom > 0.25 ? COR.penhasco : COR.penhascoEscuro, 1, 1, 1, x + nx * fora, y, z + nz * fora)
+    }
+    if (!longeDoCaminho(c.x + x, c.z + z) || rnd() < 0.4) return
+    const h = 0.3 + rnd() * 0.3
+    caixa(g, rnd() > 0.5 ? COR.verde : COR.verdeEscuro, 1.04, h, 1.04, x, 0, z)
+    if (rnd() > 0.55) caixa(g, COR.verdeClaro, 0.6, 0.18, 0.6, x + (rnd() - 0.5) * 0.3, h, z + (rnd() - 0.5) * 0.3)
+    if (rnd() > 0.5) {
+      const m = 0.6 + rnd() * 1.5
+      caixa(g, rnd() > 0.5 ? COR.verde : COR.verdeEscuro, nx ? 0.24 : 1, m, nz ? 0.24 : 1, x + nx * 0.6, h - m, z + nz * 0.6)
     }
   }
-  for (let z = -D / 2 + 1.5; z < D / 2 - 1; z += 1) {
-    for (const x of [-W / 2 + 0.5, W / 2 - 0.5]) {
-      const h = 2.4 + rnd() * 1.6
-      caixa(g, rnd() > 0.5 ? COR.penhasco : COR.penhascoClaro, 1.02, h, 1, x + Math.sign(x) * 0.05, -0.5 - h + 0.02, z)
-      if (rnd() > 0.5) caixa(g, rnd() > 0.5 ? COR.verde : COR.verdeEscuro, 1, 0.35 + rnd() * 0.25, 1, x, 0, z)
-    }
-  }
-  // espuma na água em volta
+  for (let x = -W / 2 + 0.5; x < W / 2; x++) { borda(x, -D / 2 + 0.5, 0, -1); borda(x, D / 2 - 0.5, 0, 1) }
+  for (let z = -D / 2 + 1.5; z < D / 2 - 1; z++) { borda(-W / 2 + 0.5, z, -1, 0); borda(W / 2 - 0.5, z, 1, 0) }
+  // espuma na água em volta, com blocos soltos na linha d'água
   caixa(g, COR.espuma, W + 1.2, 0.05, D + 1.2, 0, -3.38, 0)
+  for (let k = 0; k < 10; k++) {
+    const lado = rnd() > 0.5 ? 1 : -1
+    const [x, z] = rnd() > 0.5 ? [(rnd() - 0.5) * W, lado * (D / 2 + 0.4)] : [lado * (W / 2 + 0.4), (rnd() - 0.5) * D]
+    caixa(g, rnd() > 0.5 ? COR.penhascoClaro : COR.penhasco, 0.8, 0.5, 0.8, x, -3.6, z)
+  }
 
   if (i === 0) {
     // Novas pessoas + Credenciamento: bandeira da Astra no mastro, mesa com laptops
@@ -431,6 +488,7 @@ export class Mundo {
       const g = new THREE.Group()
       g.position.copy(c)
       montarIlha(g, i)
+      fundir(g)
       this.mapa.add(g)
     })
     // caminho: faixa preta com bordas verdes e marcadores circulares
@@ -457,6 +515,7 @@ export class Mundo {
       meio.position.set(e.x, 0.1, e.z)
       this.mapa.add(anel, meio)
     }
+    fundir(this.mapa) // cubos boiando, caminho e pilares
     // outros participantes no mapa, com balões (como na referência)
     const figurantes: [DNA, number, number, 'reticencias' | 'oi' | 'brilho' | null][] = [
       [{ especie: 'nuvem', cor: '', acessorio: 'boina' }, -13.5, 9.5, 'oi'],
