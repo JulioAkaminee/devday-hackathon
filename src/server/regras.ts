@@ -1,5 +1,7 @@
 // Regras do servidor que dá para testar sem subir o Express (docs/AUDITORIA.md).
-import { ErroDeFase, type Estado } from '../shared/engine.ts'
+import { existsSync, readFileSync, renameSync } from 'node:fs'
+import { ErroDeFase, novoEstado, type Estado } from '../shared/engine.ts'
+import { novaAcademia, type Academia } from '../shared/academia.ts'
 
 export class ErroHttp extends Error {
   constructor(public status: number, msg: string) { super(msg) }
@@ -32,3 +34,22 @@ export class Limite {
   }
   encontrou(token: string, agora: number) { this.ultimo.set(token, agora) }
 }
+
+/** S4: snapshot ilegível não derruba o servidor: vira <arquivo>.bad-<data> e o jogo sobe vazio. */
+export function lerSnapshot(arquivo: string, agora = new Date()): unknown[] {
+  if (!existsSync(arquivo)) return []
+  try {
+    const dados = JSON.parse(readFileSync(arquivo, 'utf8'))
+    if (!Array.isArray(dados)) throw new Error('não é uma lista')
+    return dados
+  } catch (e) {
+    const destino = `${arquivo}.bad-${agora.toISOString().replace(/[:.]/g, '-')}`
+    console.error(`snapshot ilegível (${(e as Error).message}); movido para ${destino}`)
+    try { renameSync(arquivo, destino) } catch { /* sem permissão: segue vazio do mesmo jeito */ }
+    return []
+  }
+}
+
+/** Pet de um snapshot antigo ganha os campos que faltam. */
+export const completar = <P extends { historico?: Estado[]; estado?: Partial<Estado>; academia?: Academia }>(p: P) =>
+  ({ ...p, historico: p.historico ?? [], estado: { ...novoEstado(), ...p.estado }, academia: p.academia ?? novaAcademia() })

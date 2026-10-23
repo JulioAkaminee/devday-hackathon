@@ -23,7 +23,7 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
       `Map<token, …>` em memória, nunca por IP.
 - [x] **S3 · Teto de pets** (`POST /api/pets`): `pets.size >= 2000` → 503 "evento lotado". Sem teto,
       `novoCodigo` fica O(n) e trava o loop quando os códigos acabam.
-- [ ] **S4 · Snapshot não derruba o processo**: `salvar` em try/catch (mantém `sujo` para tentar de
+- [x] **S4 · Snapshot não derruba o processo**: `salvar` em try/catch (mantém `sujo` para tentar de
       novo); `carregar` em try/catch, renomeia o arquivo ruim para `.bad-<data>` e sobe vazio; ao
       carregar, preencher `historico ?? []` e `estado: { ...novoEstado(), ...p.estado }`.
 - [ ] **S5 · Erros 4xx do Express viram 400/413**, não 500 com stack no log (JSON inválido, corpo

@@ -1,6 +1,6 @@
 import express from 'express'
 import { randomBytes } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
+import { mkdirSync, renameSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import {
   ErroDeFase, ErroDeRegra, amigoAtual, motivoRecusa, avancar, comecar, conhecer, encontrar, escolher, novoEstado, type Estado,
@@ -9,7 +9,7 @@ import {
   habilidadeFraca, novaAcademia, progresso, proximaAtividade, responderAtividade, responderDiagnostico, type Academia,
 } from '../shared/academia.ts'
 import { ACESSORIOS, COR_ESPECIE, ESPECIES, TEMAS, type Acessorio, type Especie, type Tema } from '../shared/story.ts'
-import { ErroHttp, Limite, alvoDoEncontro } from './regras.ts'
+import { ErroHttp, Limite, alvoDoEncontro, completar, lerSnapshot } from './regras.ts'
 
 interface Pet {
   id: string
@@ -75,18 +75,21 @@ function semear() {
 }
 
 function carregar() {
-  if (!existsSync(ARQUIVO)) return
   // pets de uma versão antiga (espécie que não existe mais) ficam de fora
-  for (const p of JSON.parse(readFileSync(ARQUIVO, 'utf8')) as Pet[]) {
-    if (ESPECIES.includes(p.especie)) pets.set(p.id, { ...p, academia: p.academia ?? novaAcademia() })
+  for (const p of lerSnapshot(ARQUIVO) as Pet[]) {
+    if (ESPECIES.includes(p?.especie)) pets.set(p.id, completar(p))
   }
 }
 function salvar() {
   if (!sujo) return
-  mkdirSync(DATA_DIR, { recursive: true })
-  writeFileSync(ARQUIVO + '.tmp', JSON.stringify([...pets.values()]))
-  renameSync(ARQUIVO + '.tmp', ARQUIVO)
-  sujo = false
+  try {
+    mkdirSync(DATA_DIR, { recursive: true })
+    writeFileSync(ARQUIVO + '.tmp', JSON.stringify([...pets.values()]))
+    renameSync(ARQUIVO + '.tmp', ARQUIVO)
+    sujo = false
+  } catch (e) {
+    console.error('falha ao salvar o snapshot; tento de novo em 5 s:', (e as Error).message) // sujo continua true
+  }
 }
 
 function mudar(p: Pet, novo: Estado) {
