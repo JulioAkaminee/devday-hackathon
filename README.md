@@ -179,6 +179,7 @@ obrigatório para a câmera do celular ler o QR — há sempre o caminho sem câ
 | [`docs/ACADEMIA.md`](docs/ACADEMIA.md) | as perguntas, as atividades e a trilha |
 | [`docs/PLANO.md`](docs/PLANO.md) | frentes de trabalho, contratos e status |
 | [`docs/ENTREGA.md`](docs/ENTREGA.md) | roteiro do vídeo, ensaio e respostas do formulário |
+| [`docs/APRESENTACAO.md`](docs/APRESENTACAO.md) | deck interno: problema, solução, regras, números e perguntas da banca |
 | [`docs/AUDITORIA.md`](docs/AUDITORIA.md) | revisão de regras e critérios |
 
 ---
