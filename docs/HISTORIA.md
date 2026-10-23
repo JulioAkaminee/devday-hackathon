@@ -1,4 +1,4 @@
-# História — textos do Quebra-Gelo (rascunho v1)
+# História: textos do Quebra-Gelo (rascunho v1)
 
 Textos fixos da aventura. O pet narra em primeira pessoa, falando com o dono ("você").
 Cada bloco cabe numa tela de celular: no máximo 3 frases.
