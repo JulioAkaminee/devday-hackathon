@@ -315,7 +315,7 @@ function cartaoMissao(v: Visao) {
       : ''
     const f = v.academia.fraca
     const treino = f && CAPITULO_SUGERIDO[f] === e.cap ? `<p class="nota">Aqui você treina <b>${NOMES_HABILIDADE[f]}</b>, sua habilidade mais fraca.</p>` : ''
-    return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}<p class="texto">${esc(preencher(cap.abertura, vars))}</p>${treino}${escolhas(false)}${sug}${escanear}`
+    return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}<p class="texto">${esc(preencher(cap.abertura, vars))}</p>${treino}<p class="rotulo">Depois do encontro, você escolhe</p>${escolhas(false)}${sug}${escanear}`
   }
   if (e.fase === 'encontro') {
     const a = v.amigo!
