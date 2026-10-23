@@ -28,7 +28,8 @@ interface Visao {
 type Aba = 'mapa' | 'academia' | 'contatos' | 'conexoes' | 'finais'
 
 const NOMES_TEMA: Record<Tema, string> = {
-  front: 'front-end', back: 'back-end', fullstack: 'fullstack', mobile: 'mobile', dados: 'dados', design: 'design', produto: 'produto', carreira: 'carreira',
+  front: 'front-end', back: 'back-end', fullstack: 'fullstack', mobile: 'mobile', dados: 'dados', design: 'design', produto: 'produto',
+  marketing: 'marketing', comercial: 'comercial', rh: 'RH e pessoas', gestao: 'gestão', carreira: 'carreira',
 }
 const SUGESTOES_NOME = ['Xícaro', 'Bolacha', 'Pipoca', 'Tampinha', 'Biscoito', 'Faísca', 'Pudim', 'Teco', 'Bug', 'Cometa']
 
@@ -157,12 +158,21 @@ function telaCriar() {
   let passo = 0
   mundo.mostrarVitrine(dna)
 
+  // pet, nomes e as três perguntas do dia, uma por tela
+  const TOTAL = 5
   const progresso = () =>
-    `<div class="progresso" aria-label="Passo ${passo + 1} de 3">${[0, 1, 2].map((i) => `<i class="${i < passo ? 'feito' : i === passo ? 'atual' : ''}"></i>`).join('')}<span>${passo + 1} de 3</span></div>`
+    `<div class="progresso" aria-label="Passo ${passo + 1} de ${TOTAL}">${Array.from({ length: TOTAL }, (_, i) => `<i class="${i < passo ? 'feito' : i === passo ? 'atual' : ''}"></i>`).join('')}<span>${passo + 1} de ${TOTAL}</span></div>`
   const opcao = (grupo: string, v: string, rotulo: string, sel: boolean, extra = '') =>
     `<button type="button" class="${sel ? 'sel' : ''}" aria-pressed="${sel}" data-v="${v}" ${grupo === 'especie' ? `aria-label="${rotulo}"` : ''}>${extra}${grupo === 'especie' ? `<span>${rotulo}</span>` : rotulo}</button>`
-  const chips = (campo: 'area' | 'procura' | 'oferece', rotulo: string) =>
-    `<div class="pergunta-chips"><p class="rotulo">${rotulo}</p><div class="chips" data-perfil="${campo}">${TEMAS.map((t) => opcao(campo, t, NOMES_TEMA[t], perfil[campo] === t)).join('')}</div></div>`
+  const chips = (campo: 'area' | 'procura' | 'oferece') =>
+    `<div class="chips" data-perfil="${campo}">${TEMAS.map((t) => opcao(campo, t, NOMES_TEMA[t], perfil[campo] === t)).join('')}</div>`
+  const proximo = `<button class="principal">Próximo ${ICONE.seta}</button>`
+  // as três perguntas do dia: título, por que importa e as áreas para tocar
+  const PERGUNTAS: Record<number, { campo: 'area' | 'procura' | 'oferece'; titulo: string; dica: string }> = {
+    2: { campo: 'area', titulo: 'Com o que você trabalha?', dica: 'É assim que o jogo sugere com quem conversar em cada missão.' },
+    3: { campo: 'procura', titulo: 'Com o que você quer ajuda hoje?', dica: 'Na Missão 2 a gente te mostra quem pode ajudar com isso.' },
+    4: { campo: 'oferece', titulo: 'Com o que você pode ajudar?', dica: 'Quem precisa disso vai ver o seu pet como sugestão.' },
+  }
   const voltar = (para: number) => `<button type="button" class="discreto" data-ir="${para}">${ICONE.voltar} Voltar</button>`
 
   const conteudo = () => {
@@ -176,19 +186,21 @@ function telaCriar() {
       <div class="pets" data-campo="especie">${ESPECIES.map((e) => opcao('especie', e, NOMES_ESPECIE[e], dna.especie === e, foto({ especie: e, cor: '', acessorio: 'nenhum' }))).join('')}</div>
       <p class="personalidade">${PERSONALIDADE[dna.especie]}</p>
       <div class="acessorio"><span>Acessório</span><div class="segmentos" data-campo="acessorio">${ACESSORIOS.map((a) => opcao('acessorio', a, NOMES_ACESSORIO[a], dna.acessorio === a)).join('')}</div></div>
-      <button class="principal">Continuar ${ICONE.seta}</button>`
+      ${proximo}`
     if (passo === 1) return `
       ${progresso()}<h2>Como vocês se chamam?</h2>
-      <label>Seu primeiro nome<input name="dono" minlength="2" maxlength="16" required placeholder="Ana" autocomplete="given-name" value="${esc(perfil.dono)}"></label>
+      <label>Seu nome<input name="dono" minlength="2" maxlength="16" required placeholder="Ana" autocomplete="given-name" value="${esc(perfil.dono)}"></label>
       <label>Nome do pet<span class="com-botao"><input name="nome" minlength="2" maxlength="16" required value="${esc(perfil.nome)}"><button type="button" data-sortear aria-label="Sortear outro nome">${ICONE.dado}</button></span></label>
       <label>Seu LinkedIn (opcional)<input name="linkedin" maxlength="140" placeholder="linkedin.com/in/ana" inputmode="url" autocomplete="url" spellcheck="false" value="${esc(perfil.linkedin)}"></label>
       <p class="dica">Quem encontrar seu pet vê esses dois nomes. O LinkedIn só aparece para quem te encontrar no evento.</p>
-      <div class="navegacao">${voltar(0)}<button class="principal">Continuar ${ICONE.seta}</button></div>`
+      <div class="navegacao">${voltar(0)}${proximo}</div>`
+    const q = PERGUNTAS[passo]
+    const ultimo = passo === TOTAL - 1
     return `
-      ${progresso()}<h2>O que você busca hoje?</h2>
-      <p class="dica">É assim que o jogo sugere com quem conversar em cada missão.</p>
-      ${chips('area', 'Eu trabalho com')}${chips('procura', 'Quero ajuda com')}${chips('oferece', 'Posso ajudar com')}
-      <div class="navegacao">${voltar(1)}<button class="principal">Criar meu pet ${ICONE.seta}</button></div>`
+      ${progresso()}<h2>${q.titulo}</h2>
+      <p class="dica">${q.dica}</p>
+      ${chips(q.campo)}
+      <div class="navegacao">${voltar(passo - 1)}${ultimo ? `<button class="principal">Avançar ${ICONE.seta}</button>` : proximo}</div>`
   }
 
   const desenhar = () => {
@@ -240,7 +252,7 @@ function telaCriar() {
     // Enter e o botão principal avançam; no último passo, criam o pet
     form.addEventListener('submit', async (e) => {
       e.preventDefault()
-      if (passo < 2) { passo++; desenhar(); return }
+      if (passo < TOTAL - 1) { passo++; desenhar(); return }
       const botao = form.querySelector<HTMLButtonElement>('.navegacao .principal')!
       if (botao.disabled) return
       botao.disabled = true // clique duplo criava dois pets

@@ -103,7 +103,6 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .acessorio > span { font-size: 0.8rem; color: var(--cinza); }
 .com-botao { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 .com-botao button { justify-content: center; padding: 0 12px; }
-.pergunta-chips { display: grid; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chips button { border-color: var(--fio); padding: 8px 12px; font-size: 0.9rem; }
 .chips button.sel { background: var(--tinta); border-color: var(--tinta); color: var(--papel); }
