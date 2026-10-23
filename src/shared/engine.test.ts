@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { avancar, comecar, encontrar, escolher, finalDe, novoEstado, type Final, type Opcao } from './engine.ts'
+import { avancar, comecar, encontrar, ErroDeRegra, escolher, finalDe, novoEstado, type Final, type Opcao } from './engine.ts'
 
 // Caps. 1–3 com pessoas novas, cap. 4 reencontro (L1).
 function jogar(ops: Opcao[]) {
@@ -29,6 +29,14 @@ test('tabela de k escolhas profundas (QUEBRA-GELO.md, L1)', () => {
     const e = jogar([0, 1, 2, 3].map((i) => (i < k ? 'profunda' : 'ampla')))
     assert.deepEqual([e.alcance, e.profundidade, finalDe(e)], [a, p, f])
   })
+})
+
+test('missões 1–3 pedem gente nova; a 4 pede reencontro', () => {
+  let e = avancar(escolher(encontrar(comecar(novoEstado()), 'a'), 'ampla'))
+  assert.throws(() => encontrar(e, 'a'), ErroDeRegra)
+  for (const id of ['b', 'c']) e = avancar(escolher(encontrar(e, id), 'ampla'))
+  assert.throws(() => encontrar(e, 'z'), ErroDeRegra)
+  assert.equal(encontrar(e, 'b').fase, 'encontro')
 })
 
 test('ação fora de fase é recusada', () => {

@@ -3,7 +3,7 @@ import { randomBytes } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import {
-  ErroDeFase, amigoAtual, avancar, comecar, conhecer, encontrar, escolher, novoEstado, type Estado,
+  ErroDeFase, ErroDeRegra, amigoAtual, motivoRecusa, avancar, comecar, conhecer, encontrar, escolher, novoEstado, type Estado,
 } from '../shared/engine.ts'
 import {
   habilidadeFraca, novaAcademia, progresso, proximaAtividade, responderAtividade, responderDiagnostico, type Academia,
@@ -184,7 +184,11 @@ app.post('/api/encontro', (req, res) => {
   if (outro.id === p.id) throw new ErroHttp(400, 'esse é o seu próprio pet')
   mudar(p, encontrar(p.estado, outro.id))
   // O encontro vale para os dois: se o outro está esperando alguém, o capítulo dele abre também (L3)
-  if (!outro.demo) mudar(outro, outro.estado.fase === 'aguardando' ? encontrar(outro.estado, p.id) : conhecer(outro.estado, p.id))
+  // (se a missão do outro não aceita este encontro, ele só registra que te conheceu)
+  if (!outro.demo) {
+    const abre = outro.estado.fase === 'aguardando' && !motivoRecusa(outro.estado, p.id)
+    mudar(outro, abre ? encontrar(outro.estado, p.id) : conhecer(outro.estado, p.id))
+  }
   res.json(visao(p))
 })
 
@@ -243,6 +247,7 @@ if (PROD) {
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err instanceof ErroHttp) return void res.status(err.status).json({ erro: err.message })
+  if (err instanceof ErroDeRegra) return void res.status(400).json({ erro: err.message })
   if (err instanceof ErroDeFase) return void res.status(409).json({ erro: 'ação fora de hora: ' + err.message })
   console.error(err)
   res.status(500).json({ erro: 'erro interno' })

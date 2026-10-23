@@ -17,6 +17,8 @@ export interface Estado {
 }
 
 export class ErroDeFase extends Error {}
+/** Encontro que a missão atual não aceita; a mensagem vai direto para a pessoa. */
+export class ErroDeRegra extends Error {}
 
 export const novoEstado = (): Estado => ({
   cap: 0, fase: 'prologo', alcance: 0, profundidade: 0, encontros: [], escolhas: [], conhecidos: [],
@@ -37,14 +39,23 @@ export function conhecer(e: Estado, id: string): Estado {
 }
 
 /** Encontro que abre o capítulo atual. Pessoa nova nos caps. 1–3 vale +1 Alcance (L1). */
+/** Por que este encontro não vale agora (null = vale). Caps. 1–3 pedem gente nova; o 4, um reencontro (L1). */
+export function motivoRecusa(e: Estado, id: string): string | null {
+  const conhecido = e.conhecidos.includes(id)
+  if (e.cap <= 3 && conhecido) return 'Vocês já se conheceram. Procure alguém novo para esta missão.'
+  if (e.cap === 4 && !conhecido) return 'Na Missão 4, reencontre alguém que você já conheceu hoje.'
+  return null
+}
+
 export function encontrar(e: Estado, id: string): Estado {
   exigir(e, 'aguardando')
-  const nova = !e.conhecidos.includes(id)
+  const motivo = motivoRecusa(e, id)
+  if (motivo) throw new ErroDeRegra(motivo)
   return {
     ...conhecer(e, id),
     fase: 'encontro',
     encontros: [...e.encontros, id],
-    alcance: e.alcance + (nova && e.cap <= 3 ? 1 : 0),
+    alcance: e.alcance + (e.cap <= 3 ? 1 : 0),
   }
 }
 
