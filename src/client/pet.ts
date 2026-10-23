@@ -21,8 +21,12 @@ const PRETO = '#1b1b1b'
 const BRANCO = '#f7f7f2'
 const BOCHECHA = '#ff8fab'
 const LINGUA = '#ff5c7a'
-const VERDE = '#1fbf5f'
-const VERDE_ESCURO = '#16934a'
+const VERDE = '#22b04b' // verde do banner do evento
+const VERDE_ESCURO = '#178a3a'
+const AZUL = '#2f7bf5'
+const AMARELO = '#ffd60a'
+const ROSA = '#ff3d8b'
+const LARANJA = '#ff5a1f'
 
 /** Grade de voxels: chave "x,y,z" → cor. x centrado, y para cima a partir do chão, z para a frente. */
 class Voxels {
@@ -35,9 +39,10 @@ class Voxels {
   caixa(x0: number, y0: number, z0: number, x1: number, y1: number, z1: number, cor: string) {
     for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) for (let z = z0; z <= z1; z++) this.set(x, y, z, cor)
   }
-  /** Preenche onde f(x,y,z) devolve uma cor, dentro dos limites. */
+  /** Preenche onde f(x,y,z) devolve uma cor, dentro dos limites (arredondados para a grade). */
   forma(x0: number, y0: number, z0: number, x1: number, y1: number, z1: number, f: (x: number, y: number, z: number) => string | null) {
-    for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) for (let z = z0; z <= z1; z++) {
+    const r = Math.round
+    for (let x = r(x0); x <= r(x1); x++) for (let y = r(y0); y <= r(y1); y++) for (let z = r(z0); z <= r(z1); z++) {
       const c = f(x, y, z)
       if (c) this.set(x, y, z, c)
     }
@@ -110,115 +115,135 @@ const mochila = (v: Voxels, y0: number, y1: number, larg = 4) => {
   v.caixa(-larg, y0, z - 3, larg, y1, z - 1, PRETO)
   v.caixa(-larg + 1, y0 + 1, z - 4, larg - 1, y0 + 3, z - 4, '#333333')
 }
+const boina = (v: Voxels) => {
+  // pousa na camada cheia mais alta do miolo (ignora vapor e brilhos soltos)
+  let t = v.topo()
+  const cheia = (y: number) => {
+    let n = 0
+    for (let x = -4; x <= 4; x++) for (let z = -4; z <= 4; z++) if (v.tem(x, y, z)) n++
+    return n >= 6
+  }
+  while (t > 0 && !cheia(t)) t--
+  v.forma(-7, t + 1, -7, 7, t + 2, 7, (x, y, z) => (Math.hypot(x + 1, z) <= (y === t + 1 ? 6.5 : 5.5) ? PRETO : null))
+  v.set(0, t + 3, 0, PRETO)
+}
 
 // ---------- os 10 pets ----------
 
-type Montagem = { olhos: number } // altura dos olhos, para os óculos
+// olhos: altura dos olhos (para os óculos); tem: acessórios que já fazem parte do pet e não duplicam
+type Montagem = { olhos: number; tem?: Acessorio[] }
 
 const PETS: Record<Especie, (v: Voxels) => Montagem> = {
   xicara(v) {
     pernas(v, PRETO)
-    v.caixa(-6, 3, -6, 6, 15, 6, BRANCO)
-    v.caixa(-5, 15, -5, 5, 15, 5, '#5b3417') // café
-    v.caixa(-6, 3, -6, 6, 6, 6, VERDE) // blusinha
-    for (const [x, y] of [[-1, 4], [0, 5], [1, 4]]) v.pintar(x, y, BRANCO) // selo </>
+    v.caixa(-6, 3, -5, 6, 17, 5, BRANCO)
+    v.caixa(-5, 17, -4, 5, 17, 4, '#5b3417') // café
+    v.caixa(-6, 3, -5, 6, 8, 5, VERDE) // blusinha
+    // selo </> no peito
+    for (let x = -4; x <= 4; x++) for (let y = 3; y <= 7; y++) v.colar(x, y, BRANCO)
+    for (const [x, y] of [[-2, 6], [-3, 5], [-2, 4], [1, 6], [0, 5], [-1, 4], [2, 6], [3, 5], [2, 4]]) v.pintar(x, y, PRETO)
     // alça
-    v.caixa(-9, 7, -1, -7, 7, 1, VERDE); v.caixa(-9, 13, -1, -7, 13, 1, VERDE); v.caixa(-10, 7, -1, -9, 13, 1, VERDE)
-    for (const [x, y] of [[0, 17], [1, 18], [0, 19], [-1, 20]]) v.set(x, y, 0, '#e8e8e8') // vapor
-    braco(v, 7, 7, VERDE, true)
-    olhosFelizes(v, 11); bochechas(v, 9); bocaAberta(v, 8)
-    return { olhos: 11 }
+    v.caixa(-9, 8, -1, -7, 8, 1, VERDE); v.caixa(-9, 15, -1, -7, 15, 1, VERDE); v.caixa(-10, 8, -1, -9, 15, 1, VERDE)
+    for (const [x, y] of [[0, 19], [0, 20], [-1, 21], [1, 21], [0, 22]]) v.set(x, y, 0, '#e4e4de') // vapor
+    braco(v, 7, 9, VERDE, true); braco(v, -7, 5, VERDE)
+    olhosFelizes(v, 13); bochechas(v, 11, 5); bocaAberta(v, 9)
+    return { olhos: 13 }
   },
   caderninho(v) {
     pernas(v, '#1c5fd6')
-    v.caixa(-6, 3, -2, 6, 20, 2, '#2f7bf5')
-    v.caixa(-5, 19, -1, 6, 20, 1, BRANCO) // páginas
-    v.caixa(6, 4, -1, 6, 19, 1, BRANCO)
-    for (let y = 4; y <= 19; y += 2) v.caixa(-8, y, -1, -7, y, 1, PRETO) // espiral
-    v.caixa(-2, 5, 3, 2, 8, 3, BRANCO) // etiqueta
-    // caneta verde na mão
-    for (let i = 0; i < 9; i++) v.set(9, 8 + i, 1 + (i > 6 ? 1 : 0), i < 2 ? '#0f5c2e' : VERDE)
-    braco(v, 7, 9, '#2f7bf5')
-    braco(v, -9, 9, '#2f7bf5')
-    olhosAltos(v, 13); bochechas(v, 12); sorriso(v, 11)
+    v.caixa(-6, 3, 3, 6, 20, 3, AZUL) // capa
+    v.caixa(-6, 3, -3, 6, 20, -3, AZUL) // contracapa
+    v.caixa(-6, 3, -3, -6, 20, 3, AZUL) // lombada
+    v.caixa(-5, 4, -2, 5, 19, 2, BRANCO) // páginas
+    for (let y = 5; y <= 17; y += 3) v.caixa(-8, y, -1, -7, y + 1, 1, PRETO) // espiral
+    // caneta verde na mão erguida
+    braco(v, 7, 9, AZUL, true)
+    for (let i = 0; i < 9; i++) for (const z of [1, 2]) v.set(10 + Math.floor(i / 3), 9 + i, z, i < 1 ? PRETO : i > 6 ? VERDE_ESCURO : VERDE)
+    olhosAltos(v, 13, 2); bochechas(v, 12, 4); bocaAberta(v, 10)
     return { olhos: 14 }
   },
   laptopinho(v) {
     pernas(v, PRETO, 4)
-    v.caixa(-8, 3, -1, 8, 4, 9, '#d4d4d4') // base
-    for (let x = -6; x <= 6; x += 2) for (let z = 1; z <= 7; z += 2) v.set(x, 5, z, '#3a3a3a') // teclado
-    v.caixa(-8, 5, -3, 8, 19, -2, '#d4d4d4') // tampa
-    v.caixa(-7, 6, -1, 7, 18, -1, '#111111') // tela
-    for (const s of [-1, 1]) { v.set(s * 3 - 1, 12, 0, VERDE); v.set(s * 3, 13, 0, VERDE); v.set(s * 3 + 1, 12, 0, VERDE) }
-    v.set(7, 19, -1, VERDE) // luzinha
-    braco(v, 9, 5, '#d4d4d4'); braco(v, -9, 5, '#d4d4d4')
-    return { olhos: 12 }
+    v.caixa(-8, 3, -1, 8, 4, 9, '#e2e2e2') // base
+    for (let x = -6; x <= 6; x += 2) for (let z = 1; z <= 7; z += 2) v.set(x, 5, z, '#2b2b2b') // teclado
+    v.caixa(-8, 5, -3, 8, 20, -2, '#e2e2e2') // tampa
+    v.caixa(-7, 7, -1, 7, 19, -1, '#111111') // tela
+    // olhos ^ ^ verdes na tela
+    for (const c of [-4, 4]) for (const [x, y] of [[-2, 13], [-2, 14], [-1, 15], [0, 15], [1, 15], [2, 14], [2, 13]]) v.set(c + x, y, 0, VERDE)
+    v.set(7, 20, -1, VERDE) // luzinha
+    braco(v, 9, 4, '#e2e2e2'); braco(v, -9, 4, '#e2e2e2')
+    return { olhos: 13 }
   },
   plantinha(v) {
     pernas(v, VERDE)
-    v.forma(-6, 3, -6, 6, 13, 6, (x, _y, z) => (Math.abs(x) === 6 && Math.abs(z) === 6 ? null : BRANCO)) // vaso
-    // folhagem: bolhas de verde
-    for (const [cx, cy, cz, r] of [[0, 18, 0, 5], [-4, 16, 2, 3.5], [4, 17, -1, 3.5], [2, 22, 1, 3], [-2, 21, -2, 3], [0, 25, 0, 2]]) {
-      v.forma(cx - 6, cy - 6, cz - 6, cx + 6, cy + 6, cz + 6, (x, y, z) => {
-        const d = Math.hypot(x - cx, (y - cy) * 1.1, z - cz)
-        return d <= r ? ((x * 7 + y * 3 + z * 5) % 4 === 0 ? VERDE_ESCURO : VERDE) : null
+    v.forma(-6, 3, -6, 6, 12, 6, (x, _y, z) => (Math.abs(x) === 6 && Math.abs(z) === 6 ? null : BRANCO)) // vaso
+    // folhas pontudas: losangos ao longo de uma direção, saindo do vaso
+    for (const [dx, dy, dz, L] of [[0, 1, 0, 12], [-0.6, 0.8, 0.2, 11], [0.6, 0.8, -0.1, 11], [0.1, 0.7, 0.7, 9], [-0.1, 0.7, -0.7, 9], [-0.9, 0.45, 0.1, 9], [0.9, 0.45, 0.2, 9]]) {
+      const n = Math.hypot(dx, dy, dz)
+      v.forma(-12, 12, -12, 12, 26, 12, (x, y, z) => {
+        const t = (x * dx + (y - 12) * dy + z * dz) / n / L
+        if (t < 0 || t > 1) return null
+        const d = Math.hypot(x - (dx / n) * t * L, y - 12 - (dy / n) * t * L, z - (dz / n) * t * L)
+        return d <= Math.sin(Math.PI * t) ** 0.7 * 3.4 + 0.3 ? (d < 0.7 ? VERDE_ESCURO : VERDE) : null
       })
     }
-    mochila(v, 5, 12, 4)
-    braco(v, 7, 7, BRANCO); braco(v, -7, 7, BRANCO)
-    olhosAltos(v, 8); bochechas(v, 7); sorriso(v, 6)
-    return { olhos: 9 }
+    mochila(v, 4, 11, 4)
+    braco(v, 7, 7, VERDE); braco(v, -7, 7, VERDE)
+    olhosAltos(v, 8); bochechas(v, 7, 4); sorriso(v, 6)
+    return { olhos: 9, tem: ['mochila'] }
   },
   lampada(v) {
-    pernas(v, '#e0b000')
-    v.caixa(-4, 3, -4, 4, 8, 4, '#3d3d3d') // rosca
-    for (let y = 4; y <= 8; y += 2) v.caixa(-5, y, -5, 5, y, 5, '#555555')
+    pernas(v, '#f2c200')
+    v.caixa(-4, 3, -4, 4, 8, 4, '#2a2a2a') // rosca
+    for (let y = 4; y <= 8; y += 2) v.caixa(-5, y, -5, 5, y, 5, '#3d3d3d')
     v.forma(-8, 9, -8, 8, 23, 8, (x, y, z) => {
       const d = Math.hypot(x, (y - 15) * 1.05, z)
-      return d <= 8 && (y >= 9 || Math.hypot(x, z) <= 6) ? (y > 19 && x < -2 ? '#fff3a3' : '#ffd60a') : null
+      return d <= 8 && (y >= 9 || Math.hypot(x, z) <= 6) ? AMARELO : null
     })
-    for (const [x, y] of [[-10, 20], [10, 19], [7, 25], [-6, 25], [0, 27]]) v.set(x, y, 0, '#ffd60a') // brilhos
-    braco(v, 9, 12, '#ffd60a'); braco(v, -9, 12, '#ffd60a')
-    olhosAltos(v, 13)
+    for (const [x, y] of [[-4, 20], [-3, 20], [-4, 19]]) v.pintar(x, y, '#fff6c2') // reflexo
+    for (const [x, y] of [[-10, 19], [10, 20], [11, 21], [7, 25], [-6, 25], [0, 27]]) v.set(x, y, 0, AMARELO) // brilhos
+    braco(v, 8, 10, AMARELO); braco(v, -8, 10, AMARELO)
+    olhosAltos(v, 13, 3)
     return { olhos: 14 }
   },
   coracao(v) {
-    pernas(v, '#d81b6a')
-    // coração implícito (x²+y²−1)³ − x²y³ ≤ 0, extrudado com bordas arredondadas
-    v.forma(-9, 3, -4, 9, 19, 4, (x, y, z) => {
-      const X = x / 7.5, Y = (y - 12) / 7.5
-      const h = (X * X + Y * Y - 1) ** 3 - X * X * Y ** 3
-      if (h > 0) return null
-      return Math.abs(z) <= 4 - (h > -0.05 ? 2 : h > -0.2 ? 1 : 0) ? (y < 8 ? '#e8317a' : '#ff3d8b') : null
+    pernas(v, '#e8317a', 2)
+    // dois lobos + ponta truncada; a espessura cresce longe da borda (bordas arredondadas)
+    const dentro = (x: number, y: number) =>
+      Math.hypot(x - 4.5, y - 14) <= 5 || Math.hypot(x + 4.5, y - 14) <= 5 || (y >= 3 && y <= 14 && Math.abs(x) <= 1.5 + (y - 3) * 0.72)
+    const cheio = (x: number, y: number, r: number) => dentro(x + r, y) && dentro(x - r, y) && dentro(x, y + r) && dentro(x, y - r)
+    v.forma(-10, 3, -5, 10, 19, 5, (x, y, z) => {
+      if (!dentro(x, y)) return null
+      const t = 2 + [1, 2, 3].filter((r) => cheio(x, y, r)).length
+      return Math.abs(z) <= t ? ROSA : null
     })
-    braco(v, 9, 9, '#ff3d8b'); braco(v, -9, 9, '#ff3d8b')
-    // óculos redondos fazem parte do personagem
-    for (const s of [-1, 1]) for (let x = 1; x <= 4; x++) for (let y = 12; y <= 15; y++) if (!((x === 1 || x === 4) && (y === 12 || y === 15))) v.colar(s * x + (s < 0 ? 0 : 0), y, PRETO)
-    v.colar(0, 14, PRETO)
-    sorriso(v, 9)
-    return { olhos: 13 }
+    braco(v, 9, 11, ROSA); braco(v, -9, 11, ROSA)
+    // óculos escuros redondos fazem parte do personagem
+    for (const s of [-1, 1]) for (let x = 1; x <= 7; x++) for (let y = 11; y <= 16; y++) if (Math.hypot(x - 4, y - 13.5) <= 2.7) v.colar(s * x, y, PRETO)
+    for (let x = -1; x <= 1; x++) v.colar(x, 14, PRETO)
+    return { olhos: 13, tem: ['oculos'] }
   },
   globinho(v) {
     pernas(v, '#4a5568')
     v.forma(-8, 3, -8, 8, 19, 8, (x, y, z) => {
       if (Math.hypot(x, y - 11, z) > 8.2) return null
       const terra = Math.sin(x * 0.55 + z * 0.3) + Math.cos(y * 0.6 - z * 0.4) + Math.sin((x + y) * 0.35) > 1.1
-      return terra ? VERDE : '#2f7bf5'
+      return terra ? VERDE : AZUL
     })
     mochila(v, 6, 15, 5)
     braco(v, 9, 10, VERDE, true); braco(v, -9, 10, VERDE)
     // rosto em área azul limpa
-    for (let x = -5; x <= 5; x++) for (let y = 7; y <= 14; y++) v.pintar(x, y, '#2f7bf5')
+    for (let x = -5; x <= 5; x++) for (let y = 7; y <= 14; y++) v.pintar(x, y, AZUL)
     olhosFelizes(v, 12); bochechas(v, 10); bocaAberta(v, 8)
-    return { olhos: 12 }
+    return { olhos: 12, tem: ['mochila'] }
   },
   estrelinha(v) {
-    pernas(v, '#e0b000', 4)
+    pernas(v, '#f2c200', 4)
     // estrela de 5 pontas: polígono no plano xy
     const pts: [number, number][] = []
     for (let i = 0; i < 10; i++) {
       const a = Math.PI / 2 + (i * Math.PI) / 5
-      const r = i % 2 ? 4.2 : 10
+      const r = i % 2 ? 4.4 : 10
       pts.push([Math.cos(a) * r, Math.sin(a) * r + 12])
     }
     const dentro = (x: number, y: number) => {
@@ -229,33 +254,38 @@ const PETS: Record<Especie, (v: Voxels) => Montagem> = {
       }
       return c
     }
-    v.forma(-10, 2, -3, 10, 22, 3, (x, y, z) => (dentro(x, y) && (Math.abs(z) < 3 || dentro(x * 1.15, (y - 12) * 1.15 + 12)) ? '#ffd60a' : null))
+    // mais grossa no miolo, fina nas pontas
+    const encolhida = (x: number, y: number, k: number) => dentro(x * k, (y - 12) * k + 12)
+    v.forma(-10, 2, -4, 10, 22, 4, (x, y, z) =>
+      dentro(x, y) && (Math.abs(z) < 3 || encolhida(x, y, 1.2)) && (Math.abs(z) < 4 || encolhida(x, y, 1.5)) ? AMARELO : null)
     mochila(v, 7, 14, 4)
+    braco(v, 9, 14, AMARELO, true) // acenando
     olhosFelizes(v, 13); bochechas(v, 11, 4); bocaAberta(v, 9)
-    return { olhos: 13 }
+    return { olhos: 13, tem: ['mochila'] }
   },
   conezinho(v) {
-    pernas(v, '#c92a2a')
-    v.caixa(-9, 3, -9, 9, 4, 9, '#ff4d3d') // base
+    pernas(v, '#d9441a')
+    v.caixa(-9, 3, -9, 9, 4, 9, LARANJA) // base
     for (let y = 5; y <= 22; y++) {
       const r = Math.round(7 - (y - 5) * 0.36)
-      const listra = y >= 11 && y <= 13 ? BRANCO : y >= 17 && y <= 19 ? BRANCO : '#ff4d3d'
+      const listra = (y >= 11 && y <= 13) || (y >= 17 && y <= 19) ? BRANCO : LARANJA
       v.forma(-r, y, -r, r, y, r, (x, _y, z) => (Math.hypot(x, z) <= r + 0.5 ? listra : null))
     }
     mochila(v, 6, 12, 4)
-    braco(v, 7, 8, '#ff4d3d'); braco(v, -7, 8, '#ff4d3d')
+    braco(v, 7, 7, LARANJA); braco(v, -7, 7, LARANJA)
     olhosAltos(v, 7, 2); bochechas(v, 6, 4)
-    return { olhos: 8 }
+    return { olhos: 8, tem: ['mochila'] }
   },
   nuvem(v) {
     pernas(v, '#1c5fd6')
-    for (const [cx, cy, r] of [[0, 12, 6], [-5, 9, 4.5], [5, 10, 5], [-8, 7, 3], [8, 7, 3], [-2, 15, 4.5], [3, 15, 4]]) {
+    for (const [cx, cy, r] of [[0, 8, 6], [-3, 12, 5], [4, 11.5, 4.5], [-7, 9, 4], [7, 8.5, 4]]) {
       v.forma(cx - 7, cy - 7, -6, cx + 7, cy + 7, 6, (x, y, z) => (Math.hypot(x - cx, y - cy, z * 1.3) <= r && y >= 3 ? '#3d8bff' : null))
     }
     v.caixa(-9, 3, -4, 9, 6, 4, '#3d8bff')
     mochila(v, 6, 13, 5)
-    olhosAltos(v, 11)
-    return { olhos: 12 }
+    boina(v)
+    olhosAltos(v, 10)
+    return { olhos: 11, tem: ['mochila', 'boina'] }
   },
 }
 
@@ -281,7 +311,7 @@ function malha(v: Voxels) {
     m.setMatrixAt(i, t)
     // variação leve de tom: dá o aspecto de cubinhos da referência
     const ruido = ((x * 73856093) ^ (y * 19349663) ^ (z * 83492791)) & 7
-    m.setColorAt(i, c.set(cor).multiplyScalar(0.94 + ruido * 0.012))
+    m.setColorAt(i, c.set(cor).multiplyScalar(0.96 + ruido * 0.008))
   })
   return m
 }
@@ -293,17 +323,13 @@ export function criarPet(dna: DNA, itens: Itens = { crachas: false, xicara: fals
   let v = cache.get(chave)
   if (!v) {
     v = new Voxels()
-    const { olhos } = PETS[dna.especie](v)
-    const topo = v.topo()
-    if (dna.acessorio === 'boina') {
-      v.forma(-6, topo + 1, -6, 6, topo + 2, 6, (x, y, z) => (Math.hypot(x + 1, z) <= (y === topo + 1 ? 6 : 5) ? PRETO : null))
-      v.set(0, topo + 3, 0, PRETO)
-    } else if (dna.acessorio === 'oculos') {
+    const { olhos, tem = [] } = PETS[dna.especie](v)
+    if (tem.includes(dna.acessorio)) { /* já faz parte do pet */ }
+    else if (dna.acessorio === 'boina') boina(v)
+    else if (dna.acessorio === 'oculos') {
       for (const s of [-1, 1]) for (let x = 1; x <= 4; x++) for (let y = olhos - 1; y <= olhos + 2; y++) v.colar(s * x, y, PRETO)
       v.colar(0, olhos + 1, PRETO)
-    } else if (dna.acessorio === 'mochila') {
-      mochila(v, 5, 12, 4)
-    }
+    } else if (dna.acessorio === 'mochila') mochila(v, 5, 12, 4)
     // itens das barras (QUEBRA-GELO.md, seção 3)
     if (itens.crachas) for (const [x, y, cor] of [[-4, 5, BRANCO], [-4, 6, VERDE], [4, 4, BRANCO], [4, 5, PRETO]] as const) v.colar(x, y, cor)
     if (itens.xicara) { v.caixa(10, 6, 1, 12, 9, 3, BRANCO); v.caixa(11, 9, 2, 11, 9, 2, '#5b3417') }
