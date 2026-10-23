@@ -172,6 +172,9 @@ let atividadeAberta: string | null = null
 let resultado: { acertou: boolean; explicacao: string } | null = null
 let medidas = { ampla: 0, profunda: 0 }
 let chaveCartao = ''
+// sobe a cada ação: resposta de sondagem que saiu antes dela chega velha e é descartada
+let versao = 0
+let sondando = false
 
 const questao = (q: Questao, attr: string, rotulo: string) =>
   `<p class="rotulo">${rotulo} <span>${NOMES_HABILIDADE[q.habilidade]}</span></p><p class="situacao">${esc(q.situacao)}</p>
@@ -241,18 +244,23 @@ async function iniciarJogo() {
   document.body.className = 'jogando'
   render()
   setInterval(async () => {
+    if (sondando || document.hidden) return
+    sondando = true
+    const v0 = versao
     try {
       const antes = visao!.conhecidos.length
       const nova = await api('eu')
+      if (versao !== v0) return
       visao = nova
       const novo = nova.conhecidos.at(-1)
       if (nova.conhecidos.length > antes && novo) aviso(`${novo.nome}, de ${novo.dono}, te encontrou`, 'ok')
       render()
-    } catch { /* rede oscilou: tenta de novo no próximo ciclo */ }
+    } catch { /* rede oscilou: tenta de novo no próximo ciclo */ } finally { sondando = false }
   }, 2000)
 }
 
 async function acao(rota: string, corpo: object = {}) {
+  versao++
   try { visao = await api(rota, corpo); render() } catch (err) {
     // 409 = a ação já aconteceu (clique duplo, outra aba): só sincroniza, sem mensagem técnica
     if ((err as { status?: number }).status === 409) { visao = await api('eu').catch(() => visao); render(); return }
@@ -451,6 +459,7 @@ ui.addEventListener('click', (ev) => {
     render()
   } else if (d.atividade) { atividadeAberta = d.atividade; resultado = null; render() }
   else if (d.resposta !== undefined) {
+    versao++
     api<Visao & { resultado: typeof resultado }>('atividade', { id: atividadeAberta, opcao: Number(d.resposta) })
       .then((r) => { resultado = r.resultado; visao = r; render() })
       .catch((err) => aviso((err as Error).message))

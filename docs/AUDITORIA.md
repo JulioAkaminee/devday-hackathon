@@ -30,7 +30,7 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
       grande). Mensagem de `ErroDeFase` genérica (não expor a máquina de estados).
 - [x] **C1 · Token velho se recupera**: 401 no polling ou em `acao` → apaga `qg-token` e recarrega.
 - [x] **C2 · iOS não dá zoom no formulário**: `font-size: 16px` em `input, select` (`style.css:50`).
-- [ ] **C3 · Polling não sobrescreve ação** (`main.ts:241`): contador `versao` incrementado em `acao`
+- [x] **C3 · Polling não sobrescreve ação** (`main.ts:241`): contador `versao` incrementado em `acao`
       e na atividade; descartar resposta do polling se mudou; não disparar com um polling em voo;
       pular quando `document.hidden`.
 - [ ] **C4 · Clique duplo em "Criar meu pet"** cria dois pets e dois `setInterval`: desabilitar o
