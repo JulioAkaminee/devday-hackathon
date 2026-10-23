@@ -25,7 +25,7 @@ export const ANIMACOES = {
 };
 
 /** Partes que podem ser ligadas e desligadas (acessórios). */
-export const ACESSORIOS = ['mochila', 'oculos', 'boina', 'caneta', 'vapor', 'brilhos'];
+export const ACESSORIOS = ['mochila', 'oculos', 'boina', 'caneta', 'vapor', 'brilhos', 'crachas', 'cafe', 'capa'];
 
 const FACES = [
   { n: [1, 0, 0], cantos: [[1, 0, 0], [1, 1, 0], [1, 1, 1], [1, 0, 1]] },

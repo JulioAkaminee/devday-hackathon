@@ -53,6 +53,7 @@ export const CORES = {
   logoCinza: '#5b6067',
   brilho: '#ffe45e*',
   lente: '#17181b',
+  lenteBrilho: '#4a4f57',
   rosca: '#2e3035',
   roscaClara: '#45484f',
   continente: '#3cc05a',
@@ -199,6 +200,7 @@ export const PETS = [
     nome: 'Xícara',
     personalidade: 'Curioso e sempre puxa assunto.',
     animacao: 'acenar',
+    encaixes: { olhos: { x: 6, y: 14, dist: 6, larg: 4 }, topo: { x: 6, y: 18, z: 5, raio: 4.6 }, peito: { x: 6, y: 8, sep: 4 } },
     construir(m) {
       m.parte('corpo', { pivo: [6, 4, 5] });
       m.bloco(0, 12, 7, 18, 0, 10, 2, C.branco);
@@ -239,6 +241,7 @@ export const PETS = [
     personalidade: 'Organizado e adora trocar ideias.',
     animacao: 'parado',
     pose: { bracoD: 0.45, caneta: -0.95 },
+    encaixes: { olhos: { x: 5.5, y: 14.5, dist: 5, larg: 2 }, topo: { x: 5.5, y: 19, z: 2.5, raio: 3.6 }, peito: { x: 5.5, y: 8.5, sep: 4 } },
     construir(m) {
       m.parte('corpo', { pivo: [5.5, 4, 2.5] });
       m.caixa(0, 4, 0, 10, 18, 0, C.azul);
@@ -272,6 +275,7 @@ export const PETS = [
     nome: 'Laptopinho',
     personalidade: 'Criativo e sempre tem um projeto.',
     animacao: 'parado',
+    encaixes: { olhos: { x: 7, y: 13, dist: 6, larg: 4 }, topo: { x: 7, y: 18, z: 1.5, raio: 4 }, peito: { x: 7, y: 6.5, sep: 7 } },
     construir(m) {
       m.parte('corpo', { pivo: [7, 4, 5] });
       // base com teclado e touchpad
@@ -300,6 +304,7 @@ export const PETS = [
     nome: 'Plantinha',
     personalidade: 'Tranquila e faz conexões inesperadas.',
     animacao: 'parado',
+    encaixes: { olhos: { x: 5.5, y: 7.5, dist: 5, larg: 2 }, topo: { x: 5.5, y: 19.5, z: 4.5, raio: 3.4 }, peito: { x: 5.5, y: 5, sep: 7 } },
     construir(m) {
       m.parte('corpo', { pivo: [5.5, 3, 4.5] });
       m.bloco(0, 11, 3, 10, 0, 9, 2, C.branco);
@@ -331,6 +336,7 @@ export const PETS = [
     nome: 'Lâmpada',
     personalidade: 'Cheio de ideias e energia.',
     animacao: 'parado',
+    encaixes: { olhos: { x: 6, y: 13.5, dist: 4, larg: 2 }, topo: { x: 6, y: 19.5, z: 6, raio: 4 }, peito: { x: 6, y: 10.5, sep: 4 } },
     construir(m) {
       const [cx, cy, cz, r] = [6, 13.6, 6, 5.9];
       m.parte('corpo', { pivo: [cx, 3, cz] });
@@ -354,6 +360,7 @@ export const PETS = [
     nome: 'Coração',
     personalidade: 'Empático e sempre escuta de verdade.',
     animacao: 'parado',
+    encaixes: { olhos: { x: 9.5, y: 14.5, dist: 7, larg: 6 }, topo: { x: 6, y: 22, z: 3.5, raio: 3.4 }, peito: { x: 9.5, y: 10, sep: 4 } },
     construir(m) {
       m.parte('corpo', { pivo: [9.5, 4, 3.5] });
       const forma = (cx, cy) => {
@@ -384,6 +391,7 @@ export const PETS = [
     personalidade: 'Adora gente de todas as áreas.',
     animacao: 'parado',
     pose: { bracoD: 0.35 },
+    encaixes: { olhos: { x: 6.5, y: 12, dist: 6, larg: 3 }, topo: { x: 6.5, y: 17, z: 6.5, raio: 4 }, peito: { x: 6.5, y: 8, sep: 4 } },
     construir(m) {
       const [cx, cy, cz, r] = [6.5, 10.6, 6.5, 6.4];
       m.parte('corpo', { pivo: [cx, 4, cz] });
@@ -418,6 +426,7 @@ export const PETS = [
     nome: 'Estrelinha',
     personalidade: 'Animado e sempre incentiva os outros.',
     animacao: 'acenar',
+    encaixes: { olhos: { x: 9.5, y: 13, dist: 6, larg: 3 }, topo: { x: 9.5, y: 20.5, z: 3, raio: 2.8 }, peito: { x: 9.5, y: 9, sep: 3 } },
     construir(m) {
       const [cx, cy, R, r] = [9.5, 10.9, 9.4, 4.6];
       const vertices = Array.from({ length: 10 }, (_, n) => {
@@ -455,6 +464,7 @@ export const PETS = [
     nome: 'Conezinho',
     personalidade: 'Direto e ajuda a focar no objetivo.',
     animacao: 'parado',
+    encaixes: { olhos: { x: 7.5, y: 6.5, dist: 5, larg: 2 }, topo: { x: 7.5, y: 21, z: 7.5, raio: 2.8 }, peito: { x: 7.5, y: 4, sep: 6 } },
     construir(m) {
       m.parte('corpo', { pivo: [7.5, 0, 7.5] });
       m.bloco(0, 15, 0, 2, 0, 15, 2, (x, y) => (y < 1 ? C.laranjaEscuro : C.laranja));
@@ -474,6 +484,7 @@ export const PETS = [
     nome: 'Nuvem',
     personalidade: 'Observador e sempre vê o lado diferente.',
     animacao: 'parado',
+    encaixes: { olhos: { x: 8.5, y: 10.5, dist: 5, larg: 2 }, topo: { x: 9.5, y: 18, z: 6.5, raio: 4.5 }, peito: { x: 8.5, y: 7, sep: 4 } },
     construir(m) {
       m.parte('corpo', { pivo: [8.5, 4, 6.5] });
       for (const [x, y, z, r] of [[8.5, 9.8, 6.5, 5.6], [3.9, 8.4, 6.5, 3.9], [13.1, 8.4, 6.5, 3.9], [10.2, 13.2, 6.5, 4.3], [5.9, 12.4, 6.5, 3.4]]) {
@@ -497,12 +508,87 @@ export const PETS = [
   },
 ];
 
-/** Monta o pet e devolve os dados (o mesmo formato dos arquivos em json/). */
-export function gerarPet(id) {
+// ---------------------------------------------------------------------------------------------
+// Acessórios escolhidos na criação e itens ganhos pelas barras, que servem em qualquer pet.
+// Cada pet informa onde ficam os olhos, o topo e o peito (`encaixes`).
+
+/** Óculos escuros sobre os olhos, com ponte entre as lentes. */
+function oculos(m, { x, y, dist, larg }) {
+  m.parte('oculos', { tipo: 'item', pai: 'corpo', pivo: [x, y, 0] });
+  const w = larg + 2;
+  const lente = ['S' + 'K'.repeat(w - 1), 'K'.repeat(w), '.' + 'K'.repeat(w - 2) + '.'];
+  const jTopo = Math.floor(y + 1);
+  for (const cx of [x - dist / 2, x + dist / 2]) m.desenhar(lente, Math.round(cx - w / 2), jTopo, { K: C.lente, S: C.lenteBrilho }, { relevo: 1, em: 'oculos' });
+  const fimEsq = Math.round(x - dist / 2 - w / 2) + w, iniDir = Math.round(x + dist / 2 - w / 2);
+  if (iniDir > fimEsq) m.desenhar(['K'.repeat(iniDir - fimEsq)], fimEsq, jTopo, { K: C.lente }, { relevo: 1, em: 'oculos' });
+}
+
+/** Boina preta apoiada no topo, um pouco inclinada, com o cabinho. */
+function boina(m, { x, y, z, raio }) {
+  m.parte('boina', { tipo: 'item', pai: 'corpo', pivo: [x, y, z] });
+  m.elipsoide(x + 0.4, y + 0.6, z, raio, 1.2, raio * 0.85, C.tinta, { giroZ: -0.16 });
+  m.esfera(x + 0.1, y + 1.9, z, 0.7, C.tinta);
+}
+
+/** Dois crachás pendurados no peito (Alcance alto). */
+function crachas(m, { x, y, sep }) {
+  m.parte('crachas', { tipo: 'item', pai: 'corpo', pivo: [x, y, 0] });
+  const jTopo = Math.floor(y + 1.5);
+  m.desenhar(['GG', 'WW', 'WW'], Math.round(x - sep / 2 - 1), jTopo, { G: C.verde, W: C.branco }, { relevo: 1, em: 'crachas' });
+  m.desenhar(['KK', 'WW', 'WW'], Math.round(x + sep / 2 - 1), jTopo, { K: C.tinta, W: C.branco }, { relevo: 1, em: 'crachas' });
+}
+
+/** Xicrinha de café na mão direita (Profundidade alta); sem mão livre, ela flutua do lado esquerdo. */
+function cafe(m, encaixes) {
+  const braco = m.obterParte('caneta') ? null : m.obterParte('bracoD');
+  let x, y, z;
+  if (braco) {
+    const vs = [...braco.voxels.keys()].map((k) => k.split(',').map(Number));
+    x = Math.max(...vs.map((v) => v[0])) + 1;
+    y = Math.min(...vs.map((v) => v[1]));
+    z = Math.round(vs.reduce((s, v) => s + v[2], 0) / vs.length);
+  } else {
+    const vs = [...m.obterParte('corpo').voxels.keys()].map((k) => k.split(',').map(Number));
+    x = Math.min(...vs.map((v) => v[0])) - 3;
+    y = Math.round(encaixes.peito.y);
+    z = Math.round(vs.reduce((s, v) => s + v[2], 0) / vs.length);
+  }
+  m.parte('cafe', { tipo: 'item', pai: braco ? 'bracoD' : 'corpo', pivo: [x, y, z] });
+  m.caixa(x, y, z - 1, x + 1, y + 1, z, C.branco);
+  m.caixa(x, y + 2, z - 1, x + 1, y + 2, z, C.cafe);
+  m.setFino(x + 2, y + 1, z, C.branco);
+}
+
+/** Capa verde de "conector" (as duas barras altas): abas dos lados da mochila, sem cobrir a logo. */
+function capa(m) {
+  const mochila = m.obterParte('mochila');
+  if (!mochila) return;
+  const vs = [...mochila.voxels.keys()].map((k) => k.split(',').map(Number));
+  const xs = vs.map((v) => v[0]), ys = vs.map((v) => v[1]), zs = vs.map((v) => v[2]);
+  const [x0, x1, y0, y1, z0, z1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys) - 2, Math.min(...zs), Math.max(...zs)];
+  m.parte('capa', { tipo: 'item', pai: 'corpo', pivo: [(x0 + x1 + 1) / 2, y1, z1] });
+  for (const x of [x0 - 1, x1 + 1]) {
+    for (let y = y0 + 1; y <= y1; y++) for (let z = z0 + 1; z <= z1; z++) m.setFino(x, y, z, y === y1 ? C.verdeEscuro : C.verde);
+  }
+  for (let x = x0 - 1; x <= x1 + 1; x++) m.setFino(x, y1 + 1, z1, C.verde);
+}
+
+/**
+ * Monta o pet e devolve os dados (o mesmo formato dos arquivos em json/).
+ * opcoes.acessorio: 'nenhum' | 'oculos' | 'boina' (quem já nasce com o acessório não ganha outro igual).
+ * opcoes.itens: { crachas, xicara, capa } — os itens das barras de Alcance e Profundidade.
+ */
+export function gerarPet(id, { acessorio = 'nenhum', itens = {} } = {}) {
   const def = PETS.find((p) => p.id === id);
   if (!def) throw new Error(`Pet desconhecido: ${id}`);
   const m = new Modelo({ escala: ESCALA });
   def.construir(m);
-  const { id: _id, construir: _construir, ...meta } = def;
+  const { encaixes } = def;
+  if (acessorio === 'oculos' && !m.obterParte('oculos')) oculos(m, encaixes.olhos);
+  if (acessorio === 'boina' && !m.obterParte('boina')) boina(m, encaixes.topo);
+  if (itens.crachas) crachas(m, encaixes.peito);
+  if (itens.xicara) cafe(m, encaixes);
+  if (itens.capa) capa(m);
+  const { id: _id, construir: _construir, encaixes: _encaixes, ...meta } = def;
   return { id, versao: 3, ...meta, pose: def.pose ?? {}, ...m.exportar() };
 }
