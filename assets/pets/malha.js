@@ -2,7 +2,9 @@
  * Monta e anima os pets em Three.js a partir dos dados de especies.js (ou de json/<id>.json).
  *
  * - Só as faces visíveis de cada parte viram geometria, com oclusão de ambiente por vértice
- *   (os cantos entre voxels ficam mais escuros) e uma textura de bisel que marca cada cubinho.
+ *   (os cantos entre voxels ficam mais escuros).
+ * - Um mapa de normais arredonda a beirada de cada cubo, dando o aspecto de plástico macio.
+ * - Logos e textos são adesivos (decalques) nítidos por cima dos voxels; hastes finas fazem arames.
  * - Cada parte é um grupo com o próprio pivô, então dá para animar braços, pernas e acessórios.
  *
  * Uso:
@@ -12,6 +14,7 @@
  *   animarPet(pet, segundos, 'andar');
  */
 import * as THREE from 'three';
+import { CAMINHO as CAMINHO_LOGO } from './logo.js';
 
 export const ANIMACOES = {
   parado: 'Parado',
@@ -32,19 +35,19 @@ const FACES = [
   { n: [0, 0, 1], cantos: [[0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]] },
   { n: [0, 0, -1], cantos: [[1, 0, 0], [0, 0, 0], [0, 1, 0], [1, 1, 0]] },
 ];
-const LUZ_OCLUSAO = [0.5, 0.68, 0.85, 1];
+const LUZ_OCLUSAO = [0.64, 0.79, 0.91, 1];
 
 let materiais;
 
-/** Textura branca com as bordas escurecidas: multiplicada pela cor, desenha a junta entre os cubos. */
-function texturaBisel() {
+/** Junta bem suave entre os cubos (multiplicada pela cor). */
+function texturaJunta() {
   const lado = 64;
   const tela = document.createElement('canvas');
   tela.width = tela.height = lado;
   const g = tela.getContext('2d');
   g.fillStyle = '#fff';
   g.fillRect(0, 0, lado, lado);
-  for (const [recuo, alfa] of [[0, 0.24], [2, 0.12], [4, 0.06], [6, 0.025]]) {
+  for (const [recuo, alfa] of [[0, 0.06], [2, 0.025]]) {
     g.strokeStyle = `rgba(0, 0, 0, ${alfa})`;
     g.lineWidth = 2;
     g.strokeRect(recuo + 1, recuo + 1, lado - 2 * recuo - 2, lado - 2 * recuo - 2);
@@ -55,15 +58,105 @@ function texturaBisel() {
   return textura;
 }
 
+/** Mapa de normais que inclina a beirada de cada face: cada voxel parece um cubo de quinas arredondadas. */
+function texturaNormalBisel() {
+  const lado = 64, largura = 0.13, forca = 0.6;
+  const tela = document.createElement('canvas');
+  tela.width = tela.height = lado;
+  const g = tela.getContext('2d');
+  const img = g.createImageData(lado, lado);
+  for (let py = 0; py < lado; py++) {
+    for (let px = 0; px < lado; px++) {
+      const u = (px + 0.5) / lado, v = 1 - (py + 0.5) / lado;
+      const eu = Math.min(u, 1 - u), ev = Math.min(v, 1 - v);
+      const nx = eu < largura ? Math.sign(u - 0.5) * (1 - eu / largura) ** 1.5 * forca : 0;
+      const ny = ev < largura ? Math.sign(v - 0.5) * (1 - ev / largura) ** 1.5 * forca : 0;
+      const d = Math.hypot(nx, ny, 1);
+      const o = (py * lado + px) * 4;
+      img.data[o] = ((nx / d) * 0.5 + 0.5) * 255;
+      img.data[o + 1] = ((ny / d) * 0.5 + 0.5) * 255;
+      img.data[o + 2] = ((1 / d) * 0.5 + 0.5) * 255;
+      img.data[o + 3] = 255;
+    }
+  }
+  g.putImageData(img, 0, 0);
+  const textura = new THREE.CanvasTexture(tela);
+  textura.colorSpace = THREE.NoColorSpace;
+  textura.anisotropy = 4;
+  return textura;
+}
+
 function obterMateriais() {
   if (!materiais) {
-    const map = texturaBisel();
+    const map = texturaJunta();
+    const normalMap = texturaNormalBisel();
     materiais = {
-      fosco: new THREE.MeshStandardMaterial({ vertexColors: true, map, roughness: 0.62, metalness: 0 }),
+      fosco: new THREE.MeshStandardMaterial({ vertexColors: true, map, normalMap, roughness: 0.5, metalness: 0 }),
       brilho: new THREE.MeshBasicMaterial({ vertexColors: true, map }),
     };
   }
   return materiais;
+}
+
+const texturasDecalque = new Map();
+
+/** Textura de um decalque: a logo da OpenAI ou um texto, na cor pedida, com fundo transparente. */
+function texturaDecalque({ tipo, texto, cor, largura, altura }) {
+  const chave = `${tipo}|${texto}|${cor}|${(largura / altura).toFixed(2)}`;
+  if (texturasDecalque.has(chave)) return texturasDecalque.get(chave);
+  const base = 256;
+  const tela = document.createElement('canvas');
+  tela.width = Math.round(base * Math.max(1, largura / altura));
+  tela.height = Math.round(base * Math.max(1, altura / largura));
+  const g = tela.getContext('2d');
+  g.fillStyle = cor;
+  if (tipo === 'logo') {
+    const lado = Math.min(tela.width, tela.height);
+    g.translate((tela.width - lado) / 2, (tela.height - lado) / 2);
+    g.scale(lado / 24, lado / 24);
+    g.fill(new Path2D(CAMINHO_LOGO), 'evenodd');
+  } else {
+    g.font = `800 ${Math.round(tela.height * 0.62)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillText(texto, tela.width / 2, tela.height * 0.54);
+  }
+  const textura = new THREE.CanvasTexture(tela);
+  textura.colorSpace = THREE.SRGBColorSpace;
+  textura.anisotropy = 8;
+  texturasDecalque.set(chave, textura);
+  return textura;
+}
+
+/** Plano do decalque, virado para a normal, um pouco afastado da superfície. */
+function malhaDecalque(d, pivo) {
+  const material = new THREE.MeshStandardMaterial({
+    map: texturaDecalque(d), transparent: true, roughness: 0.55, polygonOffset: true, polygonOffsetFactor: -4,
+  });
+  const malha = new THREE.Mesh(new THREE.PlaneGeometry(d.largura, d.altura), material);
+  const normal = new THREE.Vector3(...d.normal).normalize();
+  const cima = Math.abs(normal.y) > 0.9 ? new THREE.Vector3(0, 0, -1) : new THREE.Vector3(0, 1, 0);
+  const direita = new THREE.Vector3().crossVectors(cima, normal).normalize();
+  cima.crossVectors(normal, direita);
+  malha.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(direita, cima, normal));
+  malha.position.set(d.centro[0] - pivo[0], d.centro[1] - pivo[1], d.centro[2] - pivo[2]).addScaledVector(normal, 0.03);
+  malha.receiveShadow = true;
+  return malha;
+}
+
+/** Cilindro fino entre dois pontos. */
+function malhaHaste(h, pivo) {
+  const de = new THREE.Vector3(...h.de).sub(new THREE.Vector3(...pivo));
+  const para = new THREE.Vector3(...h.para).sub(new THREE.Vector3(...pivo));
+  const eixo = new THREE.Vector3().subVectors(para, de);
+  const malha = new THREE.Mesh(
+    new THREE.CylinderGeometry(h.raio, h.raio, eixo.length(), 10),
+    new THREE.MeshStandardMaterial({ color: h.cor, roughness: 0.5 }),
+  );
+  malha.position.copy(de).addScaledVector(eixo, 0.5);
+  malha.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), eixo.normalize());
+  malha.castShadow = true;
+  return malha;
 }
 
 function geometriaDaParte(parte, paleta, ocupado, brilhante) {
@@ -116,8 +209,8 @@ function geometriaDaParte(parte, paleta, ocupado, brilhante) {
 }
 
 /**
- * Cria o pet 3D. A raiz fica no chão (y = 0), centralizada em x e z; 1 voxel = 1 unidade.
- * Devolve { raiz, grupos, partes, dados }.
+ * Cria o pet 3D. A raiz fica no chão (y = 0), centralizada em x e z. Uma unidade do mundo é uma
+ * unidade do projeto (dados.escala voxels finos). Devolve { raiz, grupos, partes, dados }.
  */
 export function criarPet3D(dados) {
   const { paleta, limites } = dados;
@@ -128,7 +221,10 @@ export function criarPet3D(dados) {
 
   const raiz = new THREE.Group();
   raiz.name = dados.id;
-  const grupos = { raiz };
+  const modelo = new THREE.Group();
+  modelo.scale.setScalar(1 / (dados.escala ?? 1));
+  raiz.add(modelo);
+  const grupos = { raiz: modelo };
   const pivos = { raiz: centro };
   const pendentes = [...dados.partes];
   while (pendentes.length) {
@@ -147,18 +243,22 @@ export function criarPet3D(dados) {
       malha.receiveShadow = true;
       grupo.add(malha);
     }
+    for (const d of dados.decalques ?? []) if (d.parte === p.nome) grupo.add(malhaDecalque(d, p.pivo));
+    for (const h of dados.hastes ?? []) if (h.parte === p.nome) grupo.add(malhaHaste(h, p.pivo));
     grupos[p.pai].add(grupo);
     grupos[p.nome] = grupo;
     pivos[p.nome] = p.pivo;
     grupo.userData.repouso = { posicao: grupo.position.clone() };
   }
-  raiz.userData.repouso = { posicao: new THREE.Vector3() };
   return { raiz, grupos, partes: Object.fromEntries(dados.partes.map((p) => [p.nome, p])), dados };
 }
 
 /** Libera a memória de vídeo de um pet que não vai mais ser usado. */
 export function descartarPet(pet) {
-  pet.raiz.traverse((o) => o.geometry?.dispose());
+  pet.raiz.traverse((o) => {
+    o.geometry?.dispose();
+    if (o.material && o.material !== materiais?.fosco && o.material !== materiais?.brilho) o.material.dispose();
+  });
   pet.raiz.removeFromParent();
 }
 
@@ -172,25 +272,27 @@ export function mostrarParte(pet, nome, visivel) {
  * Animações: parado, andar, pular, acenar, comemorar (ver ANIMACOES).
  */
 export function animarPet(pet, t, animacao = 'parado') {
-  const { grupos, partes, dados, raiz } = pet;
+  const { grupos, partes, dados } = pet;
   for (const [nome, g] of Object.entries(grupos)) {
     if (nome === 'raiz') continue;
     g.position.copy(g.userData.repouso.posicao);
     g.rotation.set(0, 0, 0);
     g.scale.set(1, 1, 1);
   }
+  const S = dados.escala ?? 1; // deslocamentos abaixo estão em unidades do projeto
   const lista = Object.values(partes);
   const bracos = lista.filter((p) => p.tipo === 'braco');
   const pernas = lista.filter((p) => p.tipo === 'perna');
   const sinal = (p) => (p.lado === 'E' ? -1 : 1);
   const corpo = grupos.corpo;
   const pose = dados.pose ?? {};
-  const subir = (y) => raiz.children.forEach((filho) => (filho.position.y += y));
+  const subir = (y) => grupos.raiz.children.forEach((filho) => (filho.position.y += y * S));
   const esticar = (e) => corpo.scale.set(1 / Math.sqrt(e), e, 1 / Math.sqrt(e));
 
   for (const b of bracos) grupos[b.nome].rotation.z = sinal(b) * (pose[b.nome] ?? 0);
+  for (const [nome, angulo] of Object.entries(pose)) if (partes[nome] && partes[nome].tipo !== 'braco') grupos[nome].rotation.z = angulo;
   lista.filter((p) => p.tipo === 'flutuante').forEach((p, i) => {
-    grupos[p.nome].position.y += Math.sin(t * 1.8 + i * 2) * 0.45;
+    grupos[p.nome].position.y += Math.sin(t * 1.8 + i * 2) * 0.45 * S;
     grupos[p.nome].rotation.y = Math.sin(t * 0.7 + i) * 0.3;
   });
   if (grupos.folhas) grupos.folhas.rotation.z = Math.sin(t * 1.6) * 0.06;
@@ -200,7 +302,7 @@ export function animarPet(pet, t, animacao = 'parado') {
       const f = t * 7.5, s = Math.sin(f);
       for (const p of pernas) grupos[p.nome].rotation.x = s * 0.6 * sinal(p);
       for (const b of bracos) grupos[b.nome].rotation.x = -s * 0.5 * sinal(b);
-      corpo.position.y += Math.abs(Math.cos(f)) * 0.7;
+      corpo.position.y += Math.abs(Math.cos(f)) * 0.7 * S;
       corpo.rotation.z = s * 0.05;
       break;
     }
@@ -225,7 +327,7 @@ export function animarPet(pet, t, animacao = 'parado') {
       if (b) grupos[b.nome].rotation.z = sinal(b) * (levantar + Math.sin(t * 9) * Math.min(0.32, levantar * 0.45));
       else corpo.rotation.z = Math.sin(t * 6) * 0.12;
       corpo.rotation.z += Math.sin(t * 3) * 0.035;
-      corpo.position.y += Math.sin(t * 2.2) * 0.15;
+      corpo.position.y += Math.sin(t * 2.2) * 0.15 * S;
       break;
     }
     case 'comemorar': {
@@ -237,7 +339,7 @@ export function animarPet(pet, t, animacao = 'parado') {
       break;
     }
     default: {
-      corpo.position.y += Math.sin(t * 2.2) * 0.18;
+      corpo.position.y += Math.sin(t * 2.2) * 0.18 * S;
       esticar(1 + Math.sin(t * 2.2 + Math.PI / 2) * 0.015);
       for (const b of bracos) grupos[b.nome].rotation.z += sinal(b) * (0.05 + Math.sin(t * 2.2) * 0.04);
     }
@@ -300,7 +402,7 @@ function sombraDeContato() {
 
 /** Aponta a câmera para o pet, de frente e um pouco pela esquerda, cabendo inteiro no quadro. */
 export function enquadrar(camera, pet, { azimute = -0.42, elevacao = 0.3, margem = 1.16 } = {}) {
-  const [larg, alt, prof] = pet.dados.tamanho;
+  const [larg, alt, prof] = pet.dados.tamanho.map((v) => v / (pet.dados.escala ?? 1));
   const alvoY = alt * 0.46;
   const meiaFov = THREE.MathUtils.degToRad(camera.fov) / 2;
   const raioH = (Math.max(larg, prof) / 2) * margem;
