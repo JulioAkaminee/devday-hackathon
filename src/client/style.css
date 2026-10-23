@@ -169,7 +169,7 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 
 /* ---------- navegação inferior ---------- */
 .abas { position: absolute; bottom: max(20px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); display: flex; background: var(--papel); border: 1.5px solid var(--linha); border-radius: var(--raio); }
-.abas button { border: 0; border-radius: 0; background: none; padding: 8px 20px; min-height: 52px; color: var(--cinza); font-size: 0.92rem; }
+.abas button { border: 0; border-radius: 0; background: none; padding: 8px 20px; min-height: 52px; color: var(--cinza); font-size: 0.92rem; white-space: nowrap; }
 .abas button + button { border-left: 1px solid var(--fio); }
 .abas button.ativa { color: var(--tinta); font-weight: 600; box-shadow: inset 0 -4px 0 var(--verde); }
 .abas button.ativa svg { color: var(--verde-escuro); }
