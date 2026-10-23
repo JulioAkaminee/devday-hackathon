@@ -1,10 +1,13 @@
 import QRCode from 'qrcode'
 import type { Estado, Final, Opcao } from '../shared/engine.ts'
-import { finalDe } from '../shared/engine.ts'
+import { finalDe, TOTAL_CAPITULOS } from '../shared/engine.ts'
 import {
-  ACESSORIOS, CAPITULOS, CORES, ESPECIES, FINAIS, NOMES_ACESSORIO, NOMES_ESPECIE, PROLOGO, TEMAS, preencher,
+  ACESSORIOS, CAPITULOS, COR_ESPECIE, ESPECIES, FINAIS, NOMES_ACESSORIO, NOMES_ESPECIE, PERSONALIDADE, PROLOGO, TEMAS, preencher,
   type Especie, type Tema,
 } from '../shared/story.ts'
+import {
+  ATIVIDADES, CAPITULO_SUGERIDO, DIAGNOSTICO, HABILIDADES, NOMES_HABILIDADE, type Academia, type Habilidade, type Questao,
+} from '../shared/academia.ts'
 import { itensDe, type DNA } from './pet.ts'
 import { Mundo } from './world.ts'
 import './style.css'
@@ -19,12 +22,19 @@ interface Visao {
   conhecidos: PetPublico[]
   capitulosSalvos: number[]
   sugestoes: PetPublico[]
+  academia: Academia & { progresso: Record<Habilidade, { feitas: number; total: number }>; proxima: string | null; fraca: Habilidade | null }
 }
+type Aba = 'mapa' | 'academia' | 'contatos' | 'finais'
 
 const NOMES_TEMA: Record<Tema, string> = {
   front: 'front-end', back: 'back-end', mobile: 'mobile', dados: 'dados', design: 'design', produto: 'produto', carreira: 'carreira',
 }
+const EMOJI: Record<Especie, string> = {
+  xicara: '☕', caderninho: '📒', laptopinho: '💻', plantinha: '🪴', lampada: '💡',
+  coracao: '💗', globinho: '🌍', estrelinha: '⭐', conezinho: '🚧', nuvem: '☁️',
+}
 const SUGESTOES_NOME = ['Xícaro', 'Bolacha', 'Pipoca', 'Tampinha', 'Biscoito', 'Faísca', 'Nuvem', 'Pudim', 'Teco', 'Bug']
+const LOGO = '<span class="seta">›</span>QUEBRA-GELO<span class="seta">‹</span>'
 
 const ui = document.querySelector<HTMLDivElement>('#ui')!
 const mundo = new Mundo(document.querySelector<HTMLCanvasElement>('#cena')!)
@@ -38,9 +48,9 @@ let token = guardado.get('qg-token')
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
 const h = (html: string) => { ui.innerHTML = html }
 
-function aviso(msg: string) {
+function aviso(msg: string, tipo: 'erro' | 'ok' = 'erro') {
   const t = document.createElement('div')
-  t.className = 'aviso'
+  t.className = 'aviso ' + tipo
   t.textContent = msg
   document.body.append(t)
   setTimeout(() => t.remove(), 3500)
@@ -60,7 +70,7 @@ async function api<T = Visao>(rota: string, corpo?: object): Promise<T> {
 // ---------- Criação do pet (D1: uma tela, sem IA, sem foto) ----------
 
 function telaCriar() {
-  const dna: DNA = { especie: 'gato', cor: CORES[0], acessorio: 'nenhum' }
+  const dna: DNA = { especie: 'xicara', cor: COR_ESPECIE.xicara, acessorio: 'nenhum' }
   mundo.mostrarVitrine(dna)
   const opcoes = <T extends string>(nome: string, lista: readonly T[], rotulo: (v: T) => string) =>
     `<div class="opcoes" data-campo="${nome}">${lista.map((v, i) => `<button type="button" class="${i ? '' : 'sel'}" data-v="${v}">${rotulo(v)}</button>`).join('')}</div>`
@@ -69,11 +79,10 @@ function telaCriar() {
 
   h(`
     <form class="painel criar">
-      <h1>Quebra-Gelo</h1>
+      <div class="logo">${LOGO}</div>
       <p class="sub">Monte seu pet. Ele só avança quando você conversa com alguém de verdade.</p>
-      <label>Espécie</label>${opcoes('especie', ESPECIES, (e) => NOMES_ESPECIE[e])}
-      <label>Cor</label>
-      <div class="opcoes cores" data-campo="cor">${CORES.map((c, i) => `<button type="button" class="${i ? '' : 'sel'}" data-v="${c}" style="background:${c}" aria-label="cor ${c}"></button>`).join('')}</div>
+      <label>Escolha seu pet</label>${opcoes('especie', ESPECIES, (e) => `${EMOJI[e]} ${NOMES_ESPECIE[e]}`)}
+      <p class="personalidade">${PERSONALIDADE.xicara}</p>
       <label>Acessório</label>${opcoes('acessorio', ACESSORIOS, (a) => NOMES_ACESSORIO[a])}
       <div class="linha">
         <label>Nome do pet<input name="nome" maxlength="16" required value="${SUGESTOES_NOME[Math.floor(Math.random() * SUGESTOES_NOME.length)]}"></label>
@@ -89,8 +98,9 @@ function telaCriar() {
       const b = (e.target as HTMLElement).closest('button')
       if (!b) return
       grupo.querySelectorAll('button').forEach((x) => x.classList.toggle('sel', x === b))
-      const campo = grupo.dataset.campo as keyof DNA
-      ;(dna as unknown as Record<string, string>)[campo] = b.dataset.v!
+      ;(dna as unknown as Record<string, string>)[grupo.dataset.campo!] = b.dataset.v!
+      dna.cor = COR_ESPECIE[dna.especie]
+      form.querySelector('.personalidade')!.textContent = PERSONALIDADE[dna.especie]
       mundo.trocarPet(dna)
     })
   })
@@ -111,10 +121,58 @@ function telaCriar() {
 // ---------- Jogo ----------
 
 let visao: Visao | null = null
+let aba: Aba = 'mapa'
 let chave = ''
 let capMontado = -1
 let itensChave = ''
-let escolhaLocal: { cap: number; op: Opcao } | null = null
+let escolhaLocal: number | null = null
+// Academia (desafio nº 4)
+let diagRespostas: number[] = []
+let atividadeAberta: string | null = null
+let resultado: { acertou: boolean; explicacao: string } | null = null
+
+const questao = (q: Questao, attr: string, rotulo: string) =>
+  `<p class="rotulo">${rotulo} · ${NOMES_HABILIDADE[q.habilidade]}</p><p class="situacao">${esc(q.situacao)}</p>
+   <div class="alternativas">${q.opcoes.map((o, i) => `<button ${attr}="${i}"><b>${'abc'[i]}</b> ${esc(o)}</button>`).join('')}</div>`
+
+/** Diagnóstico: 5 situações, uma por vez, com o pet-recepcionista. */
+function diagnostico() {
+  const i = diagRespostas.length
+  if (i >= DIAGNOSTICO.length) return '<p>Montando sua trilha…</p>'
+  return `<p class="dica">Antes de entrar, 5 situações rápidas. Não tem resposta errada para entrar: elas montam sua trilha na Academia.</p>
+    ${questao(DIAGNOSTICO[i], 'data-diag', `Situação ${i + 1} de ${DIAGNOSTICO.length}`)}`
+}
+
+/** Aba Academia: trilha de bolinhas estilo Duolingo, mais fraca primeiro (K5). */
+function academia(v: Visao) {
+  const a = v.academia
+  if (!a.diagnostico) return `<h2>Academia</h2>${diagnostico()}`
+  if (atividadeAberta) {
+    const q = HABILIDADES.flatMap((h) => ATIVIDADES[h]).find((x) => x.id === atividadeAberta)!
+    if (resultado) {
+      return `<h2>${resultado.acertou ? '✅ Boa!' : '💡 Quase'}</h2><p class="situacao">${esc(q.situacao)}</p>
+        <p class="explicacao ${resultado.acertou ? 'certo' : 'errado'}">${esc(resultado.explicacao)}</p>
+        <button class="principal" data-acao="continuar">Continuar</button>`
+    }
+    return `<h2>Academia</h2>${questao(q, 'data-resposta', 'Atividade')}<button data-acao="voltar-trilha">← Trilha</button>`
+  }
+  const fraca = a.fraca!
+  const trilha = a.trilha.map((h) => {
+    const p = a.progresso[h]
+    const bolinhas = ATIVIDADES[h].map((q) => {
+      const feita = q.id in a.feitas
+      const atual = q.id === a.proxima
+      const cls = feita ? (a.feitas[q.id] ? 'certa' : 'errada') : atual ? 'atual' : 'bloqueada'
+      const icone = feita ? (a.feitas[q.id] ? '✓' : '↺') : atual ? '★' : '🔒'
+      return `<button class="bolinha ${cls}" ${feita || atual ? `data-atividade="${q.id}"` : 'disabled'} aria-label="${cls}">${icone}</button>`
+    }).join('')
+    return `<div class="habilidade"><div class="hab-topo"><b>${NOMES_HABILIDADE[h]}</b><span>${p.feitas}/${p.total}</span></div>
+      <i class="hab-barra"><em style="width:${(p.feitas / p.total) * 100}%"></em></i><div class="bolinhas">${bolinhas}</div></div>`
+  }).join('')
+  const cap = CAPITULOS[CAPITULO_SUGERIDO[fraca] - 1]
+  return `<h2>Academia</h2><p class="dica">Sua habilidade mais fraca é <b>${NOMES_HABILIDADE[fraca]}</b>: a Missão ${CAPITULO_SUGERIDO[fraca]} (${cap.titulo}) é o seu treino na Aventura.</p>
+    <div class="trilha">${trilha}</div>${a.proxima ? '' : '<p>🏆 Trilha completa!</p>'}`
+}
 
 const dnaDe = (p: PetPublico): DNA => ({ especie: p.especie, cor: p.cor, acessorio: p.acessorio })
 
@@ -141,7 +199,14 @@ async function iniciarJogo() {
   }
   render()
   setInterval(async () => {
-    try { visao = await api('eu'); render() } catch { /* rede oscilou: tenta de novo no próximo ciclo */ }
+    try {
+      const antes = visao!.conhecidos.length
+      const nova = await api('eu')
+      visao = nova
+      const novo = nova.conhecidos.at(-1)
+      if (nova.conhecidos.length > antes && novo) aviso(`${novo.nome}, de ${novo.dono}, te encontrou!`, 'ok')
+      render()
+    } catch { /* rede oscilou: tenta de novo no próximo ciclo */ }
   }, 2000)
 }
 
@@ -149,19 +214,16 @@ async function acao(rota: string, corpo: object = {}) {
   try { visao = await api(rota, corpo); render() } catch (err) { aviso((err as Error).message) }
 }
 
-function render() {
-  const v = visao!
+/** Atualiza o mundo 3D a partir do estado. Só mexe no que mudou. */
+function sincronizarMundo(v: Visao) {
   const e = v.estado
-  const k = `${e.cap}|${e.fase}|${v.amigo?.id}|${v.conhecidos.length}|${v.sugestoes.length}|${v.capitulosSalvos.join()}`
-  if (k === chave) return
-  chave = k
-
   const dna = dnaDe(v.pet)
   const itens = itensDe(e.alcance, e.profundidade)
   const ik = JSON.stringify(itens)
-  const capMundo = e.fase === 'final' ? 5 : e.cap
+  const capMundo = e.fase === 'final' ? TOTAL_CAPITULOS : e.cap
+
   if (capMundo !== capMontado || e.fase === 'aguardando' || e.fase === 'final') {
-    mundo.montarFase(capMundo, dna, itens)
+    mundo.irPara(capMundo, dna, itens)
     capMontado = capMundo
     itensChave = ik
     if (e.cap === 3 && e.fase !== 'final') {
@@ -173,82 +235,184 @@ function render() {
     itensChave = ik
   }
 
+  const feitos = e.fase === 'final' ? TOTAL_CAPITULOS : e.cap - 1
+  const porIlha = e.encontros.slice(0, Math.max(0, feitos)).map((id) => {
+    const p = v.conhecidos.find((c) => c.id === id)
+    return p ? dnaDe(p) : null
+  })
+  mundo.atualizarMapa(e.fase === 'final' ? 5 : e.cap, e.escolhas, porIlha)
+
+  const cap = CAPITULOS[e.cap - 1]
+  if (e.fase === 'encontro' && v.amigo) {
+    mundo.chegarAmigo(dnaDe(v.amigo))
+    const vars = variaveis(v)
+    mundo.mostrarZonas([preencher(cap.ampla.opcao, vars), preencher(cap.profunda.opcao, vars)], escolher)
+  } else if (e.fase === 'consequencia') {
+    if (v.amigo) mundo.chegarAmigo(dnaDe(v.amigo))
+    if (escolhaLocal === e.cap) { mundo.consequencia(e.escolhas.at(-1)!); escolhaLocal = null }
+  } else if (e.fase === 'final') {
+    mundo.cenaFinal(finalDe(e), v.conhecidos.map(dnaDe))
+  }
+}
+
+function cartaoMissao(v: Visao) {
+  const e = v.estado
   const vars = variaveis(v)
   const cap = CAPITULOS[e.cap - 1]
-  let balao = ''
+  const pontos = Array.from({ length: TOTAL_CAPITULOS }, (_, i) => `<i class="${i < e.cap - 1 || e.fase === 'final' ? 'feito' : i === e.cap - 1 ? 'atual' : ''}"></i>`).join('')
+  const topo = (rotulo: string, titulo: string) => `<div class="cartao-topo"><span>${rotulo}</span><span class="pontos">${pontos}</span></div><h2>${esc(titulo)}</h2>`
+  const escanear = `<button class="escanear" data-acao="escanear"><span>⌗</span> Escanear pet</button>`
 
   if (e.fase === 'prologo') {
-    balao = `<p>${esc(preencher(PROLOGO, vars))}</p><button class="principal" data-acao="comecar">Começar a aventura</button>`
-  } else if (e.fase === 'aguardando') {
+    // Credenciamento: o diagnóstico da Academia vem antes da aventura (K4)
+    if (!v.academia.diagnostico) return `${topo('Credenciamento', 'A recepção quer te conhecer')}${diagnostico()}`
+    const fraca = v.academia.fraca!
+    return `${topo('Prólogo', 'Credenciamento')}<p class="dica">🎓 Sua trilha na Academia começa por <b>${NOMES_HABILIDADE[fraca]}</b>.</p><p>${esc(preencher(PROLOGO, vars))}</p><button class="principal" data-acao="comecar">Começar a aventura</button>`
+  }
+  if (e.fase === 'aguardando') {
     const sug = v.sugestoes.length
-      ? `<div class="sugestoes">${v.sugestoes.map((s) => `<button data-codigo="${s.codigo}">${esc(s.nome)} (${esc(s.dono)}) · oferece ${NOMES_TEMA[s.oferece]} · <b>${s.codigo}</b></button>`).join('')}</div>`
+      ? `<div class="sugestoes">${v.sugestoes.map((s) => `<button data-codigo="${s.codigo}">${EMOJI[s.especie]} <b>${esc(s.nome)}</b> · ${esc(s.dono)} · oferece ${NOMES_TEMA[s.oferece]} <code>${s.codigo}</code></button>`).join('')}</div>`
       : ''
-    balao = `<p>${esc(preencher(cap.abertura, vars))}</p>${sug}
-      <form class="encontro"><input name="codigo" maxlength="4" placeholder="Código do outro pet" autocomplete="off" autocapitalize="characters"><button class="principal">Encontrar</button></form>
-      <p class="dica">Mostre o seu código <b>${v.pet.codigo}</b> ou digite o de quem você conheceu.</p>`
+    const f = v.academia.fraca
+    const treino = f && CAPITULO_SUGERIDO[f] === e.cap ? `<p class="dica">🎓 Esta missão treina <b>${NOMES_HABILIDADE[f]}</b>, sua habilidade mais fraca.</p>` : ''
+    return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}<p>${esc(preencher(cap.abertura, vars))}</p>${treino}${sug}${escanear}`
+  }
+  if (e.fase === 'encontro') {
+    const op = (o: Opcao, icone: string, efeito: string) =>
+      `<button class="escolha ${o}" data-op="${o}"><span class="icone">${icone}</span><span>${esc(preencher(cap[o].opcao, vars))}<small>${efeito}</small></span></button>`
+    return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}<p>${esc(preencher(cap.encontro, vars))}</p>
+      <p class="pergunta">${esc(cap.pergunta)} <small>Toque numa opção ou ande até a zona.</small></p>
+      <div class="escolhas">${op('ampla', '💬', '+2 Alcance')}${op('profunda', '🤝', '+2 Profundidade')}</div>`
+  }
+  if (e.fase === 'consequencia') {
+    const o = e.escolhas.at(-1)!
+    return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}<p class="consequencia ${o}">${esc(preencher(cap[o].consequencia, vars))}</p>
+      <button class="principal" data-acao="avancar">${e.cap < TOTAL_CAPITULOS ? 'Seguir para a próxima ilha' : 'Subir ao palco'} →</button>`
+  }
+  const tipo: Final = finalDe(e)
+  return `${topo('Final', FINAIS[tipo].titulo)}<p>${esc(preencher(FINAIS[tipo].texto, vars))}</p>${retomar(v)}`
+}
+
+const retomar = (v: Visao) => v.capitulosSalvos.length
+  ? `<p class="dica">Volte a uma missão salva e tente o outro caminho:</p><div class="salvos">${v.capitulosSalvos.map((c) => `<button data-retomar="${c}">⏪ Missão ${c}</button>`).join('')}</div>`
+  : ''
+
+function painelAba(v: Visao) {
+  if (aba === 'contatos') {
+    const lista = v.conhecidos.length
+      ? `<ul class="contatos">${v.conhecidos.map((c) => `<li><span class="avatar" style="background:${c.cor}">${EMOJI[c.especie]}</span><div><b>${esc(c.nome)}</b> · ${esc(c.dono)}<small>${NOMES_TEMA[c.area]} · oferece ${NOMES_TEMA[c.oferece]}</small></div></li>`).join('')}</ul>`
+      : '<p>Ninguém ainda. Escaneie um pet para começar.</p>'
+    return `<h2>Quem eu conheci</h2>${lista}`
+  }
+  if (aba === 'finais') {
+    const e = v.estado
+    const atual = e.fase === 'final' ? `<p>Você chegou em <b>${FINAIS[finalDe(e)].titulo}</b>.</p>` : '<p>Complete as 4 missões para chegar a um dos 3 finais.</p>'
+    const todos = (Object.keys(FINAIS) as Final[]).map((f) => `<li class="${e.fase === 'final' && finalDe(e) === f ? 'feito' : ''}">🏆 ${FINAIS[f].titulo}</li>`).join('')
+    return `<h2>Meus finais</h2>${atual}<ul class="finais">${todos}</ul>${retomar(v)}`
+  }
+  return academia(v)
+}
+
+function render() {
+  const v = visao!
+  const e = v.estado
+  const k = `${e.cap}|${e.fase}|${v.amigo?.id}|${v.conhecidos.length}|${v.sugestoes.length}|${v.capitulosSalvos.join()}|${aba}` +
+    `|${diagRespostas.length}|${!!v.academia.diagnostico}|${Object.keys(v.academia.feitas).length}|${atividadeAberta}|${!!resultado}`
+  if (k === chave) return
+  chave = k
+  sincronizarMundo(v)
+
+  if (e.fase === 'aguardando') {
     const pendente = sessionStorage.getItem('qg-c')
     if (pendente) { sessionStorage.removeItem('qg-c'); acao('encontro', { codigo: pendente }) }
-  } else if (e.fase === 'encontro' && v.amigo) {
-    mundo.chegarAmigo(dnaDe(v.amigo))
-    const rotulos: [string, string] = [preencher(cap.ampla.opcao, vars), preencher(cap.profunda.opcao, vars)]
-    mundo.mostrarZonas(e.cap, rotulos, (op) => escolher(op))
-    balao = `<p>${esc(preencher(cap.encontro, vars))}</p><p><b>${esc(cap.pergunta)}</b> Ande até uma das zonas, ou toque:</p>
-      <div class="escolhas"><button class="ampla" data-op="ampla">📣 ${esc(rotulos[0])}</button><button class="profunda" data-op="profunda">☕ ${esc(rotulos[1])}</button></div>`
-  } else if (e.fase === 'consequencia') {
-    const op = e.escolhas.at(-1)!
-    if (v.amigo) mundo.chegarAmigo(dnaDe(v.amigo))
-    if (escolhaLocal?.cap === e.cap) { mundo.consequencia(e.cap, op); escolhaLocal = null }
-    balao = `<p class="${op}">${esc(preencher(cap[op].consequencia, vars))}</p><button class="principal" data-acao="avancar">${e.cap < 4 ? 'Seguir para o próximo capítulo' : 'Ir para o palco'} →</button>`
-  } else if (e.fase === 'final') {
-    const tipo: Final = finalDe(e)
-    mundo.cenaFinal(tipo, v.conhecidos.map(dnaDe))
-    const salvos = v.capitulosSalvos.map((c) => `<button data-retomar="${c}">⏪ Cap. ${c}</button>`).join('')
-    balao = `<h2>${FINAIS[tipo].titulo}</h2><p>${esc(preencher(FINAIS[tipo].texto, vars))}</p>
-      <details><summary>Quem eu conheci (${v.conhecidos.length})</summary><ul>${v.conhecidos.map((c) => `<li><b>${esc(c.nome)}</b>, de ${esc(c.dono)} · ${NOMES_TEMA[c.area]} · oferece ${NOMES_TEMA[c.oferece]}</li>`).join('')}</ul></details>
-      <p class="dica">Retomar de um capítulo salvo e tentar outro caminho:</p><div class="salvos">${salvos}</div>`
   }
 
-  const titulo = e.fase === 'final' ? 'Final' : e.cap === 0 ? 'Prólogo · Credenciamento' : `Capítulo ${e.cap} · ${cap.titulo}`
-  const barra = (nome: string, valor: number, cls: string) =>
-    `<div class="barra ${cls}"><span>${nome}</span><i style="width:${Math.min(100, (valor / 12) * 100)}%"></i><b>${valor}</b></div>`
+  const medidor = (nome: string, valor: number, cls: string) =>
+    `<div class="medidor ${cls}"><span>${nome}</span><b>${valor}</b><i><em style="width:${Math.min(100, (valor / 12) * 100)}%"></em></i></div>`
+  const abaBtn = (id: Aba, icone: string, nome: string) =>
+    `<button class="${aba === id ? 'ativa' : ''}" data-aba="${id}"><span>${icone}</span><span class="nome">${nome}</span></button>`
+
   h(`
-    <header class="hud">
-      <div class="titulo">${titulo}${cap && e.fase !== 'final' ? `<small>${cap.local}</small>` : ''}</div>
-      <div class="barras">${barra('📣 Alcance', e.alcance, 'ampla')}${barra('☕ Profundidade', e.profundidade, 'profunda')}</div>
-      <button class="codigo" data-acao="qr">${esc(v.pet.nome)} · <b>${v.pet.codigo}</b></button>
+    <header class="topo">
+      <div class="logo">${LOGO}</div>
+      <div class="evento"><b>DevDay · São Paulo</b><small>OpenAI DevDay Community</small></div>
+      <button class="eu" data-acao="escanear" title="Meu código">
+        <span class="avatar" style="background:${v.pet.cor}">${EMOJI[v.pet.especie]}</span>
+        <span><small>Minha aventura</small><b>${esc(v.pet.nome)}</b></span><code>${v.pet.codigo}</code>
+      </button>
+      ${medidor('Alcance', e.alcance, 'ampla')}${medidor('Profundidade', e.profundidade, 'profunda')}
     </header>
-    <section class="balao">${balao}</section>`)
+    <section class="cartao">${aba === 'mapa' ? cartaoMissao(v) : painelAba(v)}</section>
+    <nav class="abas">
+      ${abaBtn('mapa', '🗺️', 'Mapa')}${abaBtn('academia', '🎓', 'Academia')}${abaBtn('contatos', '👥', 'Quem eu conheci')}${abaBtn('finais', '🏆', 'Meus finais')}
+    </nav>`)
 }
 
 function escolher(op: Opcao) {
-  escolhaLocal = { cap: visao!.estado.cap, op }
+  escolhaLocal = visao!.estado.cap
   acao('escolha', { opcao: op })
 }
 
-ui.addEventListener('click', async (ev) => {
+ui.addEventListener('click', (ev) => {
   const b = (ev.target as HTMLElement).closest('button')
   if (!b) return
-  if (b.dataset.acao === 'comecar') acao('comecar')
-  else if (b.dataset.acao === 'avancar') acao('avancar')
-  else if (b.dataset.acao === 'qr') mostrarQr()
-  else if (b.dataset.op) escolher(b.dataset.op as Opcao)
-  else if (b.dataset.codigo) acao('encontro', { codigo: b.dataset.codigo })
-  else if (b.dataset.retomar) { capMontado = -1; acao('retomar', { cap: Number(b.dataset.retomar) }) }
-})
-ui.addEventListener('submit', (ev) => {
-  ev.preventDefault()
-  const codigo = new FormData(ev.target as HTMLFormElement).get('codigo')
-  if (codigo) acao('encontro', { codigo })
+  const d = b.dataset
+  if (d.acao === 'comecar') acao('comecar')
+  else if (d.acao === 'avancar') acao('avancar')
+  else if (d.acao === 'escanear') abrirEscanear()
+  else if (d.op) escolher(d.op as Opcao)
+  else if (d.codigo) acao('encontro', { codigo: d.codigo })
+  else if (d.retomar) { capMontado = -1; aba = 'mapa'; acao('retomar', { cap: Number(d.retomar) }) }
+  else if (d.diag !== undefined) {
+    diagRespostas.push(Number(d.diag))
+    if (diagRespostas.length === DIAGNOSTICO.length) {
+      const respostas = diagRespostas
+      acao('diagnostico', { respostas }).then(() => { diagRespostas = []; render() })
+    }
+    render()
+  } else if (d.atividade) { atividadeAberta = d.atividade; resultado = null; render() }
+  else if (d.resposta !== undefined) {
+    api<Visao & { resultado: typeof resultado }>('atividade', { id: atividadeAberta, opcao: Number(d.resposta) })
+      .then((r) => { resultado = r.resultado; visao = r; render() })
+      .catch((err) => aviso((err as Error).message))
+  } else if (d.acao === 'continuar' || d.acao === 'voltar-trilha') {
+    atividadeAberta = null; resultado = null
+    // segue direto para a próxima bolinha, como no Duolingo
+    if (d.acao === 'continuar' && visao!.academia.proxima) atividadeAberta = visao!.academia.proxima
+    render()
+  } else if (d.aba) {
+    // Mapa de novo alterna entre a ilha atual e a visão de todas as ilhas
+    if (d.aba === 'mapa' && aba === 'mapa') mundo.verModo(mundo.modoAtual === 'mapa' ? 'ilha' : 'mapa')
+    aba = d.aba as Aba
+    render()
+  }
 })
 
-async function mostrarQr() {
+/** Escanear: o celular lê o QR com a câmera nativa; no computador, digita o código. */
+async function abrirEscanear() {
   const p = visao!.pet
-  const url = await QRCode.toDataURL(`${location.origin}/?c=${p.codigo}`, { margin: 1, width: 280 })
-  const d = document.createElement('div')
-  d.className = 'modal'
-  d.innerHTML = `<div class="painel"><img src="${url}" alt="QR do pet ${esc(p.nome)}"><p class="grande">${p.codigo}</p><p>Peça para escanear ou digitar este código.</p><button class="principal">Fechar</button></div>`
-  d.addEventListener('click', (e) => { if (e.target === d || (e.target as HTMLElement).tagName === 'BUTTON') d.remove() })
-  document.body.append(d)
+  const url = await QRCode.toDataURL(`${location.origin}/?c=${p.codigo}`, { margin: 1, width: 240 })
+  const m = document.createElement('div')
+  m.className = 'modal'
+  m.innerHTML = `<div class="painel escanear-painel" role="dialog" aria-label="Encontrar pet">
+      <h2>Encontrar um pet</h2>
+      <form><input name="codigo" maxlength="4" placeholder="CÓDIGO" autocomplete="off" autocapitalize="characters" aria-label="Código do outro pet"><button class="principal">Encontrar</button></form>
+      <p class="dica">No celular, aponte a câmera para o QR do outro pet. No computador, digite o código dele.</p>
+      <hr>
+      <p>Seu código</p><p class="grande">${p.codigo}</p><img src="${url}" alt="QR do pet ${esc(p.nome)}">
+      <button type="button" data-fechar>Fechar</button>
+    </div>`
+  const fechar = () => { m.remove(); removeEventListener('keydown', tecla) }
+  const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') fechar() }
+  addEventListener('keydown', tecla)
+  m.addEventListener('click', (e) => { if (e.target === m || (e.target as HTMLElement).dataset.fechar !== undefined) fechar() })
+  m.querySelector('form')!.addEventListener('submit', (e) => {
+    e.preventDefault()
+    const codigo = new FormData(e.target as HTMLFormElement).get('codigo')
+    if (codigo) { fechar(); acao('encontro', { codigo }) }
+  })
+  document.body.append(m)
+  m.querySelector('input')!.focus()
 }
 
 // ---------- Página /demo: pets de exemplo com QR (QUEBRA-GELO.md, seção 7) ----------
@@ -258,9 +422,9 @@ async function telaDemo() {
   const pets = await api<PetPublico[]>('demo')
   const cards = await Promise.all(pets.map(async (p) => {
     const qr = await QRCode.toDataURL(`${location.origin}/?c=${p.codigo}`, { margin: 1, width: 200 })
-    return `<div class="card"><img src="${qr}" alt=""><b class="grande">${p.codigo}</b><span>${esc(p.nome)} · ${esc(p.dono)}</span><small>${NOMES_ESPECIE[p.especie as Especie]} · ${NOMES_TEMA[p.area]} · oferece ${NOMES_TEMA[p.oferece]}</small></div>`
+    return `<div class="card"><img src="${qr}" alt=""><b class="grande">${p.codigo}</b><span>${EMOJI[p.especie]} ${esc(p.nome)} · ${esc(p.dono)}</span><small>${NOMES_TEMA[p.area]} · oferece ${NOMES_TEMA[p.oferece]}</small></div>`
   }))
-  h(`<div class="painel demo-lista"><h1>Pets de exemplo</h1><p class="sub">Para testar e demonstrar sem depender do público.</p><div class="cards">${cards.join('')}</div></div>`)
+  h(`<div class="painel demo-lista"><div class="logo">${LOGO}</div><p class="sub">Pets de exemplo para testar e demonstrar sem depender do público.</p><div class="cards">${cards.join('')}</div></div>`)
 }
 
 // ---------- Entrada ----------
@@ -273,4 +437,3 @@ if (params.get('c')) {
 if (location.pathname === '/demo') telaDemo()
 else if (token) iniciarJogo()
 else telaCriar()
-
