@@ -122,11 +122,11 @@ function telaCriar() {
       <header class="criar-topo">${LOGO()}${EVENTO}</header>
       <p class="chamada">Seu pet só avança quando você conversa com alguém de verdade.</p>
       <fieldset><legend><i>01</i> Pet</legend>
-        <div class="pets" data-campo="especie">${ESPECIES.map((e, i) => `<button type="button" class="${i ? '' : 'sel'}" data-v="${e}" aria-label="${NOMES_ESPECIE[e]}">${foto({ especie: e, cor: '', acessorio: 'nenhum' })}<span>${NOMES_ESPECIE[e]}</span></button>`).join('')}</div>
+        <div class="pets" data-campo="especie">${ESPECIES.map((e, i) => `<button type="button" class="${i ? '' : 'sel'}" aria-pressed="${!i}" data-v="${e}" aria-label="${NOMES_ESPECIE[e]}">${foto({ especie: e, cor: '', acessorio: 'nenhum' })}<span>${NOMES_ESPECIE[e]}</span></button>`).join('')}</div>
         <p class="personalidade">${PERSONALIDADE.xicara}</p>
       </fieldset>
       <fieldset><legend><i>02</i> Acessório</legend>
-        <div class="segmentos" data-campo="acessorio">${ACESSORIOS.map((a, i) => `<button type="button" class="${i ? '' : 'sel'}" data-v="${a}">${NOMES_ACESSORIO[a]}</button>`).join('')}</div>
+        <div class="segmentos" data-campo="acessorio">${ACESSORIOS.map((a, i) => `<button type="button" class="${i ? '' : 'sel'}" aria-pressed="${!i}" data-v="${a}">${NOMES_ACESSORIO[a]}</button>`).join('')}</div>
       </fieldset>
       <fieldset><legend><i>03</i> Nomes</legend>
         <div class="linha">
@@ -146,7 +146,7 @@ function telaCriar() {
     grupo.addEventListener('click', (e) => {
       const b = (e.target as HTMLElement).closest('button')
       if (!b) return
-      grupo.querySelectorAll('button').forEach((x) => x.classList.toggle('sel', x === b))
+      grupo.querySelectorAll('button').forEach((x) => { x.classList.toggle('sel', x === b); x.setAttribute('aria-pressed', String(x === b)) })
       ;(dna as unknown as Record<string, string>)[grupo.dataset.campo!] = b.dataset.v!
       dna.cor = COR_ESPECIE[dna.especie]
       form.querySelector('.personalidade')!.textContent = PERSONALIDADE[dna.especie]
@@ -456,6 +456,8 @@ function render() {
   if (ck !== chaveCartao) {
     chaveCartao = ck
     animate(ui.querySelectorAll('.cartao > *'), { opacity: [0, 1], y: [10, 0] }, { delay: stagger(0.035), duration: 0.38, ease: [0.2, 0.8, 0.2, 1] })
+    // o innerHTML apagou o botão com foco: quem usa teclado ou leitor de tela continua no cartão
+    ui.querySelector<HTMLElement>('.cartao button:not([disabled])')?.focus({ preventScroll: true })
   }
 }
 
