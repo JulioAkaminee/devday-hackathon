@@ -156,7 +156,7 @@ function telaCriar() {
   const perfil: Record<Campo, string> = {
     nome: SUGESTOES_NOME[Math.floor(Math.random() * SUGESTOES_NOME.length)], dono: '', linkedin: '', area: 'front', procura: 'back', oferece: 'front',
   }
-  let passo = 0
+  let passo = -1 // -1 é a boas-vindas: proposta e como funciona antes de pedir qualquer coisa
   mundo.mostrarVitrine(dna)
 
   // pet, nomes e as três perguntas do dia, uma por tela
@@ -177,12 +177,20 @@ function telaCriar() {
   const voltar = (para: number) => `<button type="button" class="discreto" data-ir="${para}">${ICONE.voltar} Voltar</button>`
 
   const conteudo = () => {
-    if (passo === 0) return `
+    if (passo === -1) return `
       <div class="hero">
-        <p class="chamada">Seu pet só cresce quando você conversa com alguém de verdade.</p>
-        <p class="subchamada">Monte o seu em 30 segundos e encontre gente de verdade pelo evento.</p>
+        <p class="rotulo">O jogo de networking do DevDay</p>
+        <h2 class="chamada">Seu pet só cresce quando você conversa com alguém de verdade.</h2>
+        <p class="subchamada">Cada missão pede um encontro com uma pessoa do evento. Quanto melhor a conversa, mais longe vocês vão.</p>
         <p class="prova" data-stats hidden></p>
       </div>
+      <ol class="como">
+        <li><b>Crie seu pet</b><span>Leva 30 segundos e não precisa de login.</span></li>
+        <li><b>Encontre alguém</b><span>Vocês trocam o código dos pets e a missão avança.</span></li>
+        <li><b>Escolha a conversa</b><span>Papo rápido conhece mais gente, conversa funda cria laço. Seu jeito leva a um dos 3 finais.</span></li>
+      </ol>
+      <button class="principal">Criar meu pet ${ICONE.seta}</button>`
+    if (passo === 0) return `
       ${progresso()}<h2>Escolha seu pet</h2>
       <div class="pets" data-campo="especie">${ESPECIES.map((e) => opcao('especie', e, NOMES_ESPECIE[e], dna.especie === e, foto({ especie: e, cor: '', acessorio: 'nenhum' }))).join('')}</div>
       <p class="personalidade">${PERSONALIDADE[dna.especie]}</p>
@@ -210,11 +218,12 @@ function telaCriar() {
     const form = ui.querySelector<HTMLFormElement>('form.criar')!
     // legenda do palco: nome do pet, espécie e personalidade
     const legenda = () => {
-      ui.querySelector('.legenda-pet b')!.textContent = perfil.nome.trim() || NOMES_ESPECIE[dna.especie]
-      ui.querySelector('.legenda-pet span')!.textContent = `${NOMES_ESPECIE[dna.especie]} · ${PERSONALIDADE[dna.especie]}`
+      // na boas-vindas o pet que acena puxa assunto com quem chegou
+      ui.querySelector('.legenda-pet b')!.textContent = passo === -1 ? 'Oi! Bora quebrar o gelo?' : perfil.nome.trim() || NOMES_ESPECIE[dna.especie]
+      ui.querySelector('.legenda-pet span')!.textContent = passo === -1 ? 'Crie o seu pet e me apresente para alguém do evento.' : `${NOMES_ESPECIE[dna.especie]} · ${PERSONALIDADE[dna.especie]}`
     }
     legenda()
-    if (passo === 0) mostrarStats()
+    if (passo === -1) mostrarStats()
     animate(form.querySelectorAll(':scope > :not(.criar-topo)'), { opacity: [0, 1], y: [10, 0] }, { delay: stagger(0.04), duration: 0.35, ease: [0.2, 0.8, 0.2, 1] })
     // foco no que se faz agora: o campo do nome ou o título do passo (leitor de tela anuncia a troca)
     if (passo === 1 && !perfil.dono) form.querySelector<HTMLInputElement>('input[name=dono]')!.focus({ preventScroll: true })

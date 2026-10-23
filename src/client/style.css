@@ -98,6 +98,13 @@ body:not(.criando) .bola-criar { display: none; }
 .chamada { font-size: 1.9rem; font-weight: 600; letter-spacing: -0.035em; line-height: 1.05; }
 /* o que é isso, em dez segundos: promessa, três passos e a sala ao vivo */
 .hero { display: grid; gap: 14px; }
+.criar h2.chamada { margin: 0; font-size: 2.1rem; }
+/* boas-vindas: como funciona em três passos */
+.como { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; counter-reset: como; }
+.como li { display: grid; grid-template-columns: 34px 1fr; gap: 2px 12px; counter-increment: como; }
+.como li::before { content: counter(como, decimal-leading-zero); grid-row: span 2; font-weight: 600; color: var(--verde-texto); font-variant-numeric: tabular-nums; padding-top: 1px; }
+.como b { font-size: 1.05rem; letter-spacing: -0.01em; }
+.como span { color: var(--cinza); font-size: 0.92rem; line-height: 1.4; }
 .visao { font-size: 0.95rem; line-height: 1.45; color: #2c2c2c; max-width: 48ch; }
 .prova { font-size: 0.85rem; line-height: 1.4; color: var(--cinza); padding-left: 12px; border-left: 3px solid var(--verde); }
 .prova b { color: var(--tinta); font-variant-numeric: tabular-nums; }
