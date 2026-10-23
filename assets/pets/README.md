@@ -121,8 +121,8 @@ mostrarParte(pet, 'mochila', false);               // acessórios podem ser esco
 ## Diferenças em relação à referência
 
 - **Mochila em todos:** a referência só mostra a mochila em alguns pets; aqui todos usam uma, com a logo
-  da OpenAI estampada nas costas. A logo também aparece na etiqueta do Caderninho e na base do
-  Laptopinho, como na referência.
+  da OpenAI estampada nas costas. A logo também aparece na base do Laptopinho, como na referência.
+- **Caderninho:** sem a etiqueta branca da capa.
 - **Texto:** "Oriativo" virou "Criativo".
 - **Nome:** a caneca se chama **Xícara**, como na referência dos pets. No mapa da aventura ela aparece
   como "Xícaro".

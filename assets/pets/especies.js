@@ -253,8 +253,6 @@ export const PETS = [
       par(m, OLHO_BRILHO, 2, 7, 15);
       par(m, ['B'], 1, 9, 12);
       m.desenhar(BOCA_PEQUENA, 4, 12, TINTAS);
-      // etiqueta branca, sem a logo
-      m.caixa(4, 5, 5, 6, 7, 5, C.branco);
       // braço com a caneta
       braco(m, 'D', { x: 11, yTopo: 12, comprimento: 4, z: 1, cor: C.azul, mao: C.azulEscuro, levantar: 1.4 });
       // caneta reta presa na mão; a inclinação vem da pose, para não virar escadinha
