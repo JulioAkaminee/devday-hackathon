@@ -84,6 +84,7 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .pets button img { width: 100%; max-width: 64px; aspect-ratio: 1; }
 .pets button.sel { border-color: var(--linha); background: var(--suave); box-shadow: inset 0 -4px 0 var(--verde); }
 .personalidade { font-size: 0.9rem; color: var(--cinza); }
+.criar > .principal { position: sticky; bottom: 0; box-shadow: 0 -16px 0 var(--papel), 0 32px 0 var(--papel); }
 .subchamada { margin-top: -10px; color: var(--cinza); font-size: 0.98rem; line-height: 1.4; }
 .dica { margin-top: 8px; font-size: 0.8rem; color: var(--cinza); }
 /* legenda no palco da criação: o pet ganha nome e jeito antes de nascer */
