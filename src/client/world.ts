@@ -33,7 +33,10 @@ const ESTACOES = [
   new THREE.Vector3(5, 0, -0.5),
   new THREE.Vector3(25, 0, -0.5),
 ]
-const ILHA_DO_CAP = [0, 0, 1, 2, 3]
+// Zoom (roda do mouse e pinça) multiplica a distância da câmera dentro destes limites:
+// mais perto que 0,55 os pets estouram o quadro; mais longe que 1,7 o mapa vira miniatura.
+const ZOOM_MIN = 0.55
+const ZOOM_MAX = 1.7
 
 const geo = new THREE.BoxGeometry(1, 1, 1)
 const mats = new Map<string, THREE.MeshLambertMaterial>()
@@ -319,6 +322,15 @@ export class Mundo {
   private cap = -1
   private viagem: { de: THREE.Vector3; para: THREE.Vector3; t: number } | null = null
   private pulo = 0
+  // arrastar a tela (mouse e toque): deslocamento da câmera, com inércia ao soltar
+  private base = new THREE.Vector3()
+  private pan = new THREE.Vector3()
+  private vel = new THREE.Vector3()
+  private arrasto: { x: number; y: number; t: number } | null = null
+  private dedos = new Map<number, { x: number; y: number }>()
+  private pinca: { dist: number; zoom: number } | null = null
+  private zoom = 1
+  private zoomAlvo = 1
 
   constructor(canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
@@ -331,8 +343,16 @@ export class Mundo {
     this.cena.add(sol, this.mapa, this.marcas, this.extras)
     this.montarMapa()
     addEventListener('resize', () => this.ajustar())
+    canvas.addEventListener('pointerdown', (e) => this.agarrar(e, canvas))
+    canvas.addEventListener('pointermove', (e) => this.arrastar(e))
+    for (const ev of ['pointerup', 'pointercancel'] as const) canvas.addEventListener(ev, (e) => this.soltar(e, canvas))
+    canvas.addEventListener('wheel', (e) => {
+      if (this.modo === 'vitrine') return
+      e.preventDefault()
+      this.zoomAlvo = THREE.MathUtils.clamp(this.zoomAlvo * Math.exp(e.deltaY * 0.0015), ZOOM_MIN, ZOOM_MAX)
+    }, { passive: false })
     this.ajustar()
-    this.camera.position.copy(this.camPos)
+    this.base.copy(this.camPos)
     this.olharAtual.copy(this.camOlhar)
     this.renderer.setAnimationLoop(() => this.quadro())
   }
@@ -411,7 +431,7 @@ export class Mundo {
       this.camOlhar.set(0, 0.55, 0)
     } else if (this.modo === 'final') {
       const c = ILHAS[3]
-      const d = r < 0.8 ? 1.9 : 1
+      const d = Math.max(1, 1.5 / r)
       this.camPos.set(c.x, 20 * d, c.z + 36 * d)
       this.camOlhar.set(c.x - 2, 1.5, c.z)
     } else if (r < 1.1) {
@@ -438,8 +458,9 @@ export class Mundo {
     this.trocarPet(dna)
     this.pet!.scale.setScalar(1)
     this.pet!.position.set(0, 0, 0)
+    this.pan.set(0, 0, 0)
     this.ajustar()
-    this.camera.position.copy(this.camPos)
+    this.base.copy(this.camPos)
     this.olharAtual.copy(this.camOlhar)
   }
 
@@ -466,6 +487,7 @@ export class Mundo {
     const destino = ESTACOES[cap]
     if (primeira || cap < this.cap) { this.pet!.position.copy(destino); this.pet!.rotation.y = 0 }
     else if (cap !== this.cap) this.viagem = { de: this.pet!.position.clone(), para: destino.clone(), t: 0 }
+    if (cap !== this.cap) { this.pan.set(0, 0, 0); this.vel.set(0, 0, 0) }
     this.cap = cap
     this.ajustar()
   }
@@ -510,6 +532,7 @@ export class Mundo {
   /** Final no Palco DevDay: a câmera aproxima e os contatos aparecem conforme o final. */
   cenaFinal(tipo: 'time' | 'colecionador' | 'amigo', contatos: DNA[]) {
     this.modo = 'final'
+    this.pan.set(0, 0, 0)
     this.ajustar()
     if (this.amigo) { this.cena.remove(this.amigo); this.amigo = null }
     this.extras.clear()
@@ -541,15 +564,83 @@ export class Mundo {
     }
   }
 
+  // ---------- arrastar ----------
+
+  private agarrar(e: PointerEvent, canvas: HTMLCanvasElement) {
+    if (this.modo === 'vitrine') return
+    canvas.setPointerCapture(e.pointerId)
+    this.dedos.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    this.vel.set(0, 0, 0)
+    if (this.dedos.size === 2) {
+      // dois dedos: pinça; o arrasto pausa até sobrar um dedo
+      this.arrasto = null
+      this.pinca = { dist: this.distDedos(), zoom: this.zoomAlvo }
+      return
+    }
+    canvas.classList.add('arrastando')
+    this.arrasto = { x: e.clientX, y: e.clientY, t: performance.now() }
+  }
+
+  private distDedos() {
+    const [a, b] = [...this.dedos.values()]
+    return Math.hypot(a.x - b.x, a.y - b.y) || 1
+  }
+
+  private arrastar(e: PointerEvent) {
+    if (this.dedos.has(e.pointerId)) this.dedos.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    if (this.pinca && this.dedos.size === 2) {
+      this.zoomAlvo = THREE.MathUtils.clamp((this.pinca.zoom * this.pinca.dist) / this.distDedos(), ZOOM_MIN, ZOOM_MAX)
+      return
+    }
+    const a = this.arrasto
+    if (!a) return
+    // pixels da tela viram unidades do chão na distância atual da câmera
+    const dist = this.camera.position.distanceTo(this.olharAtual)
+    const k = (2 * dist * Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2))) / innerHeight
+    const dx = -(e.clientX - a.x) * k
+    const dz = -(e.clientY - a.y) * k * 1.5 // o chão está inclinado: o vertical anda mais
+    const agora = performance.now()
+    const dt = Math.max(16, agora - a.t) / 1000
+    this.pan.x += dx; this.pan.z += dz
+    this.vel.set(dx / dt, 0, dz / dt).multiplyScalar(0.5).add(this.vel.multiplyScalar(0.5))
+    if (this.vel.length() > 40) this.vel.setLength(40)
+    a.x = e.clientX; a.y = e.clientY; a.t = agora
+  }
+
+  private soltar(e: PointerEvent, canvas: HTMLCanvasElement) {
+    this.dedos.delete(e.pointerId)
+    if (this.pinca) {
+      this.pinca = null
+      // o dedo que sobrou continua arrastando dali, sem pulo
+      const [resto] = this.dedos.values()
+      this.arrasto = resto ? { ...resto, t: performance.now() } : null
+      return
+    }
+    // dedo parado antes de soltar: sem inércia
+    if (this.arrasto && performance.now() - this.arrasto.t > 80) this.vel.set(0, 0, 0)
+    this.arrasto = null
+    canvas.classList.remove('arrastando')
+  }
+
   // ---------- animação ----------
 
   private quadro() {
     const dt = Math.min(this.relogio.getDelta(), 0.05)
     const t = this.relogio.elapsedTime
     if (document.hidden) return
-    this.camera.position.lerp(this.camPos, Math.min(1, dt * 2.5))
+    if (!this.arrasto && this.vel.lengthSq() > 0.01) {
+      this.pan.addScaledVector(this.vel, dt)
+      this.vel.multiplyScalar(Math.exp(-dt * 4))
+    }
+    const lim = this.modo === 'final' ? 12 : 38
+    this.pan.x = THREE.MathUtils.clamp(this.pan.x, -lim, lim)
+    this.pan.z = THREE.MathUtils.clamp(this.pan.z, -Math.min(lim, 16), Math.min(lim, 22))
+    this.base.lerp(this.camPos, Math.min(1, dt * 2.5))
     this.olharAtual.lerp(this.camOlhar, Math.min(1, dt * 2.5))
-    this.camera.lookAt(this.olharAtual)
+    this.zoom += (this.zoomAlvo - this.zoom) * Math.min(1, dt * 10)
+    const z = this.modo === 'vitrine' ? 1 : this.zoom
+    this.camera.position.copy(this.base).sub(this.olharAtual).multiplyScalar(z).add(this.olharAtual).add(this.pan)
+    this.camera.lookAt(this.olharAtual.clone().add(this.pan))
     const pet = this.pet
     if (pet) {
       const corpo: THREE.Group = pet.userData.corpo
