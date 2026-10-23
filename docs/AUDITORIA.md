@@ -68,7 +68,7 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
 - [x] C15 `.rotulo span` com contraste AA (`#157a33`)
 - [ ] C16 `retrato()` não guarda imagem de contexto perdido; `/demo` com `.catch`
 - [x] C17 `minlength="2"` nos nomes
-- [ ] S9 `app.disable('x-powered-by')`; rota curinga não devolve `index.html` para arquivo com ponto
+- [x] S9 `app.disable('x-powered-by')`; rota curinga não devolve `index.html` para arquivo com ponto
 - [ ] S10 Dockerfile: `CMD ["node", "--import", "tsx", "src/server/index.ts"]` (SIGTERM chega ao
       salvamento) e `HEALTHCHECK` em `/health`
 

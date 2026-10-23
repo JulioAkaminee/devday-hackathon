@@ -104,6 +104,7 @@ const um = <T extends string>(v: unknown, lista: readonly T[], campo: string): T
 }
 
 const app = express()
+app.disable('x-powered-by')
 app.use(express.json({ limit: '10kb' }))
 
 app.get('/health', (_req, res) => { res.send('ok') })
@@ -259,7 +260,8 @@ app.use('/api', (_req, _res, next) => next(new ErroHttp(404, 'rota não encontra
 if (PROD) {
   const dist = resolve('dist')
   app.use(express.static(dist))
-  app.get('/{*rota}', (_req, res) => { res.sendFile(join(dist, 'index.html')) })
+  // arquivo com ponto que não existe (ex.: /app.js velho) dá 404, não a página
+  app.get('/{*rota}', (req, res, next) => { if (req.path.includes('.')) return next(); res.sendFile(join(dist, 'index.html')) })
 } else {
   const { createServer } = await import('vite')
   const vite = await createServer({ server: { middlewareMode: true }, appType: 'spa' })
