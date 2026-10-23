@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quebra-Gelo · Apresentação</title>
+<meta name="description" content="Quebra-Gelo: o networking do DevDay, jogável." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --tinta: #141414; --papel: #ffffff; --verde: #22b04b; --verde-escuro: #178a39; --verde-texto: #157a33;
+  --gelo: #e8f7ed; --cinza: #6e6e6e; --fio: #e4e4e0; --suave: #f4f4f1;
+  --fonte: 'Inter Tight', 'Helvetica Neue', Arial, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--suave); color: var(--tinta); font-family: var(--fonte); overflow: hidden; -webkit-font-smoothing: antialiased; }
+/* palco 16:9 que escala para caber na janela */
+.palco { position: fixed; left: 50%; top: 50%; width: 1600px; height: 900px; transform-origin: 0 0; background: var(--papel); border: 2px solid var(--tinta); overflow: hidden; }
+/* chão de gelo: grade isométrica bem leve */
+.palco::before { content: ''; position: absolute; inset: 0; background-image:
+  linear-gradient(30deg, transparent 49.4%, #eef3ef 49.6%, #eef3ef 50.4%, transparent 50.6%),
+  linear-gradient(150deg, transparent 49.4%, #eef3ef 49.6%, #eef3ef 50.4%, transparent 50.6%);
+  background-size: 120px 69.28px; opacity: .9; pointer-events: none; }
+
+.slide { position: absolute; inset: 0; padding: 88px 104px 96px; display: flex; flex-direction: column; visibility: hidden; }
+.slide.ativo { visibility: visible; }
+.slide > *, .slide .sobe { opacity: 0; transform: translateY(28px); transition: opacity .6s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+.slide.ativo > *, .slide.ativo .sobe { opacity: 1; transform: none; }
+.slide.ativo > :nth-child(2), .slide.ativo .d1 { transition-delay: .08s; }
+.slide.ativo > :nth-child(3), .slide.ativo .d2 { transition-delay: .16s; }
+.slide.ativo > :nth-child(4), .slide.ativo .d3 { transition-delay: .24s; }
+.slide.ativo > :nth-child(5), .slide.ativo .d4 { transition-delay: .32s; }
+.slide.ativo .d5 { transition-delay: .44s; }
+
+.rotulo { display: inline-flex; align-items: center; gap: 10px; align-self: flex-start; font-size: 20px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; color: var(--verde-texto); }
+.rotulo i { width: 12px; height: 12px; background: var(--verde); border: 2px solid var(--tinta); transform: rotate(45deg); }
+h1 { font-size: 168px; font-weight: 600; letter-spacing: -.055em; line-height: .92; }
+h2 { font-size: 92px; font-weight: 600; letter-spacing: -.045em; line-height: .98; max-width: 1100px; }
+h2 em, h1 em { font-style: italic; font-weight: 500; color: var(--verde-texto); }
+.lead { font-size: 34px; line-height: 1.3; letter-spacing: -.015em; color: #3a3a3a; max-width: 760px; }
+.chip { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px; border: 2px solid var(--tinta); background: var(--papel); font-size: 22px; font-weight: 600; }
+.chip.verde { background: var(--verde); }
+.linha { display: flex; gap: 14px; flex-wrap: wrap; }
+
+/* marca: o cubo que racha (mesma animação do app) */
+.marca { overflow: visible; }
+.marca .metade { transform-box: fill-box; animation: quebrar 6s cubic-bezier(.3,0,.2,1) infinite; }
+.marca .esq { transform-origin: 100% 100%; --lado: -1; }
+.marca .dir { transform-origin: 0% 100%; --lado: 1; }
+@keyframes quebrar {
+  0%, 52%, 100% { transform: none; }
+  56% { transform: rotate(calc(var(--lado) * -3deg)); }
+  60% { transform: rotate(calc(var(--lado) * 3deg)); }
+  64% { transform: none; }
+  72%, 80% { transform: translate(calc(var(--lado) * 5px), 2px) rotate(calc(var(--lado) * 7deg)); }
+  88% { transform: translate(calc(var(--lado) * -1px), 0) rotate(calc(var(--lado) * -2deg)); }
+  94% { transform: none; }
+}
+.marca .lasca { transform-box: fill-box; transform-origin: center; opacity: 0; animation: lasca 6s ease-out infinite; }
+.marca .um { --dx: -7px; --dy: -14px; } .marca .dois { --dx: 8px; --dy: -12px; }
+@keyframes lasca { 0%, 64% { opacity: 0; transform: none; } 68% { opacity: 1; } 84% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(45deg); } 100% { opacity: 0; } }
+
+/* cubinhos de voxel flutuando ao fundo */
+.voxel { position: absolute; width: var(--t); aspect-ratio: 1; animation: boia var(--dur, 7s) ease-in-out infinite; animation-delay: var(--atraso, 0s); pointer-events: none; }
+@keyframes boia { 0%, 100% { translate: 0 0; } 50% { translate: 0 -18px; } }
+
+/* celulares com os prints reais */
+.cel { width: 300px; border: 2px solid var(--tinta); border-radius: 34px; padding: 10px; background: var(--tinta); box-shadow: 14px 14px 0 var(--verde); }
+.cel img { display: block; width: 100%; border-radius: 24px; }
+.tela { border: 2px solid var(--tinta); box-shadow: 14px 14px 0 var(--verde); background: var(--papel); }
+.tela img { display: block; width: 100%; }
+
+/* capa */
+.capa { justify-content: center; }
+.capa .marca { position: absolute; right: 120px; top: 170px; width: 520px; height: 520px; }
+.capa h1 { margin-top: 26px; }
+.capa .lead { margin-top: 26px; font-size: 44px; color: var(--tinta); }
+.capa .linha { margin-top: 56px; }
+
+/* problema */
+.prob { justify-content: center; gap: 40px; }
+.prob h2 { font-size: 120px; max-width: 1300px; }
+.grupos { position: absolute; right: 110px; bottom: 100px; display: flex; gap: 60px; align-items: flex-end; }
+.grupo { display: flex; gap: 6px; }
+.grupo b { width: 34px; height: 34px; border: 2px solid var(--tinta); background: var(--gelo); }
+.grupo b:nth-child(2) { background: var(--fio); } .grupo b:nth-child(3) { background: #cfe9d7; }
+.slide.ativo .solo { animation: tremer 2.4s ease-in-out infinite; }
+@keyframes tremer { 0%, 70%, 100% { transform: none; } 75% { transform: translateX(-3px); } 80% { transform: translateX(3px); } 85% { transform: translateX(-2px); } }
+
+/* duas colunas: texto + imagem */
+.duas { display: grid; grid-template-columns: 1fr auto; gap: 80px; align-items: center; height: 100%; }
+.duas > div:first-child { display: flex; flex-direction: column; gap: 30px; }
+
+/* como joga: as 3 etapas da missão */
+.ciclo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 34px; margin-top: 30px; align-items: end; }
+.passo { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.passo .cel { width: 196px; }
+.passo:nth-child(2) .cel { transform: translateY(-24px); }
+.passo .n { display: flex; align-items: center; gap: 12px; font-size: 28px; font-weight: 600; }
+.passo .n i { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--tinta); color: var(--papel); font-style: normal; font-size: 20px; }
+.passo.feito .n i { background: var(--verde); color: var(--tinta); }
+
+/* alcance x profundidade */
+.medir { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 60px; }
+.medidor { border: 2px solid var(--tinta); padding: 40px; display: flex; flex-direction: column; gap: 18px; background: var(--papel); }
+.medidor.funda { background: var(--tinta); color: var(--papel); }
+.medidor .mais { font-size: 120px; font-weight: 600; letter-spacing: -.05em; line-height: .9; }
+.medidor h3 { font-size: 44px; font-weight: 600; letter-spacing: -.03em; }
+.medidor p { font-size: 26px; line-height: 1.35; opacity: .8; }
+.barra { height: 18px; border: 2px solid currentColor; }
+.barra span { display: block; height: 100%; width: 0; background: var(--verde); transition: width 1.6s cubic-bezier(.2,.7,.2,1) .5s; }
+.slide.ativo .barra span { width: var(--w); }
+
+/* finais */
+.finais { display: flex; gap: 18px; margin-top: 8px; }
+.final { flex: 1; border: 2px solid var(--tinta); padding: 22px; font-size: 24px; font-weight: 600; line-height: 1.2; background: var(--papel); }
+.final small { display: block; margin-top: 8px; font-weight: 500; font-size: 20px; color: var(--cinza); }
+.final:nth-child(2) { background: var(--gelo); } .final:nth-child(3) { background: var(--verde); } .final:nth-child(3) small { color: var(--tinta); }
+.par { display: flex; gap: 26px; align-items: flex-end; }
+.par .cel:last-child { width: 260px; transform: translateY(-40px) rotate(3deg); }
+.par .cel:first-child { transform: rotate(-3deg); }
+
+/* telão ao vivo */
+.vivo { justify-content: space-between; }
+.numeros { display: grid; grid-template-columns: repeat(3, 1fr); border: 2px solid var(--tinta); }
+.numero { padding: 40px; border-left: 2px solid var(--tinta); }
+.numero:first-child { border-left: 0; }
+.numero b { display: block; font-size: 180px; font-weight: 600; letter-spacing: -.06em; line-height: .9; font-variant-numeric: tabular-nums; }
+.numero span { font-size: 28px; font-weight: 500; }
+.ponto { display: inline-block; width: 16px; height: 16px; border-radius: 50%; background: var(--verde); margin-right: 10px; animation: pulsa 1.6s ease-in-out infinite; }
+@keyframes pulsa { 50% { box-shadow: 0 0 0 10px rgba(34,176,75,.18); } }
+
+/* fechamento */
+.fim { display: grid; grid-template-columns: 1fr auto; gap: 80px; align-items: center; }
+.fim h2 { font-size: 112px; }
+.qr { width: 380px; padding: 28px; border: 2px solid var(--tinta); background: var(--papel); box-shadow: 14px 14px 0 var(--verde); }
+.qr img { display: block; width: 100%; }
+.url { font-size: 40px; font-weight: 600; color: var(--verde-texto); letter-spacing: -.02em; }
+.stack { font-size: 22px; color: var(--cinza); }
+
+/* rodapé: missões como progresso */
+.rodape { position: absolute; left: 104px; right: 104px; bottom: 38px; display: flex; align-items: center; justify-content: space-between; font-size: 18px; font-weight: 600; color: var(--cinza); z-index: 5; }
+.rodape .logo { display: flex; align-items: center; gap: 10px; color: var(--tinta); }
+.rodape .logo svg { width: 28px; height: 28px; }
+.pontos { display: flex; gap: 8px; }
+.pontos button { width: 14px; height: 14px; border-radius: 10px; border: 2px solid var(--tinta); background: var(--papel); cursor: pointer; transition: width .4s cubic-bezier(.2,.7,.2,1), background .3s; }
+.pontos button.ativo { width: 44px; background: var(--verde); }
+.pontos button.visto { background: var(--tinta); }
+/* barra de apresentação: some com o mouse parado */
+.barra-ap { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; align-items: center; gap: 4px; padding: 6px; background: var(--tinta); color: var(--papel); border-radius: 40px; font: 600 15px var(--fonte); z-index: 10; transition: opacity .3s, transform .3s; }
+.barra-ap button { display: grid; place-items: center; min-width: 40px; height: 40px; padding: 0 12px; border: 0; border-radius: 30px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.barra-ap button:hover, .barra-ap button[aria-pressed="true"] { background: #2c2c2c; }
+.barra-ap button[aria-pressed="true"] { color: var(--verde); }
+.barra-ap .cont { padding: 0 10px; font-variant-numeric: tabular-nums; color: #bdbdbd; }
+.barra-ap svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+body.quieto .barra-ap { opacity: 0; transform: translate(-50%, 12px); pointer-events: none; }
+body.quieto { cursor: none; }
+/* grade de slides (tecla G) */
+body.grade .palco { display: none; }
+.grade-v { position: fixed; inset: 0; overflow: auto; padding: 40px; display: none; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; background: var(--suave); z-index: 9; }
+body.grade .grade-v { display: grid; }
+.grade-v button { position: relative; aspect-ratio: 16 / 9; border: 2px solid var(--tinta); background: var(--papel); font: 600 22px var(--fonte); text-align: left; padding: 18px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; }
+.grade-v button.ativo { box-shadow: 8px 8px 0 var(--verde); }
+.grade-v button small { font-size: 14px; color: var(--verde-texto); text-transform: uppercase; letter-spacing: .03em; }
+
+@media (prefers-reduced-motion: reduce) {
+  .marca .metade, .marca .lasca, .voxel, .solo, .ponto { animation: none !important; }
+  .slide > *, .slide .sobe, .barra span { transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="palco" id="palco">
+
+  <!-- 1 capa -->
+  <section class="slide capa">
+    <span class="rotulo"><i></i>OpenAI DevDay São Paulo · Hackathon</span>
+    <h1>Quebra-<br>Gelo</h1>
+    <p class="lead">O networking do DevDay, <em style="color:var(--verde-texto)">jogável.</em></p>
+    <div class="linha"><span class="chip verde">Trilha Educação e inclusão</span><span class="chip">Miguel e Julio Akamine</span></div>
+    <svg class="marca" data-marca viewBox="0 0 100 100" aria-hidden="true"></svg>
+  </section>
+
+  <!-- 2 problema -->
+  <section class="slide prob">
+    <span class="rotulo"><i></i>O problema</span>
+    <h2>Todo evento tem <em>gelo.</em></h2>
+    <p class="lead">Cada um fica no próprio grupo. Puxar conversa com quem você não conhece trava, ainda mais para quem é tímido ou está chegando na área.</p>
+    <div class="grupos" aria-hidden="true">
+      <div class="grupo"><b></b><b></b><b></b></div>
+      <div class="grupo"><b></b><b></b></div>
+      <div class="grupo solo"><b style="background:var(--verde)"></b></div>
+      <div class="grupo"><b></b><b></b><b></b></div>
+    </div>
+  </section>
+
+  <!-- 3 ideia -->
+  <section class="slide">
+    <div class="duas">
+      <div>
+        <span class="rotulo sobe"><i></i>A ideia</span>
+        <h2 class="sobe d1">Seu pet só cresce quando você <em>conversa de verdade.</em></h2>
+        <p class="lead sobe d2">Em 30 segundos você cria um pet de voxel e diz sua área, com o que quer ajuda e com o que pode ajudar. O jogo usa isso para sugerir com quem conversar.</p>
+        <div class="linha sobe d3"><span class="chip">Sem instalar</span><span class="chip">Abre no celular</span><span class="chip">QR no telão</span></div>
+      </div>
+      <div class="tela sobe d4" style="width:640px"><img src="d-boasvindas.jpg" alt="Tela de boas-vindas do Quebra-Gelo" /></div>
+    </div>
+  </section>
+
+  <!-- 4 como joga -->
+  <section class="slide">
+    <span class="rotulo"><i></i>Como joga</span>
+    <h2 style="font-size:76px">4 missões. Cada uma começa com <em>um encontro real.</em></h2>
+    <div class="ciclo">
+      <div class="passo sobe d2 feito"><div class="cel"><img src="m-1-aguardando.jpg" alt="Missão aguardando: código e QR" /></div><span class="n"><i>1</i>Encontrar: troque o código</span></div>
+      <div class="passo sobe d3 feito"><div class="cel"><img src="m-2-encontro.jpg" alt="Encontro: escolha da conversa" /></div><span class="n"><i>2</i>Conversar: escolha como</span></div>
+      <div class="passo sobe d4"><div class="cel"><img src="m-3-resultado.jpg" alt="Resultado com +2 em destaque" /></div><span class="n"><i>3</i>Resultado: o pet cresce</span></div>
+    </div>
+  </section>
+
+  <!-- 5 alcance x profundidade -->
+  <section class="slide">
+    <span class="rotulo"><i></i>A escolha</span>
+    <h2 style="font-size:84px">Papo rápido ou <em>conversa funda?</em></h2>
+    <div class="medir">
+      <div class="medidor sobe d2"><span class="mais">+2</span><h3>Alcance</h3><p>Conhecer mais gente. Um oi, uma troca rápida, o próximo encontro.</p><div class="barra"><span style="--w:72%"></span></div></div>
+      <div class="medidor funda sobe d3"><span class="mais" style="color:var(--verde)">+2</span><h3>Profundidade</h3><p>Ficar, perguntar algo pessoal e ouvir. Menos gente, mais conexão.</p><div class="barra"><span style="--w:48%"></span></div></div>
+    </div>
+  </section>
+
+  <!-- 6 finais e contatos -->
+  <section class="slide">
+    <div class="duas">
+      <div>
+        <span class="rotulo sobe"><i></i>O final</span>
+        <h2 class="sobe d1" style="font-size:80px">Seu jeito de conversar decide <em>o seu final.</em></h2>
+        <div class="finais sobe d2"><div class="final">Final 1<small>3 finais possíveis</small></div><div class="final">Final 2<small>pelo Alcance e Profundidade</small></div><div class="final">Final 3<small>e dá para ver outro</small></div></div>
+        <p class="lead sobe d3" style="font-size:30px">No fim você leva a lista de quem conheceu. O LinkedIn é opcional e só aparece para quem te encontrou.</p>
+      </div>
+      <div class="par sobe d4"><div class="cel" style="width:270px"><img src="m-5-final.jpg" alt="Tela de final" /></div><div class="cel"><img src="m-4-contatos.jpg" alt="Lista de quem você conheceu" /></div></div>
+    </div>
+  </section>
+
+  <!-- 7 academia -->
+  <section class="slide">
+    <div class="duas">
+      <div>
+        <span class="rotulo sobe"><i></i>Inclusão · Academia</span>
+        <h2 class="sobe d1">Puxar assunto <em>se aprende.</em></h2>
+        <p class="lead sobe d2">Um diagnóstico de 5 perguntas monta uma trilha curta com atividades para quem trava na hora de conversar. Treina, depois vai para o evento.</p>
+        <div class="linha sobe d3"><span class="chip verde">Diagnóstico</span><span class="chip">Trilha</span><span class="chip">Prática no evento</span></div>
+      </div>
+      <div class="cel sobe d4" style="width:330px"><img src="m-4-academia.jpg" alt="Academia no celular" /></div>
+    </div>
+  </section>
+
+  <!-- 8 telão ao vivo -->
+  <section class="slide vivo">
+    <span class="rotulo"><i></i>Telão do evento</span>
+    <h2 style="font-size:84px"><span class="ponto"></span>A sala inteira vê <em>o gelo quebrando.</em></h2>
+    <div class="numeros">
+      <div class="numero"><b data-stat="pessoas">0</b><span>pessoas jogando agora</span></div>
+      <div class="numero"><b data-stat="encontros">0</b><span>encontros de verdade</span></div>
+      <div class="numero"><b data-stat="finais">0</b><span>finais alcançados</span></div>
+    </div>
+  </section>
+
+  <!-- 9 fechamento -->
+  <section class="slide">
+    <div class="fim" style="height:100%">
+      <div style="display:flex;flex-direction:column;gap:30px">
+        <span class="rotulo sobe"><i></i>Bora?</span>
+        <h2 class="sobe d1">Abra no celular e <em>quebre o gelo.</em></h2>
+        <p class="url sobe d2">quebra-gelo.julioakamine.com</p>
+        <p class="stack sobe d3">Vite · TypeScript · Three.js · Express · roda no navegador</p>
+      </div>
+      <div class="qr sobe d4"><img src="qr.svg" alt="QR code para quebra-gelo.julioakamine.com" /></div>
+    </div>
+  </section>
+
+  <div class="rodape">
+    <span class="logo"><svg class="marca" data-marca viewBox="0 0 100 100" aria-hidden="true"></svg>Quebra-Gelo</span>
+    <div class="pontos" id="pontos"></div>
+    <span id="num">1 / 9</span>
+  </div>
+</div>
+<div class="grade-v" id="grade"></div>
+<nav class="barra-ap" aria-label="Controles da apresentação">
+  <button id="ant" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <span class="cont" id="cont">1 / 9</span>
+  <button id="prox" aria-label="Próximo"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  <button id="bgrade" aria-label="Ver todos os slides (G)" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg></button>
+  <button id="bauto" aria-label="Avançar sozinho (P)" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M7 5v14l11-7z"/></svg></button>
+  <button id="btela" aria-label="Tela cheia (F)"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+</nav>
+
+<script>
+// o mesmo cubo do app (MARCA em src/client/main.ts)
+const costura = 'M50 10 44 19 53 27 45 36 50 46'
+const olho = (x) => `<ellipse cx="${x}" cy="39" rx="5" ry="7.2"/>`
+const marca = `<g stroke="#141414" stroke-width="3.2" stroke-linejoin="round">` +
+  `<g class="metade esq"><path d="${costura} 14 28z" fill="#e8f7ed"/><path d="M14 28 50 46 50 92 14 72z" fill="#22b04b"/>` +
+  `<g transform="matrix(1 .5 0 1 0 0)" fill="none" stroke-width="3.6">${olho(25)}${olho(39)}</g></g>` +
+  `<g class="metade dir"><path d="${costura} 86 28z" fill="#e8f7ed"/><path d="M86 28 50 46 50 92 86 72z" fill="#178a39"/></g>` +
+  `<path class="lasca um" d="M44 2 49 4.5 44 7 39 4.5z" fill="#e8f7ed" stroke-width="2"/><path class="lasca dois" d="M57 0 61 2 57 4 53 2z" fill="#22b04b" stroke-width="2"/></g>`
+document.querySelectorAll('[data-marca]').forEach((s) => { s.innerHTML = marca })
+
+// cubinhos de voxel espalhados pelo palco
+const palco = document.getElementById('palco')
+const cubo = (c1, c2, c3) => `<svg viewBox="0 0 100 100"><g stroke="#141414" stroke-width="4" stroke-linejoin="round"><path d="M50 8 90 28 50 48 10 28z" fill="${c1}"/><path d="M10 28 50 48 50 92 10 72z" fill="${c2}"/><path d="M90 28 50 48 50 92 90 72z" fill="${c3}"/></g></svg>`
+;[[1380, 90, 54, 0, 'v'], [1500, 640, 40, 1.2, 'g'], [70, 720, 34, 2, 'g'], [820, 40, 28, .6, 'v'], [1180, 780, 30, 1.8, 'v']].forEach(([x, y, t, a, k]) => {
+  const d = document.createElement('div')
+  d.className = 'voxel'; d.setAttribute('aria-hidden', 'true')
+  d.style.cssText = `left:${x}px;top:${y}px;--t:${t}px;--atraso:-${a}s;--dur:${6 + a}s`
+  d.innerHTML = k === 'v' ? cubo('#e8f7ed', '#22b04b', '#178a39') : cubo('#ffffff', '#e4e4e0', '#cfcfca')
+  palco.prepend(d)
+})
+
+// escala do palco
+function escalar() {
+  const s = Math.min(innerWidth / 1640, innerHeight / 940)
+  palco.style.transform = `scale(${s}) translate(-50%, -50%)`
+}
+addEventListener('resize', escalar); escalar()
+
+// navegação
+const slides = [...document.querySelectorAll('.slide')]
+const pontos = document.getElementById('pontos')
+slides.forEach((_, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', `Slide ${i + 1}`); b.onclick = (e) => { e.stopPropagation(); ir(i) }; pontos.appendChild(b) })
+let atual = -1
+function ir(i) {
+  i = Math.max(0, Math.min(slides.length - 1, i))
+  if (i === atual) return
+  slides[atual]?.classList.remove('ativo')
+  atual = i
+  slides[i].classList.add('ativo')
+  ;[...pontos.children].forEach((b, j) => { b.classList.toggle('ativo', j === i); b.classList.toggle('visto', j < i) })
+  document.getElementById('num').textContent = `${i + 1} / ${slides.length}`
+  document.getElementById('cont').textContent = `${i + 1} / ${slides.length}`
+  ;[...grade.children].forEach((b, j) => b.classList.toggle('ativo', j === i))
+  history.replaceState(null, '', '#' + (i + 1))
+  if (slides[i].classList.contains('vivo')) contar()
+}
+addEventListener('keydown', (e) => {
+  if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); ir(atual + 1) }
+  if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); ir(atual - 1) }
+  if (e.key === 'Home') ir(0)
+  if (e.key === 'End') ir(slides.length - 1)
+  if (e.key === 'f') telaCheia()
+  if (e.key === 'g') alternarGrade()
+  if (e.key === 'p') alternarAuto()
+  if (e.key === 'Escape' && document.body.classList.contains('grade')) alternarGrade()
+})
+let x0 = null
+addEventListener('pointerdown', (e) => { x0 = e.target.closest('.barra-ap, .grade-v, .pontos') ? null : e.clientX })
+addEventListener('pointerup', (e) => {
+  if (x0 === null) return
+  const dx = e.clientX - x0; x0 = null
+  if (Math.abs(dx) > 40) ir(atual + (dx < 0 ? 1 : -1))
+  else ir(atual + (e.clientX > innerWidth / 3 ? 1 : -1))
+})
+// grade: um cartão por slide com o rótulo e o título
+const grade = document.getElementById('grade')
+slides.forEach((s, i) => {
+  const b = document.createElement('button')
+  b.innerHTML = `<small>${i + 1} · ${s.querySelector('.rotulo')?.textContent ?? ''}</small><span>${(s.querySelector('h1, h2')?.textContent ?? '').replace(/\s+/g, ' ')}</span>`
+  b.onclick = () => { alternarGrade(); ir(i) }
+  grade.appendChild(b)
+})
+function alternarGrade() {
+  const on = document.body.classList.toggle('grade')
+  document.getElementById('bgrade').setAttribute('aria-pressed', on)
+}
+// avanço automático a cada 8 s, volta ao início no fim
+let auto = 0
+function alternarAuto() {
+  if (auto) { clearInterval(auto); auto = 0 } else auto = setInterval(() => ir(atual === slides.length - 1 ? 0 : atual + 1), 8000)
+  document.getElementById('bauto').setAttribute('aria-pressed', !!auto)
+}
+function telaCheia() { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.() }
+document.getElementById('ant').onclick = () => ir(atual - 1)
+document.getElementById('prox').onclick = () => ir(atual + 1)
+document.getElementById('bgrade').onclick = alternarGrade
+document.getElementById('bauto').onclick = alternarAuto
+document.getElementById('btela').onclick = telaCheia
+// barra e cursor somem depois de 2,5 s sem mexer o mouse
+let quieto = 0
+addEventListener('pointermove', () => { document.body.classList.remove('quieto'); clearTimeout(quieto); quieto = setTimeout(() => document.body.classList.add('quieto'), 2500) })
+ir((parseInt(location.hash.slice(1)) || 1) - 1)
+
+// números reais do jogo, contando até o valor
+async function contar() {
+  let st
+  try { st = await (await fetch('/api/stats')).json() } catch { return }
+  document.querySelectorAll('[data-stat]').forEach((el) => {
+    const alvo = Number(st[el.dataset.stat]) || 0
+    const t0 = performance.now()
+    const passo = (t) => { const p = Math.min(1, (t - t0) / 1400); el.textContent = Math.round(alvo * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(passo) }
+    requestAnimationFrame(passo)
+  })
+}
+</script>
+</body>
+</html>
