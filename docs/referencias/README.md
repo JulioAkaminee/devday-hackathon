@@ -45,6 +45,9 @@ Referência da tela do **mapa da aventura**, em estilo voxel isométrico. Recebi
 Referência dos **pets**: 10 objetos do dia a dia de um evento, em voxel, cada um com nome e
 personalidade. Recebida em 23/10/2026.
 
+**Já virou asset:** os 10 pets estão modelados em [`assets/pets/`](../../assets/pets/README.md), com
+galeria 3D, animações, JSON e PNG de cada um.
+
 | # | Pet | Personalidade | Visual |
 |---|---|---|---|
 | 01 | **Xícara** | Curioso e sempre puxa assunto. | caneca branca com alça verde, café, selo `</>` no peito |
