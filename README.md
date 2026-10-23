@@ -9,6 +9,9 @@
 | **Desafios** | nº 10 · Aventura com escolhas e consequências &nbsp;·&nbsp; nº 4 · Trilha de estudo personalizada |
 | **Trilha do evento** | Educação e inclusão |
 | **Demo** | <https://quebra-gelo.julioakamine.com> · telão do evento em `/tela` · pets de exemplo em `/demo` |
+| **Vídeo** | <https://quebra-gelo.julioakamine.com/video> · onboarding narrado de 1:16 |
+| **Slides** | <https://quebra-gelo.julioakamine.com/slides/> · setas ou toque para navegar, `F` tela cheia, `G` grade |
+| **Equipe** | Miguel Vaz e Julio Akamine |
 
 ---
 
@@ -98,7 +101,7 @@ Verificado em 23/10, antes da entrega:
 | Testes | **15 de 15** passando (`node:test`): os 3 finais, as travas, os dois perfis da Academia |
 | Build | `vite build` em 3,4 s |
 | Site | `https://quebra-gelo.julioakamine.com` com HTTPS, deploy automático a cada push na `main` |
-| Rotas | `/health` `/` `/demo` `/tela` `/api/stats` `/api/online` respondendo `200` |
+| Rotas | `/health` `/` `/demo` `/tela` `/video` `/slides/` `/api/stats` `/api/online` respondendo `200` |
 | Dados | volume persistente em `/data` (snapshot dos pets sobrevive a redeploy) |
 
 Rotas principais da API: `POST /api/pets`, `GET /api/eu`, `POST /api/comecar`, `POST /api/encontro`,
@@ -159,7 +162,8 @@ obrigatório para a câmera do celular ler o QR — há sempre o caminho sem câ
 - **O núcleo roda sem IA, de propósito.** A história é autoral e as sugestões saem de regra pura — o
   jogo funciona mesmo com a rede do evento ruim, e o mesmo vale para o celular.
 - **Celular e computador com a mesma qualidade**: alvos de toque de 44 px, layout próprio em cada um, e
-  o mesmo jogo nos dois (QR no celular, teclado no notebook).
+  o mesmo jogo nos dois (QR no celular, teclado no notebook). No celular, o campo do código fica preso
+  no pé do cartão, as abas têm nome e os painéis abrem como folha de baixo para cima.
 - **Acessibilidade**: caminho sem câmera para quem não pode ou não quer usar QR, e
   `prefers-reduced-motion` desliga confete e animações mais fortes.
 
@@ -168,7 +172,7 @@ obrigatório para a câmera do celular ler o QR — há sempre o caminho sem câ
 | Nome | GitHub |
 |---|---|
 | Julio Akamine | [@JulioAkaminee](https://github.com/JulioAkaminee) |
-| Miguel Souza | [@miguelvzs](https://github.com/miguelvzs) |
+| Miguel Vaz | [@miguelvzs](https://github.com/miguelvzs) |
 
 ## Documentação
 
@@ -181,6 +185,8 @@ obrigatório para a câmera do celular ler o QR — há sempre o caminho sem câ
 | [`docs/ENTREGA.md`](docs/ENTREGA.md) | roteiro do vídeo, ensaio e respostas do formulário |
 | [`docs/APRESENTACAO.md`](docs/APRESENTACAO.md) | deck interno: problema, solução, regras, números e perguntas da banca |
 | [`docs/AUDITORIA.md`](docs/AUDITORIA.md) | revisão de regras e critérios |
+| [`docs/entrega/`](docs/entrega/) | vídeo de onboarding (com e sem narração), roteiro da narração, slides em PPTX e em texto |
+| [`src/client/public/slides/`](src/client/public/slides/) | os slides da apresentação servidos em `/slides/` |
 
 ---
 
