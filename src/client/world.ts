@@ -346,7 +346,8 @@ export class Mundo {
     const sol = new THREE.DirectionalLight('#ffffff', 1.4)
     sol.position.set(-8, 14, 10)
     this.cena.add(sol, this.mapa, this.marcas, this.extras)
-    this.montarMapa()
+    // as placas são desenhadas em canvas: espera a Inter Tight, senão saem na fonte reserva
+    Promise.all([500, 600].map((p) => document.fonts.load(`${p} 96px ${FONTE}`))).catch(() => {}).finally(() => this.montarMapa())
     addEventListener('resize', () => this.ajustar())
     canvas.addEventListener('pointerdown', (e) => this.agarrar(e, canvas))
     canvas.addEventListener('pointermove', (e) => this.arrastar(e))
