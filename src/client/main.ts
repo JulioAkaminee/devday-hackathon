@@ -53,7 +53,9 @@ const olhar = { x: 0, y: 0 }
 const MARCA = () => {
   const t = `style="transform: translate(${olhar.x}px, ${olhar.y}px)"`
   const olho = (x: number, y: number) => `<g transform="rotate(-8 ${x} ${y})"><ellipse class="olho" ${t} cx="${x}" cy="${y}" rx="4.2" ry="6" fill="none" stroke="var(--tinta)" stroke-width="3.6"/></g>`
-  return `<svg class="marca" viewBox="0 0 100 100" data-amp="3.2" aria-hidden="true"><g stroke="var(--tinta)" stroke-width="3" stroke-linejoin="round"><path d="M50 8 88 29 50 50 12 29z" fill="#dff3e6"/><path d="M12 29 50 50 50 93 12 72z" fill="var(--verde)"/><path d="M88 29 50 50 50 93 88 72z" fill="#178a39"/><path d="M34 22 46 27 41 32 55 37" fill="none" stroke-linecap="round"/></g>${olho(25, 58)}${olho(38, 65)}</svg>`
+  // as duas metades se separam pela rachadura em zigue-zague e voltam (animação no CSS, .marca .metade)
+  const costura = 'M50 8 45 18 54 27 46 37 50 50'
+  return `<svg class="marca" viewBox="0 0 100 100" data-amp="3.2" aria-hidden="true"><g stroke="var(--tinta)" stroke-width="3" stroke-linejoin="round"><g class="metade esq"><path d="${costura} 12 29z" fill="#dff3e6"/><path d="M12 29 50 50 50 93 12 72z" fill="var(--verde)"/>${olho(25, 58)}${olho(38, 65)}</g><g class="metade dir"><path d="${costura} 88 29z" fill="#dff3e6"/><path d="M88 29 50 50 50 93 88 72z" fill="#178a39"/></g></g></svg>`
 }
 const LOGO = () => `<span class="logo">${MARCA()}<span>Quebra-Gelo</span></span>`
 const EVENTO = '<span class="evento"><span>DevDay</span><span>Community Hackathon</span><span>São Paulo</span></span>'

@@ -140,6 +140,21 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .medidor i { height: 10px; background: var(--fio); border-radius: 10px; overflow: hidden; display: block; }
 .medidor em { display: block; height: 100%; border-radius: 10px; }
 .marca .olho { transform-box: fill-box; transform-origin: center; }
+/* o cubo da marca quebra o gelo a cada 6 s: treme, racha ao meio e se junta de novo */
+.marca:has(.metade) { overflow: visible; }
+.marca .metade { transform-box: fill-box; animation: quebrar 6s cubic-bezier(.3, 0, .2, 1) infinite; }
+.marca .esq { transform-origin: 100% 100%; --lado: -1; }
+.marca .dir { transform-origin: 0% 100%; --lado: 1; }
+@keyframes quebrar {
+  0%, 52%, 100% { transform: none; }
+  56% { transform: rotate(calc(var(--lado) * -3deg)); }
+  60% { transform: rotate(calc(var(--lado) * 3deg)); }
+  64% { transform: none; }
+  72%, 80% { transform: translate(calc(var(--lado) * 5px), 2px) rotate(calc(var(--lado) * 7deg)); }
+  88% { transform: translate(calc(var(--lado) * -1px), 0) rotate(calc(var(--lado) * -2deg)); }
+  94% { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .marca .metade { animation: none; } }
 .medidor.ampla em { background: var(--verde); }
 .medidor.profunda em { background: var(--tinta); }
 
