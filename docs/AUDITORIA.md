@@ -16,24 +16,24 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
 
 ## Lote 1 — alto (antes do vídeo)
 
-- [x] **S1 · Encontro só em `aguardando`, antes de buscar o código** (`server/index.ts:183`). Hoje um
+- [x] `d6002e5` **S1 · Encontro só em `aguardando`, antes de buscar o código** (`server/index.ts:183`). Hoje um
       código inexistente dá 404 e um real dá 409: dá para enumerar os 4 caracteres, e com `retomar` para
       a Missão 1 um pet abre o capítulo de vários outros. Checar a fase primeiro.
-- [x] **S2 · Limite por token** (PLANO A5): encontro a cada 5 s, bloqueio após ~20 códigos errados;
+- [x] `c6caf91` **S2 · Limite por token** (PLANO A5): encontro a cada 5 s, bloqueio após ~20 códigos errados;
       `Map<token, …>` em memória, nunca por IP.
-- [x] **S3 · Teto de pets** (`POST /api/pets`): `pets.size >= 2000` → 503 "evento lotado". Sem teto,
+- [x] `af113ac` **S3 · Teto de pets** (`POST /api/pets`): `pets.size >= 2000` → 503 "evento lotado". Sem teto,
       `novoCodigo` fica O(n) e trava o loop quando os códigos acabam.
-- [x] **S4 · Snapshot não derruba o processo**: `salvar` em try/catch (mantém `sujo` para tentar de
+- [x] `68c5f73` **S4 · Snapshot não derruba o processo**: `salvar` em try/catch (mantém `sujo` para tentar de
       novo); `carregar` em try/catch, renomeia o arquivo ruim para `.bad-<data>` e sobe vazio; ao
       carregar, preencher `historico ?? []` e `estado: { ...novoEstado(), ...p.estado }`.
-- [x] **S5 · Erros 4xx do Express viram 400/413**, não 500 com stack no log (JSON inválido, corpo
+- [x] `6c2721e` **S5 · Erros 4xx do Express viram 400/413**, não 500 com stack no log (JSON inválido, corpo
       grande). Mensagem de `ErroDeFase` genérica (não expor a máquina de estados).
-- [x] **C1 · Token velho se recupera**: 401 no polling ou em `acao` → apaga `qg-token` e recarrega.
-- [x] **C2 · iOS não dá zoom no formulário**: `font-size: 16px` em `input, select` (`style.css:50`).
-- [x] **C3 · Polling não sobrescreve ação** (`main.ts:241`): contador `versao` incrementado em `acao`
+- [x] `b53fbfb` **C1 · Token velho se recupera**: 401 no polling ou em `acao` → apaga `qg-token` e recarrega.
+- [x] `9d321e9` **C2 · iOS não dá zoom no formulário**: `font-size: 16px` em `input, select` (`style.css:50`).
+- [x] `840003a` **C3 · Polling não sobrescreve ação** (`main.ts:241`): contador `versao` incrementado em `acao`
       e na atividade; descartar resposta do polling se mudou; não disparar com um polling em voo;
       pular quando `document.hidden`.
-- [x] **C4 · Clique duplo em "Criar meu pet"** cria dois pets e dois `setInterval`: desabilitar o
+- [x] `e95c997` **C4 · Clique duplo em "Criar meu pet"** cria dois pets e dois `setInterval`: desabilitar o
       botão durante o envio; guardar o id do intervalo.
 
 ## Lote 2 — médio
