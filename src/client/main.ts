@@ -518,22 +518,52 @@ function render() {
   }
 }
 
-addEventListener('pointermove', (ev) => {
-  // cada marca olha a partir do próprio centro; o deslocamento segue a escala do viewBox de cada uma
+// Olhos das marcas: um laço só, com mola amortecida até o alvo (o ponteiro move o alvo, não reinicia animação).
+// Ponteiro parado ou toque: os olhos passeiam devagar. Piscada em intervalo aleatório, às vezes dupla.
+const ponteiro = { x: 0, y: 0, t: 0 }
+addEventListener('pointermove', (ev) => { ponteiro.x = ev.clientX; ponteiro.y = ev.clientY; ponteiro.t = performance.now() })
+const molas = new WeakMap<Element, { x: number; y: number; vx: number; vy: number }>()
+let proximaPiscada = performance.now() + 2500
+let passeio = { x: 0, y: 0, ate: 0 }
+let quadroAnterior = performance.now()
+function olhos(agora: number) {
+  requestAnimationFrame(olhos)
+  const dt = Math.min(0.05, (agora - quadroAnterior) / 1000)
+  quadroAnterior = agora
+  if (calmo.matches) return
+  let sy = 1
+  if (agora >= proximaPiscada) {
+    const p = (agora - proximaPiscada) / 170
+    if (p >= 1) proximaPiscada = agora + (Math.random() < 0.18 ? 140 : 2400 + Math.random() * 3600)
+    else sy = 1 - 0.9 * Math.sin(Math.PI * p)
+  }
+  const parado = !ponteiro.t || agora - ponteiro.t > 2600
+  if (parado && agora > passeio.ate) {
+    const a = Math.random() * Math.PI * 2, r = 0.25 + Math.random() * 0.6
+    passeio = { x: Math.cos(a) * r, y: Math.sin(a) * r * 0.6, ate: agora + 1100 + Math.random() * 2200 }
+  }
   document.querySelectorAll<SVGSVGElement>('.marca').forEach((m, i) => {
     const r = m.getBoundingClientRect()
     if (!r.width) return
-    const dx = ev.clientX - (r.left + r.width / 2)
-    const dy = ev.clientY - (r.top + r.height / 2)
-    const d = Math.hypot(dx, dy) || 1
-    const k = Math.min(1, d / Math.max(160, r.width)) * 2.6 * (m.viewBox.baseVal.width / 40)
-    const x = (dx / d) * k, y = (dy / d) * k
-    if (i === 0) { olhar.x = x; olhar.y = y }
-    animate(m.querySelectorAll('.olho'), { x, y }, { type: 'spring', stiffness: 220, damping: 16, mass: 0.6 })
+    const amp = 2.6 * (m.viewBox.baseVal.width / 40)
+    let tx = passeio.x * amp, ty = passeio.y * amp
+    if (!parado) {
+      const dx = ponteiro.x - (r.left + r.width / 2), dy = ponteiro.y - (r.top + r.height / 2)
+      const d = Math.hypot(dx, dy) || 1
+      const k = Math.min(1, d / Math.max(160, r.width)) * amp
+      tx = (dx / d) * k; ty = (dy / d) * k
+    }
+    const s = molas.get(m) ?? { x: olhar.x, y: olhar.y, vx: 0, vy: 0 }
+    const rigidez = 90, amortecer = 2 * Math.sqrt(rigidez) * 0.9
+    s.vx += ((tx - s.x) * rigidez - s.vx * amortecer) * dt
+    s.vy += ((ty - s.y) * rigidez - s.vy * amortecer) * dt
+    s.x += s.vx * dt; s.y += s.vy * dt
+    molas.set(m, s)
+    if (i === 0) { olhar.x = s.x; olhar.y = s.y }
+    m.querySelectorAll<SVGElement>('.olho').forEach((o) => { o.style.transform = `translate(${s.x}px, ${s.y}px) scaleY(${sy})` })
   })
-})
-// piscada de vez em quando
-setInterval(() => calmo.matches || animate(document.querySelectorAll('.marca .olho'), { scaleY: [1, 0.12, 1] }, { duration: 0.22 }), 4800)
+}
+requestAnimationFrame(olhos)
 
 function escolher(op: Opcao) {
   escolhaLocal = visao!.estado.cap
