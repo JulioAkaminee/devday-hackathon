@@ -158,6 +158,16 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .eu small, .medidor span { font-size: 0.78rem; color: var(--cinza); }
 .eu b { font-size: 1.05rem; }
 .avatar { width: 48px; height: 48px; background: var(--suave); border-radius: 50%; }
+/* pessoas online: ponto verde pulsando e o número ao vivo; o toque abre a lista */
+.online { border: 0; border-left: 1px solid var(--fio); border-radius: 0; background: none; padding: 0 22px; min-height: 48px; gap: 8px; font-size: 1.05rem; white-space: nowrap; }
+.online:hover { background: none !important; }
+.online b { display: inline-block; font-variant-numeric: tabular-nums; }
+.online span { color: var(--cinza); }
+.online:hover span { color: var(--tinta); }
+.ponto { position: relative; width: 10px; height: 10px; border-radius: 50%; background: var(--verde); flex: none; }
+.ponto::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--verde); animation: pulso 1.8s ease-out infinite; }
+@keyframes pulso { from { transform: scale(1); opacity: 0.6; } to { transform: scale(2.8); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ponto::after { animation: none; } }
 .medidores { display: flex; gap: 28px; margin-left: auto; padding-right: 0; }
 .medidor { display: grid; grid-template-columns: auto auto 128px; align-items: center; gap: 10px; }
 .medidor span { color: var(--tinta); font-weight: 500; font-size: 0.9rem; }
@@ -295,6 +305,13 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .meu-codigo { display: flex; gap: 16px; align-items: center; border-top: 1.5px solid var(--linha); padding-top: 14px; }
 .meu-codigo img { width: 132px; height: 132px; }
 .grande { font-size: 2.4rem; font-weight: 600; letter-spacing: 0.08em; }
+.ao-vivo { display: inline-flex; align-items: center; gap: 8px; }
+.online-lista { list-style: none; margin: 0; padding: 0; max-height: min(52vh, 440px); overflow: auto; border-top: 1.5px solid var(--linha); }
+.online-lista li { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--fio); }
+.online-lista li > span { display: grid; line-height: 1.2; flex: 1; min-width: 0; }
+.online-lista small { color: var(--cinza); }
+.online-lista em { font-style: normal; font-size: 0.8rem; font-weight: 600; background: var(--verde); padding: 2px 8px; }
+.online-lista .mais { justify-content: center; color: var(--cinza); border-bottom: 0; }
 /* centrado por margem: a animação de entrada usa transform e apagava o translateX */
 .aviso { position: fixed; top: 84px; left: 0; right: 0; margin-inline: auto; width: max-content; max-width: calc(100% - 32px); padding: 12px 18px; font-weight: 600; z-index: 20; border: 1.5px solid var(--linha); background: var(--papel); }
 .aviso.ok { background: var(--verde); border-color: var(--verde); }

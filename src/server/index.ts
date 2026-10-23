@@ -183,6 +183,28 @@ function estatisticas() {
 
 app.get('/api/stats', (_req, res) => { res.json(estatisticas()) })
 
+// Presença: online = fez requisição com token nos últimos 10 s (com o app aberto, o celular consulta /api/eu a cada 2 s).
+// Fica só em memória, fora do Pet: não vai para o snapshot nem marca `sujo`.
+const ONLINE_MS = 10_000
+const vistos = new Map<string, number>()
+
+// Pílula do cabeçalho e telão: { total }. Com ?lista=1 (painel aberto) vêm também os pets, até 60.
+app.get('/api/online', (req, res) => {
+  const desde = Date.now() - ONLINE_MS
+  const online: Pet[] = []
+  for (const [id, t] of vistos) {
+    const p = pets.get(id)
+    if (t >= desde && p && !p.demo) online.push(p)
+  }
+  res.set('Cache-Control', 'no-store')
+  if (req.query.lista === undefined) return void res.json({ total: online.length })
+  res.json({
+    total: online.length,
+    pets: online.sort((a, b) => a.nome.localeCompare(b.nome)).slice(0, 60)
+      .map((p) => ({ id: p.id, nome: p.nome, dono: p.dono, especie: p.especie, acessorio: p.acessorio })),
+  })
+})
+
 // Telão do evento: QR para entrar e os números ao vivo. Página própria, sem passar pelo SPA.
 app.get('/tela', async (req, res) => {
   const url = process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`
@@ -195,6 +217,7 @@ const eu = (req: express.Request) => {
   const t = req.header('x-token')
   const p = t ? [...pets.values()].find((x) => x.token === t) : undefined
   if (!p) throw new ErroHttp(401, 'pet não encontrado')
+  vistos.set(p.id, Date.now())
   return p
 }
 
@@ -232,6 +255,13 @@ function visao(p: Pet) {
 }
 
 app.get('/api/eu', (req, res) => { res.json(visao(eu(req))) })
+
+// App fechado ou em segundo plano: sai da contagem na hora, sem esperar os 10 s
+app.post('/api/sair', (req, res) => {
+  const p = eu(req)
+  vistos.delete(p.id)
+  res.json(visao(p))
+})
 
 app.post('/api/comecar', (req, res) => {
   const p = eu(req)

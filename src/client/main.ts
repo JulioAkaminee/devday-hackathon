@@ -305,6 +305,90 @@ let versao = 0
 let sondando = false
 let sondagem: ReturnType<typeof setInterval> | undefined
 
+// Pessoas online: a pílula do cabeçalho consulta a cada 3 s; só com o painel aberto vem também a lista
+type PetOnline = Pick<PetPublico, 'id' | 'nome' | 'dono' | 'especie' | 'acessorio'>
+let totalOnline = 0
+let petsOnline: PetOnline[] | null = null
+let painelOnline: HTMLElement | null = null
+let chaveOnline = ''
+let buscandoOnline = false
+let relogioOnline: ReturnType<typeof setInterval> | undefined
+const contagem = () => Math.max(1, totalOnline) // você mesmo está online
+
+async function atualizarOnline(forcar = false) {
+  if ((buscandoOnline && !forcar) || document.hidden || !token) return
+  buscandoOnline = true
+  try {
+    const o = await api<{ total: number; pets?: PetOnline[] }>(painelOnline ? 'online?lista=1' : 'online')
+    totalOnline = o.total
+    if (o.pets) petsOnline = o.pets
+    mostrarOnline()
+  } catch { /* rede oscilou: fica o último número */ } finally { buscandoOnline = false }
+}
+
+function mostrarOnline() {
+  const n = String(contagem())
+  const pilula = ui.querySelector<HTMLElement>('.online')
+  pilula?.setAttribute('aria-label', `${n} online agora: ver quem`)
+  const b = pilula?.querySelector('b')
+  if (b && b.textContent !== n) {
+    b.textContent = n
+    animate(b, { scale: [1.45, 1] }, { type: 'spring', stiffness: 420, damping: 16 })
+  }
+  desenharOnline()
+}
+
+/** Lista do painel: você primeiro, depois em ordem alfabética; quem acabou de chegar entra deslizando. */
+function desenharOnline() {
+  if (!painelOnline || !petsOnline) return
+  const meu = visao?.pet.id
+  const lista = [...petsOnline].sort((a, b) => Number(b.id === meu) - Number(a.id === meu))
+  const k = totalOnline + '|' + lista.map((p) => p.id).join()
+  if (k === chaveOnline) return
+  const antes = chaveOnline ? new Set(chaveOnline.split('|')[1].split(',')) : null
+  chaveOnline = k
+  const n = contagem()
+  painelOnline.querySelector('h2')!.textContent = `${n} ${n === 1 ? 'pessoa' : 'pessoas'} com o app aberto`
+  const ul = painelOnline.querySelector('ul')!
+  ul.innerHTML = lista.map((p) => `<li data-id="${p.id}">${foto({ ...p, cor: '' }, 'mini')}<span><b>${esc(p.nome)}</b><small>${esc(p.dono)}</small></span>${p.id === meu ? '<em>você</em>' : ''}</li>`).join('') +
+    (totalOnline > lista.length ? `<li class="mais">e mais ${totalOnline - lista.length}</li>` : '')
+  if (antes) {
+    const novos = [...ul.querySelectorAll<HTMLElement>('li[data-id]')].filter((li) => !antes.has(li.dataset.id!))
+    if (novos.length) animate(novos, { opacity: [0, 1], x: [-14, 0] }, { duration: 0.35, ease: [0.2, 0.8, 0.2, 1] })
+  }
+}
+
+function abrirOnline() {
+  if (painelOnline) return
+  const m = document.createElement('div')
+  m.className = 'modal'
+  m.innerHTML = `<div class="escanear-painel online-painel" role="dialog" aria-modal="true" aria-label="Pessoas online agora">
+      <div class="cartao-topo"><span class="ao-vivo"><i class="ponto" aria-hidden="true"></i>Ao vivo</span><button type="button" class="discreto" data-fechar>Fechar</button></div>
+      <h2>Quem está online</h2>
+      <ul class="online-lista"><li class="mais">Carregando…</li></ul>
+      <p class="nota">Achou alguém? Vá até a pessoa e leia o QR do pet.</p>
+    </div>`
+  painelOnline = m
+  chaveOnline = ''
+  const fechar = () => { m.remove(); removeEventListener('keydown', tecla); painelOnline = null }
+  const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') fechar() }
+  addEventListener('keydown', tecla)
+  m.addEventListener('click', (e) => { if (e.target === m || (e.target as HTMLElement).closest('[data-fechar]')) fechar() })
+  document.body.append(m)
+  animate(m, { opacity: [0, 1] }, { duration: 0.18 })
+  animate(m.firstElementChild!, { opacity: [0, 1], y: [16, 0], scale: [0.98, 1] }, { type: 'spring', stiffness: 320, damping: 26 })
+  m.querySelector<HTMLElement>('[data-fechar]')!.focus()
+  desenharOnline()
+  atualizarOnline(true)
+}
+
+// segundo plano ou app fechado: sai da contagem na hora; de volta, entra de novo sem esperar a sondagem
+document.addEventListener('visibilitychange', () => {
+  if (!token || !visao) return
+  if (document.hidden) fetch('/api/sair', { method: 'POST', headers: { 'x-token': token }, keepalive: true }).catch(() => {})
+  else api('eu').then(() => atualizarOnline()).catch(() => {})
+})
+
 const questao = (q: Questao, attr: string, rotulo: string) =>
   `<p class="rotulo">${rotulo} <span>${NOMES_HABILIDADE[q.habilidade]}</span></p><p class="situacao">${esc(q.situacao)}</p>
    <div class="alternativas">${q.opcoes.map((o, i) => `<button ${attr}="${i}"><b>${'abc'[i]}</b><span>${esc(o)}</span></button>`).join('')}</div>`
@@ -400,6 +484,9 @@ async function iniciarJogo(acabouDeNascer = false) {
       render()
     } catch { /* rede oscilou: tenta de novo no próximo ciclo */ } finally { sondando = false }
   }, 2000)
+  clearInterval(relogioOnline)
+  relogioOnline = setInterval(() => atualizarOnline(), 3000)
+  atualizarOnline()
 }
 
 /** true quando o servidor aceitou a ação. */
@@ -570,6 +657,7 @@ function render() {
     <header class="topo">
       ${LOGO()}${EVENTO}
       <button class="eu" data-acao="escanear" aria-label="Meu código e QR">${foto(v.pet, 'avatar')}<span><small>Minha aventura</small><b>${esc(v.pet.nome)}</b></span></button>
+      <button class="online" data-acao="online" aria-label="${contagem()} online agora: ver quem"><i class="ponto" aria-hidden="true"></i><b>${contagem()}</b><span>online</span></button>
       <div class="medidores">${medidor('Alcance', e.alcance, 'ampla')}${medidor('Profundidade', e.profundidade, 'profunda')}</div>
     </header>
     <section class="cartao">${aba === 'mapa' ? cartaoMissao(v) : painelAba(v)}</section>
@@ -650,6 +738,7 @@ ui.addEventListener('click', (ev) => {
   if (d.acao === 'comecar') acao('comecar')
   else if (d.acao === 'avancar') acao('avancar')
   else if (d.acao === 'escanear') abrirEscanear()
+  else if (d.acao === 'online') abrirOnline()
   else if (d.op) escolher(d.op as Opcao)
   else if (d.codigo) acao('encontro', { codigo: d.codigo })
   else if (d.retomar) { capMontado = -1; aba = 'mapa'; acao('retomar', { cap: Number(d.retomar) }) }
