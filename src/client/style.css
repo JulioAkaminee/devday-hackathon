@@ -182,6 +182,7 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .escanear-painel h2 { margin: 0; }
 .escanear-painel form { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 .escanear-painel form .principal { width: auto; }
+.escanear-painel [data-fechar] { min-height: 44px; padding: 0 10px; }
 .escanear-painel input { text-transform: uppercase; letter-spacing: 0.3em; font-weight: 600; font-size: 1.2rem; }
 .meu-codigo { display: flex; gap: 16px; align-items: center; border-top: 1.5px solid var(--linha); padding-top: 14px; }
 .meu-codigo img { width: 132px; height: 132px; }

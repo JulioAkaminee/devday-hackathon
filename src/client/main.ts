@@ -513,7 +513,10 @@ ui.addEventListener('click', (ev) => {
 })
 
 /** Escanear: o celular lê o QR com a câmera nativa; no computador, digita o código. */
+let escaneando = false // dois toques rápidos abriam dois modais
 async function abrirEscanear() {
+  if (escaneando) return
+  escaneando = true
   const p = visao!.pet
   const url = await QRCode.toDataURL(`${location.origin}/?c=${p.codigo}`, { margin: 1, width: 240, color: { dark: '#141414', light: '#ffffff' } })
   const m = document.createElement('div')
@@ -525,7 +528,7 @@ async function abrirEscanear() {
       <p class="nota">No celular, aponte a câmera para o QR do outro pet.</p>
       <div class="meu-codigo"><img src="${url}" alt="QR do pet ${esc(p.nome)}"><div><p class="rotulo">Seu código</p><p class="grande">${p.codigo}</p></div></div>
     </div>`
-  const fechar = () => { m.remove(); removeEventListener('keydown', tecla) }
+  const fechar = () => { m.remove(); removeEventListener('keydown', tecla); escaneando = false }
   const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') fechar() }
   addEventListener('keydown', tecla)
   m.addEventListener('click', (e) => { if (e.target === m || (e.target as HTMLElement).closest('[data-fechar]')) fechar() })

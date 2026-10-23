@@ -63,7 +63,7 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
 - [x] C10 `touch-action: manipulation` em `button`; ignorar segundo toque < 300 ms no diagnóstico
 - [ ] C11 Avisar quando um código de QR fica guardado ("Você vai encontrar X ao começar a Missão")
 - [x] C12 `sessionStorage` em try (iOS com cookies bloqueados)
-- [ ] C13 Modal do Escanear: não abrir dois; "Fechar" com 44 px
+- [x] C13 Modal do Escanear: não abrir dois; "Fechar" com 44 px
 - [ ] C14 Foco volta ao primeiro botão do cartão após `render()`; `aria-pressed` nos seletores
 - [ ] C15 `.rotulo span` com contraste AA (`#157a33`)
 - [ ] C16 `retrato()` não guarda imagem de contexto perdido; `/demo` com `.catch`
