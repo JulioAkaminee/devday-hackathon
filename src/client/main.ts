@@ -47,12 +47,13 @@ const ICONE = {
   voltar: svg('<path d="M19 12H5M11 6l-6 6 6 6"/>'),
   dado: svg('<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h.01M15 15h.01M15 9h.01M9 15h.01M12 12h.01" stroke-width="2.6"/>'),
 }
-// Marca: a bola verde com olhos de anel do banner do evento
+// Marca: o cubo de gelo voxel, rachado no topo, com os olhos de anel do banner do evento
 // Os olhos seguem o ponteiro (spring do motion); o render reaproveita a última posição
 const olhar = { x: 0, y: 0 }
 const MARCA = () => {
   const t = `style="transform: translate(${olhar.x}px, ${olhar.y}px)"`
-  return `<svg class="marca" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="22" r="18" fill="var(--verde)"/><ellipse class="olho" ${t} cx="11" cy="17" rx="3.2" ry="4.2" fill="none" stroke="var(--tinta)" stroke-width="2.4"/><ellipse class="olho" ${t} cx="24" cy="16.5" rx="3.2" ry="4.2" fill="none" stroke="var(--tinta)" stroke-width="2.4"/></svg>`
+  const olho = (x: number, y: number) => `<g transform="rotate(-8 ${x} ${y})"><ellipse class="olho" ${t} cx="${x}" cy="${y}" rx="4.2" ry="6" fill="none" stroke="var(--tinta)" stroke-width="3.6"/></g>`
+  return `<svg class="marca" viewBox="0 0 100 100" data-amp="3.2" aria-hidden="true"><g stroke="var(--tinta)" stroke-width="3" stroke-linejoin="round"><path d="M50 8 88 29 50 50 12 29z" fill="#dff3e6"/><path d="M12 29 50 50 50 93 12 72z" fill="var(--verde)"/><path d="M88 29 50 50 50 93 88 72z" fill="#178a39"/><path d="M34 22 46 27 41 32 55 37" fill="none" stroke-linecap="round"/></g>${olho(25, 58)}${olho(38, 65)}</svg>`
 }
 const LOGO = () => `<span class="logo">${MARCA()}<span>Quebra-Gelo</span></span>`
 const EVENTO = '<span class="evento"><span>DevDay</span><span>Community Hackathon</span><span>São Paulo</span></span>'
@@ -581,7 +582,7 @@ function olhos(agora: number) {
   document.querySelectorAll<SVGSVGElement>('.marca').forEach((m, i) => {
     const r = m.getBoundingClientRect()
     if (!r.width) return
-    const amp = 2.6 * (m.viewBox.baseVal.width / 40)
+    const amp = Number(m.dataset.amp) || 2.6 * (m.viewBox.baseVal.width / 40)
     let tx = passeio.x * amp, ty = passeio.y * amp
     if (!parado) {
       const dx = ponteiro.x - (r.left + r.width / 2), dy = ponteiro.y - (r.top + r.height / 2)
