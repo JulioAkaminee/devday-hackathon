@@ -10,11 +10,11 @@ Assunto: **networking em eventos**. Três habilidades:
 |---|---|---|
 | **Abordar** | puxar conversa | 1 |
 | **Escutar** | aprofundar | 2 |
-| **Conectar** | apresentar pessoas, follow-up | 3 |
+| **Conectar** | apresentar pessoas, manter o contato depois | 3 |
 
 ## Distribuição do diagnóstico: 2 Abordar · 1 Escutar · 2 Conectar
 
-Conectar junta dois comportamentos diferentes (apresentar pessoas e fazer o follow-up) e treina dois
+Conectar junta dois comportamentos diferentes (apresentar pessoas e manter o contato depois) e treina dois
 capítulos da Aventura (3 e 4), então ganha duas perguntas, uma para cada lado. Abordar é a porta de
 entrada do evento e o exemplo oficial da seção 3B, então também tem duas. Escutar fica com uma: é a
 habilidade mais parecida com o que a Aventura já mede em Profundidade.
@@ -35,13 +35,13 @@ Você chega e vê 3 pessoas conversando em roda. O que faz?
 - (c) Vai pegar café e desiste
 
 **Explicação:** Pedir licença abre espaço sem interromper ninguém. Esperar ser notado pode levar o
-coffee break inteiro.
+intervalo inteiro.
 
 ### `diag-escutar-1` · Escutar
-Alguém conta que está migrando o time de REST para GraphQL. Você:
-- (a) Conta como foi a sua migração, que deu muito certo
-- (b) Diz que GraphQL é modinha
-- (c) Pergunta o que fez o time decidir pela troca ✅
+Alguém conta que mudou de área depois de dez anos no mesmo emprego. Você:
+- (a) Conta como foi a sua mudança, que deu muito certo
+- (b) Diz que mudar de área a essa altura é arriscado
+- (c) Pergunta o que fez a pessoa decidir pela troca ✅
 
 **Explicação:** Perguntar o porquê mostra interesse de verdade e faz a pessoa contar a parte boa da
 história. Falar de você logo de cara rouba a vez dela.
@@ -56,10 +56,10 @@ Você está conversando com a Ana quando o Léo, que você conheceu de manhã, c
 dois um assunto para começar.
 
 ### `diag-abordar-2` · Abordar
-Na fila do café, a pessoa da frente está com a camiseta de um framework que você usa. Você:
+Na fila do credenciamento, a pessoa da frente está com a camiseta de um show que você também foi. Você:
 - (a) Fica quieto: fila não é lugar de conversa
 - (b) Vira o crachá dela para ler o nome
-- (c) Comenta da camiseta e pergunta o que ela está achando do framework ✅
+- (c) Comenta da camiseta e pergunta o que ela achou do show ✅
 
 **Explicação:** Um detalhe em comum é o gancho mais fácil que existe. Fila é ótimo lugar para puxar
 assunto: todo mundo está parado e sem pressa.
@@ -80,7 +80,7 @@ mensagem ajuda a pessoa a saber quem você é no meio de tantos convites.
 ### Abordar
 
 #### `abordar-1`
-O coffee break começou e você não conhece ninguém. Qual abertura funciona melhor?
+O intervalo do café começou e você não conhece ninguém. Qual abertura funciona melhor?
 - (a) "E aí, o que você achou da última palestra?" ✅
 - (b) "Oi, você trabalha onde?" e já mostra seu LinkedIn
 - (c) Fica no celular até alguém falar com você
@@ -161,5 +161,5 @@ Você prometeu mandar um artigo para alguém que conheceu no evento. Você:
 - (b) Não manda: a pessoa já deve ter esquecido
 - (c) Manda no mesmo dia, com uma linha lembrando a conversa ✅
 
-**Explicação:** Cumprir uma promessa pequena rápido é o follow-up mais forte que existe. A linha sobre
+**Explicação:** Cumprir uma promessa pequena rápido é o melhor jeito de manter o contato. A linha sobre
 a conversa ajuda a pessoa a lembrar de você.

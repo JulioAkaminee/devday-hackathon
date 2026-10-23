@@ -30,12 +30,12 @@ export const DIAGNOSTICO: Questao[] = [
     situacao: 'Você chega e vê 3 pessoas conversando em roda. O que faz?',
     opcoes: ['Espera alguém olhar para você', 'Se aproxima e pergunta "posso entrar?"', 'Vai pegar café e desiste'],
     correta: 1,
-    explicacao: 'Pedir licença abre espaço sem interromper ninguém. Esperar ser notado pode levar o coffee break inteiro.',
+    explicacao: 'Pedir licença abre espaço sem interromper ninguém. Esperar ser notado pode levar o intervalo inteiro.',
   },
   {
     id: 'diag-escutar-1', habilidade: 'escutar',
-    situacao: 'Alguém conta que está migrando o time de REST para GraphQL. Você:',
-    opcoes: ['Conta como foi a sua migração, que deu muito certo', 'Diz que GraphQL é modinha', 'Pergunta o que fez o time decidir pela troca'],
+    situacao: 'Alguém conta que mudou de área depois de dez anos no mesmo emprego. Você:',
+    opcoes: ['Conta como foi a sua mudança, que deu muito certo', 'Diz que mudar de área a essa altura é arriscado', 'Pergunta o que fez a pessoa decidir pela troca'],
     correta: 2,
     explicacao: 'Perguntar o porquê mostra interesse de verdade e faz a pessoa contar a parte boa da história. Falar de você logo de cara rouba a vez dela.',
   },
@@ -48,8 +48,8 @@ export const DIAGNOSTICO: Questao[] = [
   },
   {
     id: 'diag-abordar-2', habilidade: 'abordar',
-    situacao: 'Na fila do café, a pessoa da frente está com a camiseta de um framework que você usa. Você:',
-    opcoes: ['Fica quieto: fila não é lugar de conversa', 'Vira o crachá dela para ler o nome', 'Comenta da camiseta e pergunta o que ela está achando do framework'],
+    situacao: 'Na fila do credenciamento, a pessoa da frente está com a camiseta de um show que você também foi. Você:',
+    opcoes: ['Fica quieto: fila não é lugar de conversa', 'Vira o crachá dela para ler o nome', 'Comenta da camiseta e pergunta o que ela achou do show'],
     correta: 2,
     explicacao: 'Um detalhe em comum é o gancho mais fácil que existe. Fila é ótimo lugar para puxar assunto: todo mundo está parado e sem pressa.',
   },
@@ -66,7 +66,7 @@ export const ATIVIDADES: Record<Habilidade, Questao[]> = {
   abordar: [
     {
       id: 'abordar-1', habilidade: 'abordar',
-      situacao: 'O coffee break começou e você não conhece ninguém. Qual abertura funciona melhor?',
+      situacao: 'O intervalo do café começou e você não conhece ninguém. Qual abertura funciona melhor?',
       opcoes: ['"E aí, o que você achou da última palestra?"', '"Oi, você trabalha onde?" e já mostra seu LinkedIn', 'Fica no celular até alguém falar com você'],
       correta: 0,
       explicacao: 'Comentar algo que vocês acabaram de viver juntos é o jeito mais leve de começar. Ninguém precisa se apresentar formalmente para responder.',
@@ -129,7 +129,7 @@ export const ATIVIDADES: Record<Habilidade, Questao[]> = {
       situacao: 'Você prometeu mandar um artigo para alguém que conheceu no evento. Você:',
       opcoes: ['Manda quando lembrar, talvez semana que vem', 'Não manda: a pessoa já deve ter esquecido', 'Manda no mesmo dia, com uma linha lembrando a conversa'],
       correta: 2,
-      explicacao: 'Cumprir uma promessa pequena rápido é o follow-up mais forte que existe. A linha sobre a conversa ajuda a pessoa a lembrar de você.',
+      explicacao: 'Cumprir uma promessa pequena rápido é o melhor jeito de manter o contato. A linha sobre a conversa ajuda a pessoa a lembrar de você.',
     },
   ],
 }
