@@ -37,7 +37,8 @@ src/shared/story.ts      espécies, acessórios, temas, textos, finais
 src/server/index.ts      Express: API, pets de exemplo, snapshot em data/mundo.json
 src/client/main.ts       telas (criação, topo, cartão da Missão, abas, Academia, modal Escanear)
 src/client/world.ts      cena Three.js: 5 ilhas, viagem do pet, zonas de escolha, final
-src/client/pet.ts        pets voxel (PETS), acessórios, itens; criarPet(dna, itens)
+src/client/pet.ts        adapta os mascotes de assets/pets ao jogo: criarPet(dna, itens), animarMascote
+assets/pets/             os 10 mascotes voxel (fonte única): especies.js, malha.js, galeria index.html
 src/client/style.css     tokens em :root (verde/preto/creme) + layout celular/computador
 ```
 
@@ -50,8 +51,12 @@ Antes de commitar: `npx tsc --noEmit`, depois `npm test` e por fim `npm run buil
 ## Contratos (não quebre sem combinar)
 
 - **Tokens visuais** só em `:root` de `style.css`. O resto do CSS usa `var(--...)`.
-- **`criarPet(dna, itens)`** devolve um `THREE.Group`. Para um pet novo:
-  1. acrescente a entrada em `PETS` (`pet.ts`);
+- **`criarPet(dna, itens)`** devolve um `THREE.Group` com `userData.corpo` (grupo que quica);
+  `animarMascote(pet, t, animacao)` mexe braços e pernas (parado, andar, pular, acenar, comemorar).
+  Todo pet usa a mochila com a logo da OpenAI; o acessório (nenhum, óculos, boina) é um extra.
+  Para um pet novo:
+  1. acrescente a entrada em `PETS` de `assets/pets/especies.js`, com os `encaixes` (olhos, topo, peito)
+     e confira na galeria (`cd assets/pets && python3 -m http.server`);
   2. acrescente a espécie em `ESPECIES`, `NOMES_ESPECIE`, `PERSONALIDADE` e `COR_ESPECIE` (`story.ts`).
 - **`FASES[0..4]`** em `world.ts`: cada ilha tem `montar` (arte) e `zonas` (onde o pet escolhe).
   Se mudar a arte, mantenha as zonas.
@@ -74,7 +79,7 @@ Pronto e testado:
 - Aventura completa: 4 Missões e 3 finais. O encontro é mútuo, com aviso "X te encontrou!" e
   retomada por capítulo.
 - Academia completa (K1–K6).
-- 10 pets voxel.
+- 10 pets voxel de `assets/pets`, com mochila e logo, animados no mundo (andar, acenar, comemorar).
 - Mapa de ilhas.
 - UI nova.
 - Dockerfile.

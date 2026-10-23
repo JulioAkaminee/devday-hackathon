@@ -22,7 +22,7 @@ toda escolha nasce de um encontro.
 
 | # | Decisão |
 |---|---|
-| D1 | O pet é **personalizado na hora, em uma tela, sem IA e sem foto**: espécie, cor, acessório e nome |
+| D1 | O pet é **personalizado na hora, em uma tela, sem IA e sem foto**: espécie, acessório (nenhum, óculos ou boina) e nome. Todo pet usa a mochila com a logo da OpenAI |
 | D2 | A narrativa é reforçada: cada missão é um **capítulo com texto**, e a consequência é **contada na história**, não só mostrada na barra |
 | D3 | A demo não depende do público: **a dupla do time basta**, com pets de exemplo e partida salva (seção 7) |
 | D4 | O critério é **complexidade, não tempo**: trabalho dividido em módulos com contrato, tocados em paralelo por duas pessoas e vários agentes (seção 9) |

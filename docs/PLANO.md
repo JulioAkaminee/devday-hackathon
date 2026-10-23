@@ -98,9 +98,11 @@ paralelo (inclusive por agentes). Marcar `[x]` com o hash do commit.
       `:root` (contrato da seção 3)
 - [ ] **V2 · Menu do mundo** — Julio · V1 · hub com Credenciamento, Aventura, Academia e Quem eu
       conheci, chamando as funções do contrato
-- [~] **V3 · Pets** — Miguel fez os 10 pets da `pets-do-evento-v1.png` em voxel (`pet.ts`, `PETS`);
-      Julio: ajustar proporção/cor e mandar novos assets — basta acrescentar uma entrada em `PETS`
-      e a espécie em `story.ts`
+- [x] **V3 · Pets** — os 10 mascotes de `assets/pets` (Julio) estão no jogo de ponta a ponta:
+      criação, retratos, mapa, amigo, figurantes, final e `/demo`, com braços e pernas animados.
+      Todos usam mochila com a logo da OpenAI; acessórios viraram **nenhum, óculos e boina**
+      (`story.ts`); itens das barras (crachás, xícara, capa) servem em qualquer pet. Pet novo:
+      entrada em `PETS` de `assets/pets/especies.js` (com `encaixes`) e a espécie em `story.ts`
 - [ ] **V4 · Arte das fases e dos finais** — Julio · — · `FASES[].montar` e `cenaFinal` com a
       identidade nova
 - [ ] **V5 · UI** — Julio · V1 · HUD, balões, tela de criação e tela da trilha seguindo os tokens,

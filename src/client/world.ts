@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import type { Opcao } from '../shared/engine.ts'
-import { criarPet, type DNA, type Itens } from './pet.ts'
+import { animarMascote, criarPet, type DNA, type Itens } from './pet.ts'
 
 // Mapa da aventura (docs/referencias/mapa-aventura-v1.png): as 4 ilhas sempre à vista, ligadas por um
 // caminho. A escolha é feita no cartão (D8); o mundo mostra onde o pet está e o que já aconteceu.
@@ -319,6 +319,8 @@ export class Mundo {
   private extras = new THREE.Group() // cena do final
   private pet: THREE.Group | null = null
   private amigo: THREE.Group | null = null
+  private figurantes: THREE.Object3D[] = [] // pets de outros participantes parados no mapa
+  private tipoFinal: 'time' | 'colecionador' | 'amigo' | null = null
   private amigoAlvo = new THREE.Vector3()
   private relogio = new THREE.Clock()
   private modo: Modo = 'vitrine'
@@ -420,6 +422,7 @@ export class Mundo {
       p.position.set(x, 0, z)
       p.rotation.y = -0.4
       this.mapa.add(p)
+      this.figurantes.push(p)
       if (b) { const s = balao(b); s.position.set(x + 0.9, 4.1, z); this.mapa.add(s) }
     }
   }
@@ -554,6 +557,7 @@ export class Mundo {
   /** Final no Palco DevDay: a câmera aproxima e os contatos aparecem conforme o final. */
   cenaFinal(tipo: 'time' | 'colecionador' | 'amigo', contatos: DNA[]) {
     this.modo = 'final'
+    this.tipoFinal = tipo
     this.pan.set(0, 0, 0)
     this.ajustar()
     if (this.amigo) { this.cena.remove(this.amigo); this.amigo = null }
@@ -713,9 +717,19 @@ export class Mundo {
         a.rotation.y = Math.atan2(delta.x, delta.z)
       } else a.rotation.y = -0.5
       a.userData.corpo.position.y = andando ? Math.abs(Math.sin(t * 12 + 1)) * 0.08 : 0
+      if (!calmo) animarMascote(a, t + 1.3, andando ? 'andar' : 'acenar')
     }
     for (const o of this.extras.children) {
       if (o.userData.festa && !calmo) o.userData.corpo.position.y = Math.abs(Math.sin(t * 6 + o.position.x)) * 0.15
+      if (!calmo) animarMascote(o, t + o.position.x, o.userData.festa ? 'comemorar' : 'parado')
+    }
+    if (!calmo) {
+      for (const o of this.marcas.children) animarMascote(o, t + o.position.x * 0.37, 'parado')
+      if (this.mapa.visible) for (const o of this.figurantes) animarMascote(o, t + o.position.x * 0.37, 'parado')
+      if (pet) {
+        const final = this.modo === 'final' && this.tipoFinal === 'time'
+        animarMascote(pet, t, this.modo === 'vitrine' ? 'acenar' : this.viagem ? 'andar' : this.pulo > 0 || final ? 'comemorar' : 'parado')
+      }
     }
     this.renderer.render(this.cena, this.camera)
   }

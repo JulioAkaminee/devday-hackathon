@@ -5,7 +5,8 @@ import type { Final } from './engine.ts'
 export const ESPECIES = [
   'xicara', 'caderninho', 'laptopinho', 'plantinha', 'lampada', 'coracao', 'globinho', 'estrelinha', 'conezinho', 'nuvem',
 ] as const
-export const ACESSORIOS = ['nenhum', 'mochila', 'oculos', 'boina'] as const
+// Todo pet já usa a mochila com a logo da OpenAI; o acessório é um extra por cima.
+export const ACESSORIOS = ['nenhum', 'oculos', 'boina'] as const
 export const TEMAS = ['front', 'back', 'mobile', 'dados', 'design', 'produto', 'carreira'] as const
 
 export type Especie = (typeof ESPECIES)[number]
@@ -34,7 +35,7 @@ export const COR_ESPECIE: Record<Especie, string> = {
   coracao: '#ff3d8b', globinho: '#2f7bf5', estrelinha: '#ffd60a', conezinho: '#ff4d3d', nuvem: '#3d8bff',
 }
 export const NOMES_ACESSORIO: Record<Acessorio, string> = {
-  nenhum: 'Nada', mochila: 'Mochila', oculos: 'Óculos', boina: 'Boina',
+  nenhum: 'Nada', oculos: 'Óculos', boina: 'Boina',
 }
 
 export const PROLOGO =
