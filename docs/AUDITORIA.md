@@ -19,7 +19,7 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
 - [x] **S1 · Encontro só em `aguardando`, antes de buscar o código** (`server/index.ts:183`). Hoje um
       código inexistente dá 404 e um real dá 409: dá para enumerar os 4 caracteres, e com `retomar` para
       a Missão 1 um pet abre o capítulo de vários outros. Checar a fase primeiro.
-- [ ] **S2 · Limite por token** (PLANO A5): encontro a cada 5 s, bloqueio após ~20 códigos errados;
+- [x] **S2 · Limite por token** (PLANO A5): encontro a cada 5 s, bloqueio após ~20 códigos errados;
       `Map<token, …>` em memória, nunca por IP.
 - [ ] **S3 · Teto de pets** (`POST /api/pets`): `pets.size >= 2000` → 503 "evento lotado". Sem teto,
       `novoCodigo` fica O(n) e trava o loop quando os códigos acabam.

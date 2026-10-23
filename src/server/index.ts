@@ -9,7 +9,7 @@ import {
   habilidadeFraca, novaAcademia, progresso, proximaAtividade, responderAtividade, responderDiagnostico, type Academia,
 } from '../shared/academia.ts'
 import { ACESSORIOS, COR_ESPECIE, ESPECIES, TEMAS, type Acessorio, type Especie, type Tema } from '../shared/story.ts'
-import { ErroHttp, alvoDoEncontro } from './regras.ts'
+import { ErroHttp, Limite, alvoDoEncontro } from './regras.ts'
 
 interface Pet {
   id: string
@@ -178,12 +178,22 @@ app.post('/api/comecar', (req, res) => {
   res.json(visao(p))
 })
 
+const limite = new Limite()
 app.post('/api/encontro', (req, res) => {
   const p = eu(req)
   const codigo = String(req.body?.codigo ?? '').trim().toUpperCase()
-  const outro = alvoDoEncontro(p.estado, codigo, (c) => [...pets.values()].find((x) => x.codigo === c))
+  const agora = Date.now()
+  limite.checar(p.token, agora)
+  let outro: Pet
+  try {
+    outro = alvoDoEncontro(p.estado, codigo, (c) => [...pets.values()].find((x) => x.codigo === c))
+  } catch (e) {
+    if (e instanceof ErroHttp) limite.errou(p.token, agora)
+    throw e
+  }
   if (outro.id === p.id) throw new ErroHttp(400, 'esse é o seu próprio pet')
   mudar(p, encontrar(p.estado, outro.id))
+  limite.encontrou(p.token, agora)
   // O encontro vale para os dois: se o outro está esperando alguém, o capítulo dele abre também (L3)
   // (se a missão do outro não aceita este encontro, ele só registra que te conheceu)
   if (!outro.demo) {
