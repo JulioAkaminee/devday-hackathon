@@ -339,6 +339,7 @@ export class Mundo {
   private pinca: { dist: number; zoom: number } | null = null
   private zoom = 1
   private zoomAlvo = 1
+  private fimZoom = 0
   /** prefers-reduced-motion: sem viagem animada, balanço, pulo, inércia nem câmera deslizando */
   calmo = false
 
@@ -362,6 +363,10 @@ export class Mundo {
       if (this.modo === 'vitrine') return
       e.preventDefault()
       this.zoomAlvo = this.limitarZoom(this.zoomAlvo * Math.exp(e.deltaY * 0.003))
+      canvas.classList.toggle('zoom-mais', e.deltaY < 0)
+      canvas.classList.toggle('zoom-menos', e.deltaY > 0)
+      clearTimeout(this.fimZoom)
+      this.fimZoom = window.setTimeout(() => canvas.classList.remove('zoom-mais', 'zoom-menos'), 450)
     }, { passive: false })
     this.ajustar()
     this.base.copy(this.camPos)
