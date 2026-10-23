@@ -55,6 +55,11 @@ não sabe puxar assunto, e quem puxa costuma ficar no "oi, tudo bem" e não lemb
 Você mostra o código do seu pet, a outra pessoa digita (ou lê o QR), e o encontro vira um capítulo.
 Como você conduz cada conversa decide o final.
 
+**Trilha do evento:** Educação e inclusão. A Academia ensina networking (diagnóstico, trilha e
+atividades com explicação), e a Aventura põe em prática com gente de verdade. É feito para quem chega
+sozinho: roda no navegador do celular sem instalar nada, tem caminho sem câmera (digitar o código) e
+respeita a preferência do sistema por menos movimento.
+
 **Demo:** _URL pública (Dokploy)_ · _link do vídeo_
 
 ### Desafios que o projeto cumpre

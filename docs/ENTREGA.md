@@ -51,7 +51,7 @@ Preencher na hora; os links ficam em aberto até existirem.
 - **Equipe:** Julio Akamine (@JulioAkaminee) e Miguel Souza (@miguelvzs)
 - **Desafio:** nº 10, Aventura com escolhas e consequências (cumpre também o nº 4, Trilha de estudo
   personalizada)
-- **Trilha do evento:** _aberta (decidir com o Julio)_
+- **Trilha do evento:** Educação e inclusão
 - **Repositório:** _link do GitHub_
 - **URL pública:** _URL do Dokploy_
 - **Vídeo:** _link_
