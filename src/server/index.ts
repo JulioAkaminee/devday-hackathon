@@ -149,9 +149,10 @@ const eu = (req: express.Request) => {
 
 function visao(p: Pet) {
   const pub = (id: string | null) => (id && pets.has(id) ? publico(pets.get(id)!) : null)
+  // cap. 2: quem oferece o que você procura; cap. 4: seus contatos, para o reencontro
   const sugestoes = p.estado.cap === 2
     ? [...pets.values()].filter((x) => x.id !== p.id && x.oferece === p.procura && !p.estado.conhecidos.includes(x.id)).slice(0, 3).map(publico)
-    : []
+    : p.estado.cap === 4 ? p.estado.conhecidos.filter((id) => pets.has(id)).map((id) => publico(pets.get(id)!)) : []
   return {
     pet: publico(p),
     estado: p.estado,
