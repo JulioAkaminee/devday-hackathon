@@ -64,40 +64,40 @@ que oferecem isso. Escolhe uma e vai lá.
 
 ---
 
-## Capítulo 3 — Cultive conexões
+## Capítulo 3: Cultive conexões
 
 **Objetivo (cartão):** Ligue pessoas que combinam
 
-**Abertura:** Você já conhece gente. Agora vem a parte que quase ninguém faz: ligar pessoas. Encontra
-alguém novo e repara se ele combina com quem a gente já conheceu.
+**Abertura:** Você já conhece algumas pessoas aqui. Agora quero que você ligue duas delas. Encontra
+alguém novo e repara se combina com quem a gente já conheceu.
 
-**Encontro:** Esse é {amigo}, de {dono_amigo}. E olha só: tem tudo a ver com {contato}, que a gente
-conheceu antes.
+**Encontro:** Esse é {amigo}, de {dono_amigo}. Me lembrou {contato}, que a gente conheceu mais cedo:
+os dois falam do mesmo assunto.
 
 **Escolha:** O que você faz com essa coincidência?
 
 | | Opção | Consequência |
 |---|---|---|
-| Ampla | Apresentar {dono_amigo} a {dono_contato} | Você juntou os dois e saiu de fininho. Eles já estão falando em montar alguma coisa juntos. Virei ponte! Ganhei mais um crachá pendurado. |
-| Profunda | Marcar um café com {dono_amigo} depois do evento | Vocês trocaram contato e marcaram um café na semana que vem. Sem pressa: essa conversa vai continuar. Ganhei uma xícara de presente. |
+| Ampla | Apresentar os dois | Você apresentou {dono_amigo} a {dono_contato} e saiu de fininho. Quando olhei para trás, os dois rabiscavam um projeto num guardanapo. Ganhei mais um crachá pendurado. |
+| Profunda | Marcar um café para depois | Vocês trocaram contato e marcaram um café para a próxima terça. {dono_amigo} já mandou o endereço. Ganhei uma xícara de presente. |
 
 ---
 
-## Capítulo 4 — Palco DevDay
+## Capítulo 4: Palco DevDay
 
 **Objetivo (cartão):** Reencontre um contato antes do pitch
 
-**Abertura:** O pitch está chegando. Última missão: reencontrar alguém que a gente já conheceu hoje.
-Escaneia o QR de um contato de novo.
+**Abertura:** Faltam poucos minutos para o pitch. Última missão: reencontrar alguém que a gente já
+conheceu hoje. Digita o código de um contato de novo.
 
-**Encontro:** {amigo} voltou! Parece que faz uma eternidade.
+**Encontro:** {amigo} voltou! Faz duas horas, mas para mim pareceu uma semana.
 
-**Escolha:** Como gastar o último tempo?
+**Escolha:** O que a gente faz com o tempo que sobrou?
 
 | | Opção | Consequência |
 |---|---|---|
-| Ampla | Pedir para {dono_amigo} te apresentar mais gente | {dono_amigo} te puxou para uma roda nova. Mais nomes, mais crachás, mais apertos de mão. Minha cabeça está girando. |
-| Profunda | Ficar e torcer pelo pitch de {dono_amigo} | Você sentou na primeira fila e gritou quando o slide travou. {dono_amigo} olhou para você e sorriu. Tem gente que coleciona contatos. Você ganhou um aliado. |
+| Ampla | Pedir para conhecer mais gente | {dono_amigo} te levou até uma roda de seis pessoas e apresentou uma por uma. Eu decorei três nomes e perdi o resto. Minha cabeça está girando. |
+| Profunda | Ficar e torcer pelo pitch | Você sentou na primeira fila do pitch de {dono_amigo} e aplaudiu quando o slide travou. No fim, a primeira pessoa que {dono_amigo} procurou foi você. Agora eu sei a quem pedir ajuda amanhã. |
 
 ---
 
