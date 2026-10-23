@@ -1,4 +1,4 @@
-import { animate, stagger } from 'motion'
+import { animate, MotionGlobalConfig, stagger } from 'motion'
 import QRCode from 'qrcode'
 import type { Estado, Final, Opcao } from '../shared/engine.ts'
 import { finalDe, TOTAL_CAPITULOS } from '../shared/engine.ts'
@@ -58,6 +58,12 @@ const EVENTO = '<span class="evento"><span>DevDay</span><span>Community Hackatho
 
 const ui = document.querySelector<HTMLDivElement>('#ui')!
 const mundo = new Mundo(document.querySelector<HTMLCanvasElement>('#cena')!)
+
+// prefers-reduced-motion: o motion pula direto para o estado final e o mundo para de balançar
+const calmo = matchMedia('(prefers-reduced-motion: reduce)')
+const aplicarCalmo = () => { MotionGlobalConfig.skipAnimations = calmo.matches; mundo.calmo = calmo.matches }
+aplicarCalmo()
+calmo.addEventListener('change', aplicarCalmo)
 
 const guardado = {
   get: (k: string) => { try { return localStorage.getItem(k) } catch { return null } },
@@ -407,7 +413,7 @@ addEventListener('pointermove', (ev) => {
   animate(document.querySelectorAll('.marca .olho'), { x: olhar.x, y: olhar.y }, { type: 'spring', stiffness: 220, damping: 16, mass: 0.6 })
 })
 // piscada de vez em quando
-setInterval(() => animate(document.querySelectorAll('.marca .olho'), { scaleY: [1, 0.12, 1] }, { duration: 0.22 }), 4800)
+setInterval(() => calmo.matches || animate(document.querySelectorAll('.marca .olho'), { scaleY: [1, 0.12, 1] }, { duration: 0.22 }), 4800)
 
 function escolher(op: Opcao) {
   escolhaLocal = visao!.estado.cap

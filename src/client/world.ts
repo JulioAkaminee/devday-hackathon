@@ -331,6 +331,8 @@ export class Mundo {
   private pinca: { dist: number; zoom: number } | null = null
   private zoom = 1
   private zoomAlvo = 1
+  /** prefers-reduced-motion: sem viagem animada, balanço, pulo, inércia nem câmera deslizando */
+  calmo = false
 
   constructor(canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
@@ -628,6 +630,8 @@ export class Mundo {
     const dt = Math.min(this.relogio.getDelta(), 0.05)
     const t = this.relogio.elapsedTime
     if (document.hidden) return
+    const calmo = this.calmo
+    if (calmo) this.vel.set(0, 0, 0)
     if (!this.arrasto && this.vel.lengthSq() > 0.01) {
       this.pan.addScaledVector(this.vel, dt)
       this.vel.multiplyScalar(Math.exp(-dt * 4))
@@ -635,16 +639,23 @@ export class Mundo {
     const lim = this.modo === 'final' ? 12 : 38
     this.pan.x = THREE.MathUtils.clamp(this.pan.x, -lim, lim)
     this.pan.z = THREE.MathUtils.clamp(this.pan.z, -Math.min(lim, 16), Math.min(lim, 22))
-    this.base.lerp(this.camPos, Math.min(1, dt * 2.5))
-    this.olharAtual.lerp(this.camOlhar, Math.min(1, dt * 2.5))
-    this.zoom += (this.zoomAlvo - this.zoom) * Math.min(1, dt * 10)
+    const suave = calmo ? 1 : Math.min(1, dt * 2.5)
+    this.base.lerp(this.camPos, suave)
+    this.olharAtual.lerp(this.camOlhar, suave)
+    this.zoom += (this.zoomAlvo - this.zoom) * (calmo ? 1 : Math.min(1, dt * 10))
     const z = this.modo === 'vitrine' ? 1 : this.zoom
     this.camera.position.copy(this.base).sub(this.olharAtual).multiplyScalar(z).add(this.olharAtual).add(this.pan)
     this.camera.lookAt(this.olharAtual.clone().add(this.pan))
     const pet = this.pet
     if (pet) {
       const corpo: THREE.Group = pet.userData.corpo
-      if (this.modo === 'vitrine') {
+      if (calmo) {
+        if (this.viagem) { pet.position.copy(this.viagem.para); this.viagem = null }
+        this.pulo = 0
+        corpo.position.y = 0
+        corpo.scale.y = 1
+        pet.rotation.y = this.modo === 'vitrine' ? 0.5 : 0
+      } else if (this.modo === 'vitrine') {
         pet.rotation.y += dt * 0.8
         corpo.position.y = Math.abs(Math.sin(t * 3)) * 0.05
       } else if (this.viagem) {
@@ -669,7 +680,8 @@ export class Mundo {
     const a = this.amigo
     if (a) {
       const delta = this.amigoAlvo.clone().sub(a.position)
-      const andando = delta.length() > 0.05
+      if (calmo) a.position.copy(this.amigoAlvo)
+      const andando = !calmo && delta.length() > 0.05
       if (andando) {
         a.position.addScaledVector(delta.normalize(), Math.min(delta.length(), 7 * dt))
         a.rotation.y = Math.atan2(delta.x, delta.z)
@@ -677,7 +689,7 @@ export class Mundo {
       a.userData.corpo.position.y = andando ? Math.abs(Math.sin(t * 12 + 1)) * 0.08 : 0
     }
     for (const o of this.extras.children) {
-      if (o.userData.festa) o.userData.corpo.position.y = Math.abs(Math.sin(t * 6 + o.position.x)) * 0.15
+      if (o.userData.festa && !calmo) o.userData.corpo.position.y = Math.abs(Math.sin(t * 6 + o.position.x)) * 0.15
     }
     this.renderer.render(this.cena, this.camera)
   }
