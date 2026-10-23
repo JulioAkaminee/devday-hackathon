@@ -26,6 +26,25 @@ body.jogando #cena { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3
 body.jogando #cena.arrastando { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%23141414'%3E%3Cpath d='M11.4 17V13.5' stroke-width='6'/%3E%3Cpath d='M15 16V12.5' stroke-width='6'/%3E%3Cpath d='M18.6 16V12.5' stroke-width='6'/%3E%3Cpath d='M22.2 17V14' stroke-width='6'/%3E%3Cpath d='M10.5 20.5 13.5 17.5' stroke-width='6'/%3E%3Cpath d='M16.5 18.5V23' stroke-width='14'/%3E%3C/g%3E%3Cg stroke='%23fff'%3E%3Cpath d='M11.4 17V13.5' stroke-width='3'/%3E%3Cpath d='M15 16V12.5' stroke-width='3'/%3E%3Cpath d='M18.6 16V12.5' stroke-width='3'/%3E%3Cpath d='M22.2 17V14' stroke-width='3'/%3E%3Cpath d='M10.5 20.5 13.5 17.5' stroke-width='3'/%3E%3Cpath d='M16.5 18.5V23' stroke-width='11'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") 16 16, grabbing; }
 body.jogando #cena.zoom-mais { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%23141414'%3E%3Cpath d='M18.5 17.5 10 6' stroke-width='6'/%3E%3Cpath d='M15 22 4.5 15' stroke-width='6'/%3E%3Cpath d='M19.5 18V15.5' stroke-width='6'/%3E%3Cpath d='M22.8 19V16.8' stroke-width='6'/%3E%3Cpath d='M17 24.5V21' stroke-width='12'/%3E%3C/g%3E%3Cg stroke='%23fff'%3E%3Cpath d='M18.5 17.5 10 6' stroke-width='3'/%3E%3Cpath d='M15 22 4.5 15' stroke-width='3'/%3E%3Cpath d='M19.5 18V15.5' stroke-width='3'/%3E%3Cpath d='M22.8 19V16.8' stroke-width='3'/%3E%3Cpath d='M17 24.5V21' stroke-width='9'/%3E%3C/g%3E%3C/g%3E%3Ccircle cx='25' cy='6.5' r='5.5' fill='%2322b04b' stroke='%23141414' stroke-width='1.6'/%3E%3Cpath d='M22.5 6.5h5' stroke='%23141414' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M25 4v5' stroke='%23141414' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") 7 10, zoom-in; }
 body.jogando #cena.zoom-menos { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%23141414'%3E%3Cpath d='M18.5 17.5 10 7.5' stroke-width='6'/%3E%3Cpath d='M15 22 9.5 10' stroke-width='6'/%3E%3Cpath d='M19.5 18V15.5' stroke-width='6'/%3E%3Cpath d='M22.8 19V16.8' stroke-width='6'/%3E%3Cpath d='M17 24.5V21' stroke-width='12'/%3E%3C/g%3E%3Cg stroke='%23fff'%3E%3Cpath d='M18.5 17.5 10 7.5' stroke-width='3'/%3E%3Cpath d='M15 22 9.5 10' stroke-width='3'/%3E%3Cpath d='M19.5 18V15.5' stroke-width='3'/%3E%3Cpath d='M22.8 19V16.8' stroke-width='3'/%3E%3Cpath d='M17 24.5V21' stroke-width='9'/%3E%3C/g%3E%3C/g%3E%3Ccircle cx='25' cy='6.5' r='5.5' fill='%2322b04b' stroke='%23141414' stroke-width='1.6'/%3E%3Cpath d='M22.5 6.5h5' stroke='%23141414' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") 9 12, zoom-out; }
+/* com a mão desenhada (mao.ts) ativa, o cursor do sistema some sobre o mapa */
+body.jogando #cena.mao-ativa[class] { cursor: none; }
+.mao { position: fixed; left: 0; top: 0; width: 46px; height: 46px; z-index: 1; pointer-events: none; opacity: 0; transition: opacity .15s; transform-style: preserve-3d; will-change: transform; }
+.mao.visivel { opacity: 1; }
+.mao svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(3px 9px 5px rgb(20 20 20 / .22)); transition: filter .22s cubic-bezier(.2, .8, .2, 1), transform .22s cubic-bezier(.2, .8, .2, 1); }
+.mao .dedo, .mao .dedao { transform-box: fill-box; transition: transform .2s cubic-bezier(.3, 1.3, .5, 1); }
+.mao .dedo { transform-origin: 50% 100%; }
+.mao .dedao { transform-origin: 90% 92%; transform: rotate(-38deg); }
+/* agarrando: dedos dobram, o dedão fecha sobre a palma e a mão encosta no mapa (sombra curta) */
+.mao[data-pose="fechada"] svg { transform: scale(.92) rotateX(14deg); filter: drop-shadow(1px 2px 1.5px rgb(20 20 20 / .32)); }
+.mao[data-pose="fechada"] .dedo { transform: scaleY(.42); }
+.mao[data-pose="fechada"] .dedao { transform: rotate(-8deg) scaleY(.8); }
+/* zoom: três dedos dobrados e a pinça entre indicador e dedão (aberta para aproximar, fechada para afastar) */
+.mao[data-pose="mais"] .dedo:not(.indicador), .mao[data-pose="menos"] .dedo:not(.indicador) { transform: scaleY(.42); }
+.mao[data-pose="mais"] .indicador { transform: rotate(-6deg); }
+.mao[data-pose="mais"] .dedao { transform: rotate(-52deg); }
+.mao[data-pose="menos"] .indicador { transform: rotate(-18deg) scaleY(.72); }
+.mao[data-pose="menos"] .dedao { transform: rotate(-24deg); }
+@media (prefers-reduced-motion: reduce) { .mao .dedo, .mao .dedao, .mao svg { transition: none; } }
 #ui { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
 #ui > * { pointer-events: auto; }
 

@@ -11,6 +11,7 @@ import {
 } from '../shared/academia.ts'
 import { itensDe, retrato, type DNA } from './pet.ts'
 import { Mundo } from './world.ts'
+import './mao.ts'
 import './style.css'
 
 interface PetPublico extends DNA {
