@@ -104,14 +104,13 @@ conheceu hoje. Digita o código de um contato de novo.
 ## Finais
 
 ### Time dos Sonhos
-Chegou a hora da jornada final e eu não estou sozinho: {lista_amigos} vieram comigo. Gente diferente,
-conversas de verdade, conexões que vão durar mais que o evento. A gente é o Time dos Sonhos.
+Chegou a hora da jornada final e {lista_amigos} vieram comigo. Cada um trabalha numa área, e com cada
+um você teve uma conversa longa. Esse é o nosso time.
 
 ### Colecionador de Crachás
-Olha quanta gente! {n} crachás pendurados em mim. Eu conheço todo mundo… mas, quando chamei para a
-jornada final, ninguém lembrou do meu nome. Da próxima vez, que tal ficar um pouco mais em cada
-conversa?
+Olha quanta gente: {n} crachás pendurados em mim. Na hora de chamar o time para a jornada final,
+ninguém lembrou do meu nome. Da próxima vez, fica um pouco mais em cada conversa?
 
 ### Amigo de Um Só
-Eu e {contato} num banquinho, dividindo o último café. Foi uma conversa incrível. Só uma. Lá fora tinha
-um evento inteiro de gente que eu nunca vou conhecer. Da próxima vez, que tal arriscar mais um oi?
+Eu e {contato} num banquinho, dividindo o último café. A conversa foi ótima e foi a única do dia, com
+um salão cheio de gente que eu não conheci. Da próxima vez, arrisca mais um oi?
