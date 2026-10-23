@@ -25,22 +25,34 @@ export interface Itens {
 const SEM_ITENS: Itens = { crachas: false, xicara: false, capa: false }
 const U = 0.062 // tamanho de um voxel no mundo: os pets ficam com 1,2 a 1,5 de altura
 
-const modelos = new Map<string, DadosPet>()
-function modelo(dna: DNA, itens: Itens) {
+// Um molde por espécie + acessório + itens. Cada pet é uma cópia que compartilha geometria e
+// material com o molde: o mundo pode remontar o mapa a cada 2 s sem alocar nada na GPU.
+const moldes = new Map<string, Pet3D>()
+function molde(dna: DNA, itens: Itens) {
   const chave = [dna.especie, dna.acessorio, itens.crachas, itens.xicara, itens.capa].join('|')
-  let dados = modelos.get(chave)
-  if (!dados) {
-    dados = gerarPet(dna.especie, { acessorio: dna.acessorio, itens })
-    modelos.set(chave, dados)
+  let m = moldes.get(chave)
+  if (!m) {
+    const dados: DadosPet = gerarPet(dna.especie, { acessorio: dna.acessorio, itens })
+    m = criarPet3D(dados)
+    moldes.set(chave, m)
   }
-  return dados
+  return m
+}
+
+function copiar(m: Pet3D): Pet3D {
+  const raiz = m.raiz.clone()
+  const grupos: Record<string, THREE.Group> = { raiz: raiz.children[0] as THREE.Group }
+  raiz.traverse((o) => {
+    if (o !== raiz && o.name && m.grupos[o.name]) grupos[o.name] = o as THREE.Group
+  })
+  return { raiz, grupos, partes: m.partes, dados: m.dados }
 }
 
 const geoSombra = new THREE.CircleGeometry(0.5, 20)
 const matSombra = new THREE.MeshBasicMaterial({ color: '#000', transparent: true, opacity: 0.18 })
 
 export function criarPet(dna: DNA, itens: Itens = SEM_ITENS) {
-  const mascote = criarPet3D(modelo(dna, itens))
+  const mascote = copiar(molde(dna, itens))
   mascote.raiz.scale.setScalar(U)
 
   const pet = new THREE.Group()
