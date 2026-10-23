@@ -38,24 +38,24 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
 
 ## Lote 2 — médio
 
-- [x] **S6 · Sugestões mostram gente real primeiro** (`server/index.ts:153`): ordenar `demo` por último
+- [x] `51f99b1` **S6 · Sugestões mostram gente real primeiro** (`server/index.ts:153`): ordenar `demo` por último
       e quem está `aguardando` primeiro, antes do `slice(0, 3)`.
-- [x] **S7 · Atividade da Academia só na ordem e uma vez** (`shared/academia.ts:170`): recusar id
+- [x] `bc345b9` **S7 · Atividade da Academia só na ordem e uma vez** (`shared/academia.ts:170`): recusar id
       diferente de `proximaAtividade`. Teste em `academia.test.ts`.
-- [x] **S8 · Diagnóstico só aceita números** (`server/index.ts:218`).
-- [x] **C5 · Safe-area do iPhone**: `.cartao` no celular com `bottom: calc(max(8px,
+- [x] `97e0789` **S8 · Diagnóstico só aceita números** (`server/index.ts:218`).
+- [x] `f3c6110` **C5 · Safe-area do iPhone**: `.cartao` no celular com `bottom: calc(max(8px,
       env(safe-area-inset-bottom)) + 66px)`; topo de `.criar` e `.demo-lista` com
       `env(safe-area-inset-top)`.
-- [x] **C6 · Sem rede**: `fetch` com `AbortSignal.timeout(8000)` e mensagem "sem conexão, tente de
+- [x] `33064c4` **C6 · Sem rede**: `fetch` com `AbortSignal.timeout(8000)` e mensagem "sem conexão, tente de
       novo" (hoje aparece "Failed to fetch"); boot que falha tenta de novo em 3 s.
-- [x] **C7 · Vazamento de GPU**: `atualizarMapa`, `cenaFinal` e `trocarPet` recriam texturas,
+- [x] `32cb772` **C7 · Vazamento de GPU**: `atualizarMapa`, `cenaFinal` e `trocarPet` recriam texturas,
       geometrias e materiais sem `dispose`. Textura do selo e sombra do pet como constantes do módulo;
       só remontar quando `cap|fase|encontros.length` mudar (inclui a cena final, que hoje reseta ao
       trocar de aba). **Pets e sombra do pet já resolvidos** em `pet.ts`: cada pet é cópia de um
       molde e compartilha geometria e material; falta a textura do selo.
-- [x] **C8 · Celular mais leve**: sem o blur (`body.jogando::before/::after`) até 760 px;
+- [x] `e80e02e` **C8 · Celular mais leve**: sem o blur (`body.jogando::before/::after`) até 760 px;
       `pixelRatio` até 1,5 em `pointer: coarse`.
-- [x] **C9 · Diagnóstico com erro não perde as 5 respostas**: `acao` devolve `true/false`; só zera
+- [x] `4d1be44` **C9 · Diagnóstico com erro não perde as 5 respostas**: `acao` devolve `true/false`; só zera
       em `true`.
 
 ## Lote 3 — baixo (se sobrar tempo)
