@@ -5,7 +5,10 @@ import { join, resolve } from 'node:path'
 import {
   ErroDeFase, amigoAtual, avancar, comecar, conhecer, encontrar, escolher, novoEstado, type Estado,
 } from '../shared/engine.ts'
-import { ACESSORIOS, CORES, ESPECIES, TEMAS, type Acessorio, type Especie, type Tema } from '../shared/story.ts'
+import {
+  habilidadeFraca, novaAcademia, progresso, proximaAtividade, responderAtividade, responderDiagnostico, type Academia,
+} from '../shared/academia.ts'
+import { ACESSORIOS, COR_ESPECIE, ESPECIES, TEMAS, type Acessorio, type Especie, type Tema } from '../shared/story.ts'
 
 interface Pet {
   id: string
@@ -22,6 +25,7 @@ interface Pet {
   demo: boolean
   estado: Estado
   historico: Estado[] // estado no início de cada capítulo, para retomar dali (demo dos dois caminhos)
+  academia: Academia // desafio nº 4: separado de Alcance e Profundidade (QUEBRA-GELO.md, 3B)
 }
 
 const PORT = Number(process.env.PORT ?? 3000)
@@ -48,30 +52,33 @@ const publico = (p: Pet) => ({
 })
 
 // Semente: pets de exemplo para a demo não depender do público (QUEBRA-GELO.md, seção 7)
-const SEMENTE: [string, string, Especie, number, Acessorio, Tema, Tema, Tema][] = [
-  ['XICA', 'Xícaro|Ana', 'gato', 0, 'laco', 'design', 'back', 'design'],
-  ['TAMP', 'Tampinha|Bruno', 'robo', 5, 'nenhum', 'back', 'design', 'back'],
-  ['BOLT', 'Bolota|Carla', 'slime', 3, 'chapeu', 'dados', 'produto', 'dados'],
-  ['NEKO', 'Neko|Diego', 'dragao', 6, 'oculos', 'front', 'carreira', 'front'],
-  ['PIXL', 'Pixel|Elisa', 'coruja', 2, 'oculos', 'mobile', 'front', 'mobile'],
-  ['LUMA', 'Luma|Fábio', 'cachorro', 7, 'chapeu', 'produto', 'dados', 'produto'],
-  ['GURU', 'Guru|Gabi', 'coruja', 1, 'nenhum', 'carreira', 'mobile', 'carreira'],
+const SEMENTE: [string, string, Especie, Acessorio, Tema, Tema, Tema][] = [
+  ['XICA', 'Xícara|Ana', 'xicara', 'nenhum', 'design', 'back', 'design'],
+  ['CADE', 'Caderninho|Bruno', 'caderninho', 'nenhum', 'back', 'design', 'back'],
+  ['LAMP', 'Lâmpada|Carla', 'lampada', 'nenhum', 'dados', 'produto', 'dados'],
+  ['CORA', 'Coração|Diego', 'coracao', 'nenhum', 'front', 'carreira', 'front'],
+  ['GLOB', 'Globinho|Elisa', 'globinho', 'nenhum', 'mobile', 'front', 'mobile'],
+  ['CONE', 'Conezinho|Fábio', 'conezinho', 'nenhum', 'produto', 'dados', 'produto'],
+  ['NUVE', 'Nuvem|Gabi', 'nuvem', 'boina', 'carreira', 'mobile', 'carreira'],
 ]
 function semear() {
-  for (const [codigo, nomes, especie, cor, acessorio, area, procura, oferece] of SEMENTE) {
+  for (const [codigo, nomes, especie, acessorio, area, procura, oferece] of SEMENTE) {
     if ([...pets.values()].some((p) => p.codigo === codigo)) continue
     const id = 'demo-' + codigo.toLowerCase()
     const [nome, dono] = nomes.split('|')
     pets.set(id, {
-      id, token: randomBytes(16).toString('hex'), codigo, nome, dono, especie, cor: CORES[cor], acessorio,
-      area, procura, oferece, demo: true, estado: novoEstado(), historico: [],
+      id, token: randomBytes(16).toString('hex'), codigo, nome, dono, especie, cor: COR_ESPECIE[especie], acessorio,
+      area, procura, oferece, demo: true, estado: novoEstado(), historico: [], academia: novaAcademia(),
     })
   }
 }
 
 function carregar() {
   if (!existsSync(ARQUIVO)) return
-  for (const p of JSON.parse(readFileSync(ARQUIVO, 'utf8')) as Pet[]) pets.set(p.id, p)
+  // pets de uma versão antiga (espécie que não existe mais) ficam de fora
+  for (const p of JSON.parse(readFileSync(ARQUIVO, 'utf8')) as Pet[]) {
+    if (ESPECIES.includes(p.especie)) pets.set(p.id, { ...p, academia: p.academia ?? novaAcademia() })
+  }
 }
 function salvar() {
   if (!sujo) return
@@ -113,7 +120,7 @@ app.post('/api/pets', (req, res) => {
     nome,
     dono,
     especie: um(b.especie, ESPECIES, 'especie'),
-    cor: um(b.cor, CORES, 'cor'),
+    cor: COR_ESPECIE[b.especie as Especie],
     acessorio: um(b.acessorio, ACESSORIOS, 'acessorio'),
     area: um(b.area, TEMAS, 'area'),
     procura: um(b.procura, TEMAS, 'procura'),
@@ -121,6 +128,7 @@ app.post('/api/pets', (req, res) => {
     demo: false,
     estado: novoEstado(),
     historico: [],
+    academia: novaAcademia(),
   }
   pets.set(p.id, p)
   sujo = true
@@ -151,6 +159,12 @@ function visao(p: Pet) {
     conhecidos: p.estado.conhecidos.map(pub).filter(Boolean),
     capitulosSalvos: p.historico.map((e, i) => (e ? i : -1)).filter((i) => i > 0),
     sugestoes,
+    academia: {
+      ...p.academia,
+      progresso: progresso(p.academia),
+      proxima: proximaAtividade(p.academia)?.id ?? null,
+      fraca: habilidadeFraca(p.academia),
+    },
   }
 }
 
@@ -187,6 +201,26 @@ app.post('/api/avancar', (req, res) => {
 })
 
 // Retomar do início de um capítulo salvo: é o que mostra os dois caminhos na demo
+// Academia (desafio nº 4): diagnóstico uma vez, depois atividades da trilha
+const errosAcademia = (f: () => void) => {
+  try { f() } catch (e) { throw new ErroHttp(400, (e as Error).message) }
+}
+app.post('/api/diagnostico', (req, res) => {
+  const p = eu(req)
+  const respostas = Array.isArray(req.body?.respostas) ? req.body.respostas.map(Number) : []
+  errosAcademia(() => { p.academia = responderDiagnostico(p.academia, respostas) })
+  sujo = true
+  res.json(visao(p))
+})
+app.post('/api/atividade', (req, res) => {
+  const p = eu(req)
+  let r!: ReturnType<typeof responderAtividade>
+  errosAcademia(() => { r = responderAtividade(p.academia, String(req.body?.id), Number(req.body?.opcao)) })
+  p.academia = r.academia
+  sujo = true
+  res.json({ ...visao(p), resultado: { acertou: r.acertou, explicacao: r.explicacao } })
+})
+
 app.post('/api/retomar', (req, res) => {
   const p = eu(req)
   const salvo = p.historico[Number(req.body?.cap)]

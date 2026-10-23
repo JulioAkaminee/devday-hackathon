@@ -1,9 +1,11 @@
 // Textos da aventura. Fonte: docs/HISTORIA.md (rascunho v1). Mudou lá, muda aqui.
 import type { Final } from './engine.ts'
 
-export const ESPECIES = ['gato', 'cachorro', 'coruja', 'dragao', 'slime', 'robo'] as const
-export const ACESSORIOS = ['nenhum', 'chapeu', 'laco', 'oculos'] as const
-export const CORES = ['#ff6b6b', '#ffa94d', '#ffd43b', '#69db7c', '#38d9a9', '#4dabf7', '#9775fa', '#f783ac'] as const
+// Pets do evento: docs/referencias/pets-do-evento-v1.png (Julio)
+export const ESPECIES = [
+  'xicara', 'caderninho', 'laptopinho', 'plantinha', 'lampada', 'coracao', 'globinho', 'estrelinha', 'conezinho', 'nuvem',
+] as const
+export const ACESSORIOS = ['nenhum', 'mochila', 'oculos', 'boina'] as const
 export const TEMAS = ['front', 'back', 'mobile', 'dados', 'design', 'produto', 'carreira'] as const
 
 export type Especie = (typeof ESPECIES)[number]
@@ -11,10 +13,28 @@ export type Acessorio = (typeof ACESSORIOS)[number]
 export type Tema = (typeof TEMAS)[number]
 
 export const NOMES_ESPECIE: Record<Especie, string> = {
-  gato: 'Gato', cachorro: 'Cachorro', coruja: 'Coruja', dragao: 'Dragão', slime: 'Slime', robo: 'Robô',
+  xicara: 'Xícara', caderninho: 'Caderninho', laptopinho: 'Laptopinho', plantinha: 'Plantinha', lampada: 'Lâmpada',
+  coracao: 'Coração', globinho: 'Globinho', estrelinha: 'Estrelinha', conezinho: 'Conezinho', nuvem: 'Nuvem',
+}
+export const PERSONALIDADE: Record<Especie, string> = {
+  xicara: 'Curioso e sempre puxa assunto.',
+  caderninho: 'Organizado e adora trocar ideias.',
+  laptopinho: 'Criativo e sempre tem um projeto.',
+  plantinha: 'Tranquila e faz conexões inesperadas.',
+  lampada: 'Cheio de ideias e energia.',
+  coracao: 'Empático e sempre escuta de verdade.',
+  globinho: 'Adora gente de todas as áreas.',
+  estrelinha: 'Animado e sempre incentiva os outros.',
+  conezinho: 'Direto e ajuda a focar no objetivo.',
+  nuvem: 'Observador e sempre vê o lado diferente.',
+}
+/** Cor principal de cada pet (avatar, rótulos). A cor não é escolhida: vem do pet. */
+export const COR_ESPECIE: Record<Especie, string> = {
+  xicara: '#1fbf5f', caderninho: '#2f7bf5', laptopinho: '#9aa0a6', plantinha: '#2f9e44', lampada: '#ffd60a',
+  coracao: '#ff3d8b', globinho: '#2f7bf5', estrelinha: '#ffd60a', conezinho: '#ff4d3d', nuvem: '#3d8bff',
 }
 export const NOMES_ACESSORIO: Record<Acessorio, string> = {
-  nenhum: 'Nada', chapeu: 'Cartola', laco: 'Laço', oculos: 'Óculos',
+  nenhum: 'Nada', mochila: 'Mochila', oculos: 'Óculos escuros', boina: 'Boina',
 }
 
 export const PROLOGO =
@@ -23,7 +43,7 @@ export const PROLOGO =
 
 export interface Capitulo {
   titulo: string
-  local: string
+  objetivo: string
   abertura: string
   encontro: string
   pergunta: string
@@ -33,8 +53,8 @@ export interface Capitulo {
 
 export const CAPITULOS: Capitulo[] = [
   {
-    titulo: 'Gente de outro planeta',
-    local: 'Mesas do hackathon',
+    titulo: 'Novas pessoas',
+    objetivo: 'Conheça alguém de outra área',
     abertura: 'Primeira missão: achar alguém que trabalha com algo bem diferente de você. Gente diferente é onde moram as ideias boas. Mostra meu código por aí.',
     encontro: '{amigo}, o pet de {dono_amigo}, apareceu! Ele me olhou desconfiado. Acho que gostou de mim.',
     pergunta: 'Como a gente conduz essa conversa?',
@@ -48,8 +68,8 @@ export const CAPITULOS: Capitulo[] = [
     },
   },
   {
-    titulo: 'Quem tem o que falta',
-    local: 'Balcão de mentoria',
+    titulo: 'Troca de ajuda',
+    objetivo: 'Encontre quem pode te ajudar',
     abertura: 'Você disse que hoje procura ajuda com {procura}. Farejei por aí e achei gente que oferece exatamente isso. Escolhe uma e vai lá.',
     encontro: '{amigo} chegou abanando o rabo. {dono_amigo} entende de {oferta}. É agora.',
     pergunta: 'Como você chega?',
@@ -63,8 +83,8 @@ export const CAPITULOS: Capitulo[] = [
     },
   },
   {
-    titulo: 'A ponte',
-    local: 'Ilhas de mesas',
+    titulo: 'Cultive conexões',
+    objetivo: 'Ligue pessoas que combinam',
     abertura: 'Você já conhece gente. Agora vem a parte que quase ninguém faz: ligar pessoas. Encontra alguém novo e repara se ele combina com quem a gente já conheceu.',
     encontro: 'Esse é {amigo}, de {dono_amigo}. E olha só: tem tudo a ver com {contato}, que a gente conheceu antes.',
     pergunta: 'O que você faz com essa coincidência?',
@@ -78,8 +98,8 @@ export const CAPITULOS: Capitulo[] = [
     },
   },
   {
-    titulo: 'Antes do pitch',
-    local: 'Auditório',
+    titulo: 'Palco DevDay',
+    objetivo: 'Reencontre um contato antes do pitch',
     abertura: 'O pitch está chegando. Última missão: reencontrar alguém que a gente já conheceu hoje. Digita o código de um contato de novo.',
     encontro: '{amigo} voltou! Parece que faz uma eternidade.',
     pergunta: 'Como gastar o último tempo?',

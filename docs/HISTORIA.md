@@ -28,7 +28,9 @@ Solução: você vai me apresentar.
 
 ---
 
-## Capítulo 1 — Gente de outro planeta
+## Capítulo 1 — Novas pessoas
+
+**Objetivo (cartão):** Conheça alguém de outra área
 
 **Abertura:** Primeira missão: achar alguém que trabalha com algo bem diferente de você. Gente
 diferente é onde moram as ideias boas. Mostra meu QR por aí.
@@ -45,7 +47,9 @@ mim.
 
 ---
 
-## Capítulo 2 — Quem tem o que falta
+## Capítulo 2 — Troca de ajuda
+
+**Objetivo (cartão):** Encontre quem pode te ajudar
 
 **Abertura:** Você disse que hoje procura {procura}. Farejei por aí e achei três pessoas que oferecem
 exatamente isso. Escolhe uma e vai lá.
@@ -61,7 +65,9 @@ exatamente isso. Escolhe uma e vai lá.
 
 ---
 
-## Capítulo 3 — A ponte
+## Capítulo 3 — Cultive conexões
+
+**Objetivo (cartão):** Ligue pessoas que combinam
 
 **Abertura:** Você já conhece gente. Agora vem a parte que quase ninguém faz: ligar pessoas. Encontra
 alguém novo e repara se ele combina com quem a gente já conheceu.
@@ -78,7 +84,9 @@ conheceu antes.
 
 ---
 
-## Capítulo 4 — Antes do pitch
+## Capítulo 4 — Palco DevDay
+
+**Objetivo (cartão):** Reencontre um contato antes do pitch
 
 **Abertura:** O pitch está chegando. Última missão: reencontrar alguém que a gente já conheceu hoje.
 Escaneia o QR de um contato de novo.
