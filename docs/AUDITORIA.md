@@ -53,7 +53,7 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
       só remontar quando `cap|fase|encontros.length` mudar (inclui a cena final, que hoje reseta ao
       trocar de aba). **Pets e sombra do pet já resolvidos** em `pet.ts`: cada pet é cópia de um
       molde e compartilha geometria e material; falta a textura do selo.
-- [ ] **C8 · Celular mais leve**: sem o blur (`body.jogando::before/::after`) até 760 px;
+- [x] **C8 · Celular mais leve**: sem o blur (`body.jogando::before/::after`) até 760 px;
       `pixelRatio` até 1,5 em `pointer: coarse`.
 - [ ] **C9 · Diagnóstico com erro não perde as 5 respostas**: `acao` devolve `true/false`; só zera
       em `true`.

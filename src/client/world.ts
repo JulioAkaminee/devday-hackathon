@@ -344,7 +344,8 @@ export class Mundo {
 
   constructor(canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
+    // tela de toque é celular: 1,5 já fica nítido e poupa GPU e bateria
+    this.renderer.setPixelRatio(Math.min(devicePixelRatio, matchMedia('(pointer: coarse)').matches ? 1.5 : 2))
     this.cena.background = new THREE.Color(COR.ceu)
     this.cena.fog = new THREE.Fog(COR.ceu, DIST_MAX - 10, DIST_MAX + 110)
     this.cena.add(new THREE.HemisphereLight('#ffffff', '#c9bfa8', 2.4))
