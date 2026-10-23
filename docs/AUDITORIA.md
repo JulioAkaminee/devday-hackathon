@@ -28,7 +28,7 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
       carregar, preencher `historico ?? []` e `estado: { ...novoEstado(), ...p.estado }`.
 - [x] **S5 · Erros 4xx do Express viram 400/413**, não 500 com stack no log (JSON inválido, corpo
       grande). Mensagem de `ErroDeFase` genérica (não expor a máquina de estados).
-- [ ] **C1 · Token velho se recupera**: 401 no polling ou em `acao` → apaga `qg-token` e recarrega.
+- [x] **C1 · Token velho se recupera**: 401 no polling ou em `acao` → apaga `qg-token` e recarrega.
 - [ ] **C2 · iOS não dá zoom no formulário**: `font-size: 16px` em `input, select` (`style.css:50`).
 - [ ] **C3 · Polling não sobrescreve ação** (`main.ts:241`): contador `versao` incrementado em `acao`
       e na atividade; descartar resposta do polling se mudou; não disparar com um polling em voo;

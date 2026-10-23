@@ -92,6 +92,8 @@ async function api<T = Visao>(rota: string, corpo?: object): Promise<T> {
     body: corpo ? JSON.stringify(corpo) : undefined,
   })
   const dados = await r.json().catch(() => ({}))
+  // token velho (servidor perdeu os pets): recomeça pela criação em vez de travar em erro
+  if (r.status === 401 && token) { guardado.set('qg-token', null); location.reload() }
   if (!r.ok) throw Object.assign(new Error(dados.erro ?? 'falha na rede'), { status: r.status })
   return dados
 }
