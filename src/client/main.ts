@@ -146,6 +146,9 @@ function telaCriar() {
   })
   form.addEventListener('submit', async (e) => {
     e.preventDefault()
+    const botao = form.querySelector<HTMLButtonElement>('button.principal')!
+    if (botao.disabled) return
+    botao.disabled = true // clique duplo criava dois pets
     const f = new FormData(form)
     try {
       const r = await api<{ token: string }>('pets', {
@@ -154,7 +157,7 @@ function telaCriar() {
       token = r.token
       guardado.set('qg-token', token)
       iniciarJogo()
-    } catch (err) { aviso((err as Error).message) }
+    } catch (err) { aviso((err as Error).message); botao.disabled = false }
   })
 }
 
@@ -175,6 +178,7 @@ let chaveCartao = ''
 // sobe a cada ação: resposta de sondagem que saiu antes dela chega velha e é descartada
 let versao = 0
 let sondando = false
+let sondagem: ReturnType<typeof setInterval> | undefined
 
 const questao = (q: Questao, attr: string, rotulo: string) =>
   `<p class="rotulo">${rotulo} <span>${NOMES_HABILIDADE[q.habilidade]}</span></p><p class="situacao">${esc(q.situacao)}</p>
@@ -243,7 +247,8 @@ async function iniciarJogo() {
   }
   document.body.className = 'jogando'
   render()
-  setInterval(async () => {
+  clearInterval(sondagem)
+  sondagem = setInterval(async () => {
     if (sondando || document.hidden) return
     sondando = true
     const v0 = versao

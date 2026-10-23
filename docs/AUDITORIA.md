@@ -33,7 +33,7 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
 - [x] **C3 · Polling não sobrescreve ação** (`main.ts:241`): contador `versao` incrementado em `acao`
       e na atividade; descartar resposta do polling se mudou; não disparar com um polling em voo;
       pular quando `document.hidden`.
-- [ ] **C4 · Clique duplo em "Criar meu pet"** cria dois pets e dois `setInterval`: desabilitar o
+- [x] **C4 · Clique duplo em "Criar meu pet"** cria dois pets e dois `setInterval`: desabilitar o
       botão durante o envio; guardar o id do intervalo.
 
 ## Lote 2 — médio
