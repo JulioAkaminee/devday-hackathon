@@ -410,9 +410,18 @@ function painelAba(v: Visao) {
   }
   if (aba === 'finais') {
     const atual = e.fase === 'final' ? finalDe(e) : null
-    const todos = (Object.keys(FINAIS) as Final[]).map((f) => `<li class="${atual === f ? 'feito' : ''}"><b>${FINAIS[f].titulo}</b><small>${atual === f ? 'seu final' : 'bloqueado'}</small></li>`).join('')
-    return `<div class="cartao-topo"><span>3 finais</span></div><h2>Meus finais</h2>
-      <p class="texto">${atual ? `Você chegou em <b>${FINAIS[atual].titulo}</b>.` : 'Complete as 4 missões para chegar a um dos 3 finais.'}</p><ul class="finais">${todos}</ul>${retomar(v)}`
+    // antes do fim, mostra para qual final as escolhas de até agora levam
+    const rumo = atual ?? (e.alcance + e.profundidade > 0 ? finalDe(e) : null)
+    const regra: Record<Final, string> = {
+      time: 'Alcance e Profundidade a partir de 4',
+      colecionador: 'Mais Alcance que Profundidade',
+      amigo: 'Profundidade igual ou maior que o Alcance',
+    }
+    const todos = (Object.keys(FINAIS) as Final[]).map((f) => `<li class="${f === atual ? 'feito' : f === rumo ? 'rumo' : ''}"><b>${FINAIS[f].titulo}</b><small>${regra[f]}</small>${f === atual ? '<em>seu final</em>' : f === rumo ? '<em>você está indo para cá</em>' : ''}</li>`).join('')
+    const texto = atual ? `Você chegou em <b>${FINAIS[atual].titulo}</b>. Volte a uma missão e escolha diferente para ver outro final.`
+      : `Hoje você tem Alcance ${e.alcance} e Profundidade ${e.profundidade}. As próximas escolhas ainda mudam o final.`
+    return `<div class="cartao-topo"><span>Aonde suas escolhas levam</span></div><h2>Meus finais</h2>
+      <p class="texto">${texto}</p><ul class="finais">${todos}</ul>${atual ? retomar(v) : ''}`
   }
   return academia(v)
 }

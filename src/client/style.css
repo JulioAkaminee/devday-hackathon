@@ -146,7 +146,10 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .conexoes li.profunda i { background: var(--tinta); color: var(--papel); }
 .conexoes li > span { margin-left: auto; font-weight: 600; font-size: 0.85rem; }
 .finais { gap: 8px; margin-bottom: 14px; }
-.finais li { border: 1.5px solid var(--fio); padding: 10px 12px; color: var(--cinza); }
+.finais li { border: 1.5px solid var(--fio); padding: 10px 12px; }
+.finais li.rumo { border-color: var(--linha); }
+.finais em { display: inline-block; margin-top: 6px; font-style: normal; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--verde-escuro); }
+.finais li.feito em { color: var(--tinta); }
 .finais li.feito { border-color: var(--linha); background: var(--verde); color: var(--tinta); }
 .finais li.feito small { color: var(--tinta); }
 
