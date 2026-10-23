@@ -251,7 +251,11 @@ async function iniciarJogo() {
 }
 
 async function acao(rota: string, corpo: object = {}) {
-  try { visao = await api(rota, corpo); render() } catch (err) { aviso((err as Error).message) }
+  try { visao = await api(rota, corpo); render() } catch (err) {
+    // 409 = a ação já aconteceu (clique duplo, outra aba): só sincroniza, sem mensagem técnica
+    if ((err as { status?: number }).status === 409) { visao = await api('eu').catch(() => visao); render(); return }
+    aviso((err as Error).message)
+  }
 }
 
 /** Atualiza o mundo 3D a partir do estado. Só mexe no que mudou. */
