@@ -46,27 +46,55 @@ conforme as regras do programa.
 
 ---
 
-## Nosso projeto
+## Nosso projeto: Quebra-Gelo
 
-**Desafio:** 10 — Aventura com escolhas e consequências — ideia **Quebra-Gelo**, ver [`docs/QUEBRA-GELO.md`](docs/QUEBRA-GELO.md)
-**Nome:** _(a definir)_
-**Trilha:** _(a definir entre as quatro acima)_
-**Problema:** _(o que dói hoje, para quem)_
-**Solução em uma frase:** _(o que o protótipo faz)_
-**Demo:** _(link do vídeo, deploy ou instruções para rodar)_
+**Problema:** num evento cheio de gente, a maioria conversa só com quem já conhece. Quem chega sozinho
+não sabe puxar assunto, e quem puxa costuma ficar no "oi, tudo bem" e não lembra de ninguém depois.
 
-> Substituir os campos acima ainda hoje — o pitch começa por eles.
+**Solução:** um pet virtual que só avança na história quando você conversa com uma pessoa de verdade.
+Você mostra o código do seu pet, a outra pessoa digita (ou lê o QR), e o encontro vira um capítulo.
+Como você conduz cada conversa decide o final.
+
+**Demo:** _URL pública (Dokploy)_ · _link do vídeo_
+
+### Desafios que o projeto cumpre
+
+| Desafio | Pedido | Onde está |
+|---|---|---|
+| **nº 10 · Aventura com escolhas e consequências** | história interativa, duas características, progresso salvo, dois caminhos com finais diferentes | 4 Missões, cada uma com uma decisão. **Papo rápido** soma **Alcance**; **ir a fundo** soma **Profundidade**. As duas barras ficam no topo. Ao fim, 3 finais: Time dos Sonhos, Colecionador de Crachás e Amigo de Um Só. O progresso fica salvo no servidor; no final, "Tente o outro caminho" volta a uma missão já jogada |
+| **nº 4 · Trilha de estudo personalizada** | 5 questões diagnósticas, trilha pelos resultados, atividades com explicação, progresso | Aba **Academia**. O diagnóstico no Credenciamento mede Abordar, Escutar e Conectar. A trilha começa pela habilidade mais fraca, e cada atividade explica a resposta. A Missão que treina a habilidade fraca vem indicada no cartão |
+
+**Banco de questões:** o desafio nº 4 prevê um banco fornecido pela organização. Como ele não veio,
+escrevemos o nosso, sobre networking em eventos: [`docs/ACADEMIA.md`](docs/ACADEMIA.md).
+
+### Como jogar
+
+1. Crie o pet: espécie, acessório, nomes, área, o que você oferece e o que procura.
+2. Responda as 5 perguntas do Credenciamento. Elas montam sua trilha na Academia.
+3. Em cada Missão, encontre alguém: digite o código de 4 letras do pet da pessoa ou leia o QR.
+   O cartão sugere quem procurar.
+4. Escolha como conversar. A consequência aparece na história e nas barras.
+5. Na Missão 4, reencontre um contato. As suas escolhas decidem o final no Palco DevDay.
+
+Sem ninguém por perto, `/demo` mostra pets de exemplo com código e QR.
+
+### Tecnologia
+
+Vite, TypeScript e Three.js (mundo e pets em voxel), Express no servidor, motion para animações de
+interface. O motor do jogo é uma função pura `(estado, ação) → estado` em `src/shared/`, com testes que
+provam os 3 finais e duas trilhas diferentes para dois perfis.
 
 ## Como rodar
 
 ```bash
 npm install          # na rede do evento o registro oficial falha: use --registry=https://registry.npmmirror.com
 npm run dev          # http://localhost:3000 (servidor + Vite na mesma porta)
-npm test             # garante que os 3 finais são alcançáveis
+npm test             # os 3 finais da Aventura e as trilhas da Academia
 ```
 
 - `/` cria o pet e joga; `/demo` mostra os pets de exemplo com código e QR.
-- Produção: `docker build` com o `Dockerfile` (Dokploy), volume em `/data`, healthcheck em `/health`.
+- Produção: `Dockerfile` (Dokploy), volume em `/data`, healthcheck em `/health`, variáveis em
+  `.env.example`. HTTPS é obrigatório para a câmera do celular ler o QR.
 
 ## Estrutura do repositório
 
