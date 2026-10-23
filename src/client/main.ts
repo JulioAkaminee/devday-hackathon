@@ -65,10 +65,13 @@ const aplicarCalmo = () => { MotionGlobalConfig.skipAnimations = calmo.matches; 
 aplicarCalmo()
 calmo.addEventListener('change', aplicarCalmo)
 
-const guardado = {
-  get: (k: string) => { try { return localStorage.getItem(k) } catch { return null } },
-  set: (k: string, v: string | null) => { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v) } catch { /* sem storage: segue sem salvar */ } },
-}
+// iOS com cookies bloqueados lança erro só de tocar no storage
+const armazem = (s: () => Storage) => ({
+  get: (k: string) => { try { return s().getItem(k) } catch { return null } },
+  set: (k: string, v: string | null) => { try { v === null ? s().removeItem(k) : s().setItem(k, v) } catch { /* sem storage: segue sem salvar */ } },
+})
+const guardado = armazem(() => localStorage)
+const sessao = armazem(() => sessionStorage)
 let token = guardado.get('qg-token')
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
@@ -421,8 +424,8 @@ function render() {
   sincronizarMundo(v)
 
   if (e.fase === 'aguardando') {
-    const pendente = sessionStorage.getItem('qg-c')
-    if (pendente) { sessionStorage.removeItem('qg-c'); acao('encontro', { codigo: pendente }) }
+    const pendente = sessao.get('qg-c')
+    if (pendente) { sessao.set('qg-c', null); acao('encontro', { codigo: pendente }) }
   }
 
   const medidor = (nome: string, valor: number, cls: string) =>
@@ -553,7 +556,7 @@ async function telaDemo() {
 
 const params = new URLSearchParams(location.search)
 if (params.get('c')) {
-  sessionStorage.setItem('qg-c', params.get('c')!.toUpperCase())
+  sessao.set('qg-c', params.get('c')!.toUpperCase())
   history.replaceState(null, '', '/')
 }
 if (location.pathname === '/demo') telaDemo()
