@@ -105,7 +105,9 @@ app.use(express.json({ limit: '10kb' }))
 
 app.get('/health', (_req, res) => { res.send('ok') })
 
+const MAX_PETS = 2000 // sem teto, novoCodigo fica lento e trava quando os códigos acabam
 app.post('/api/pets', (req, res) => {
+  if (pets.size >= MAX_PETS) throw new ErroHttp(503, 'evento lotado: não cabem mais pets')
   const b = req.body ?? {}
   const nome = typeof b.nome === 'string' ? b.nome.trim() : ''
   const dono = typeof b.dono === 'string' ? b.dono.trim() : ''
