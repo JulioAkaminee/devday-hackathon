@@ -205,7 +205,7 @@ function telaCriar() {
     if (passo === 0) return `
       ${progresso()}<h2>Escolha seu pet</h2>
       <div class="pets" data-campo="especie">${ESPECIES.map((e) => opcao('especie', e, NOMES_ESPECIE[e], dna.especie === e, foto({ especie: e, cor: '', acessorio: 'nenhum' }))).join('')}</div>
-      <p class="personalidade">${PERSONALIDADE[dna.especie]}</p>
+      <div class="previa"><img src="${retrato(dna)}" alt=""><p class="personalidade">${PERSONALIDADE[dna.especie]}</p></div>
       <div class="acessorio"><span>Acessório</span><div class="segmentos" data-campo="acessorio">${ACESSORIOS.map((a) => opcao('acessorio', a, NOMES_ACESSORIO[a], dna.acessorio === a)).join('')}</div></div>
       ${proximo}`
     if (passo === 1) return `
@@ -286,6 +286,7 @@ function telaCriar() {
       ;(dna as unknown as Record<string, string>)[grupo.dataset.campo!] = b.dataset.v
       dna.cor = COR_ESPECIE[dna.especie]
       form.querySelector('.personalidade')!.textContent = PERSONALIDADE[dna.especie]
+      form.querySelector<HTMLImageElement>('.previa img')!.src = retrato(dna) // no celular o palco 3D some: o retrato mostra a escolha
       legenda()
       mundo.trocarPet(dna)
     })

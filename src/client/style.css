@@ -141,7 +141,7 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .legenda-pet { position: absolute; left: 520px; right: 0; top: 9vh; display: grid; justify-items: center; gap: 6px; text-align: center; pointer-events: none !important; }
 .legenda-pet b { font-size: 3rem; font-weight: 600; letter-spacing: -0.045em; line-height: 1; }
 .legenda-pet span { color: var(--cinza); font-size: 1.05rem; }
-@media (min-width: 761px) { .personalidade { display: none; } }
+@media (min-width: 761px) { .previa { display: none; } }
 @media (max-width: 760px) { .legenda-pet { display: none; } }
 .segmentos { display: flex; border: 1.5px solid var(--linha); border-radius: var(--raio); }
 .segmentos button { flex: 1; border: 0; border-radius: 0; justify-content: center; font-size: 0.9rem; }
@@ -357,6 +357,25 @@ body.demo #ui { position: static; }
   .criar { padding: max(18px, env(safe-area-inset-top)) 16px 24px; border-right: 0; }
   .chamada { font-size: 1.45rem; }
   body.criando #cena { display: none; }
+  /* criação no celular: rola o formulário, o botão principal desce para o polegar e fica preso no rodapé */
+  .criar { display: flex; flex-direction: column; gap: 18px; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+  .criar > * { flex: none; }
+  .criar > .principal, .criar > .navegacao { margin-top: auto; min-height: 52px; }
+  .criar > .navegacao .principal { min-height: 52px; }
+  .criar-topo .logo { font-size: 1.15rem; }
+  .criar-topo .marca { width: 28px; height: 28px; }
+  .criar-topo .evento { font-size: 0.68rem; text-align: right; color: var(--cinza); }
+  .criar h2.chamada { font-size: clamp(1.6rem, 7.4vw, 2rem); }
+  .criar h2 { margin-top: -8px; }
+  .como { gap: 12px; }
+  /* o palco 3D some aqui: o retrato mostra o pet escolhido com o acessório */
+  .previa { display: grid; grid-template-columns: 88px 1fr; gap: 12px; align-items: center; background: var(--suave); border-radius: var(--raio); padding: 6px 12px 6px 6px; }
+  .previa img { width: 88px; height: 88px; }
+  .previa .personalidade { color: var(--tinta); font-size: 0.95rem; line-height: 1.35; }
+  .pets { gap: 6px; }
+  .pets button { min-height: 0; padding: 4px 0 6px; font-size: 0.66rem; }
+  .chips { gap: 8px; }
+  .chips button { min-height: 44px; padding: 8px 14px; }
   .topo { flex-wrap: wrap; padding: max(8px, env(safe-area-inset-top)) 12px 8px; row-gap: 8px; }
   .topo > * { padding: 0 12px; }
   .topo .logo span { font-size: 1.1rem; }
@@ -376,6 +395,7 @@ body.demo #ui { position: static; }
 }
 /* abertura: tela cheia com o cubo, que já entra rachando (delay negativo adianta o ciclo de 6 s da marca) */
 .abertura { position: fixed; inset: 0; z-index: 50; background: var(--papel); display: grid; place-content: center; justify-items: center; gap: 14px; text-align: center; cursor: pointer; padding: 16px; }
+.abertura { padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
 .abertura .marca { width: clamp(110px, 18vw, 170px); height: clamp(110px, 18vw, 170px); margin-bottom: 10px; }
 .abertura .metade, .abertura .lasca { animation-delay: -2.7s; }
 .abertura b { font-size: clamp(54px, 11vw, 150px); font-weight: 600; letter-spacing: -0.055em; line-height: 0.95; }
