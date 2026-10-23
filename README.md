@@ -48,6 +48,7 @@ conforme as regras do programa.
 
 ## Nosso projeto
 
+**Desafio:** 10 — Aventura com escolhas e consequências — ideia **Quebra-Gelo**, ver [`docs/QUEBRA-GELO.md`](docs/QUEBRA-GELO.md)
 **Nome:** _(a definir)_
 **Trilha:** _(a definir entre as quatro acima)_
 **Problema:** _(o que dói hoje, para quem)_
