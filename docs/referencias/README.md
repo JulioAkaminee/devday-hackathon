@@ -35,3 +35,41 @@ Referência da tela do **mapa da aventura**, em estilo voxel isométrico. Recebi
 - **Menu:** a navegação não tem **Credenciamento** nem **Academia**, que fazem parte da decisão D6.
 - **Marca:** a imagem usa o logo e o nome da OpenAI. Como o evento é não oficial, é preciso confirmar
   com os organizadores se a marca pode aparecer no produto.
+
+---
+
+## `pets-do-evento-v1.png`
+
+![Pets do evento](pets-do-evento-v1.png)
+
+Referência dos **pets**: 10 objetos do dia a dia de um evento, em voxel, cada um com nome e
+personalidade. Recebida em 23/10/2026.
+
+| # | Pet | Personalidade | Visual |
+|---|---|---|---|
+| 01 | **Xícara** | Curioso e sempre puxa assunto. | caneca branca com alça verde, café, selo `</>` no peito |
+| 02 | **Caderninho** | Organizado e adora trocar ideias. | caderno azul de espiral, segurando uma caneta verde |
+| 03 | **Laptopinho** | Criativo e sempre tem um projeto. | notebook cinza com olhos `^ ^` verdes na tela |
+| 04 | **Plantinha** | Tranquila e faz conexões inesperadas. | vaso branco com folhas verdes e mochila preta |
+| 05 | **Lâmpada** | Cheio de ideias e energia. | lâmpada amarela com brilhos em volta |
+| 06 | **Coração** | Empático e sempre escuta de verdade. | coração rosa com óculos escuros redondos |
+| 07 | **Globinho** | Adora gente de todas as áreas. | globo azul e verde com mochila |
+| 08 | **Estrelinha** | Animado e sempre incentiva os outros. | estrela amarela acenando, com mochila |
+| 09 | **Conezinho** | Direto e ajuda a focar no objetivo. | cone de trânsito laranja e branco |
+| 10 | **Nuvem** | Observador e sempre vê o lado diferente. | nuvem azul com boina preta e mochila |
+
+### Estilo em comum
+- Corpo de cubinhos (voxel), com olhos pretos simples e bochechas rosadas.
+- Braços e pernas curtos e quadrados.
+- Cores chapadas e saturadas, em fundo creme.
+- Acessórios que se repetem: **mochila, óculos escuros, boina, caneta, brilhos**.
+
+### Pontos a alinhar com [`QUEBRA-GELO.md`](../QUEBRA-GELO.md)
+- **Quantidade de espécies:** a imagem tem **10**. A decisão D1 fala em **6 espécies × 8 cores × 4
+  acessórios**. Esta referência pode resolver a pendência "lista de espécies, cores e acessórios".
+- **Nome do pet da caneca:** aqui ele se chama **Xícara**; no mapa da aventura, **Xícaro**.
+- **Erro de digitação:** a imagem traz "Oriativo" no Laptopinho. No produto, usar "Criativo".
+- **Marca:** o logo da OpenAI aparece no Caderninho e no Laptopinho. É a mesma ressalva do mapa.
+- **Ideia:** algumas personalidades combinam com as habilidades da Academia. Xícara (puxa assunto) →
+  Abordar; Coração (escuta) → Escutar; Globinho (gente de todas as áreas) → Conectar. Esses pets
+  podem virar os instrutores ou os pets de exemplo da semente.
