@@ -222,3 +222,9 @@ body.demo #ui { position: static; }
   /* o cabeçalho tem duas linhas aqui: o aviso desce para não cobrir as barras */
   .aviso { top: calc(env(safe-area-inset-top) + 124px); width: max-content; max-width: calc(100% - 32px); }
 }
+
+/* passos do Credenciamento: numeração no grid, como no banner */
+.passos { list-style: none; counter-reset: passo; padding: 0; margin: 0 0 14px; display: grid; gap: 8px; }
+.passos li { counter-increment: passo; display: grid; grid-template-columns: 28px 1fr; gap: 10px; font-size: 0.9rem; line-height: 1.4; padding-top: 8px; border-top: 1px solid var(--fio); }
+.passos li::before { content: counter(passo, decimal-leading-zero); color: var(--cinza); font-variant-numeric: tabular-nums; }
+.passos b { display: block; }

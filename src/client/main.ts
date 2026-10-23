@@ -306,6 +306,11 @@ function cartaoMissao(v: Visao) {
     if (!v.academia.diagnostico) return `${topo('Credenciamento', 'Antes de entrar')}${diagnostico()}`
     const fraca = v.academia.fraca!
     return `${topo('Credenciamento', 'Boas-vindas ao DevDay')}<p class="texto">${esc(preencher(PROLOGO, vars))}</p>
+      <ol class="passos">
+        <li><b>Encontre alguém de verdade.</b> Digite o código ou leia o QR do pet da pessoa.</li>
+        <li><b>Escolha como conversar.</b> Papo rápido soma Alcance; ir a fundo soma Profundidade.</li>
+        <li><b>Chegue a um dos 3 finais</b> no Palco DevDay. Suas escolhas decidem qual.</li>
+      </ol>
       <p class="nota">Sua trilha na Academia começa por <b>${NOMES_HABILIDADE[fraca]}</b>.</p>
       <button class="principal" data-acao="comecar">Começar a aventura ${ICONE.seta}</button>`
   }
