@@ -18,11 +18,6 @@
 html, body { height: 100%; background: var(--suave); color: var(--tinta); font-family: var(--fonte); overflow: hidden; -webkit-font-smoothing: antialiased; }
 /* palco 16:9 que escala para caber na janela */
 .palco { position: fixed; left: 50%; top: 50%; width: 1600px; height: 900px; transform-origin: 0 0; background: var(--papel); border: 2px solid var(--tinta); overflow: hidden; }
-/* chão de gelo: grade isométrica bem leve */
-.palco::before { content: ''; position: absolute; inset: 0; background-image:
-  linear-gradient(30deg, transparent 49.4%, #eef3ef 49.6%, #eef3ef 50.4%, transparent 50.6%),
-  linear-gradient(150deg, transparent 49.4%, #eef3ef 49.6%, #eef3ef 50.4%, transparent 50.6%);
-  background-size: 120px 69.28px; opacity: .9; pointer-events: none; }
 
 .slide { position: absolute; inset: 0; padding: 88px 104px 96px; display: flex; flex-direction: column; visibility: hidden; }
 .slide.ativo { visibility: visible; }
@@ -34,11 +29,10 @@ html, body { height: 100%; background: var(--suave); color: var(--tinta); font-f
 .slide.ativo > :nth-child(5), .slide.ativo .d4 { transition-delay: .32s; }
 .slide.ativo .d5 { transition-delay: .44s; }
 
-.rotulo { display: inline-flex; align-items: center; gap: 10px; align-self: flex-start; font-size: 20px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; color: var(--verde-texto); }
-.rotulo i { width: 12px; height: 12px; background: var(--verde); border: 2px solid var(--tinta); transform: rotate(45deg); }
-h1 { font-size: 168px; font-weight: 600; letter-spacing: -.055em; line-height: .92; }
-h2 { font-size: 92px; font-weight: 600; letter-spacing: -.045em; line-height: .98; max-width: 1100px; }
-h2 em, h1 em { font-style: italic; font-weight: 500; color: var(--verde-texto); }
+.rotulo { align-self: flex-start; font-size: 24px; font-weight: 500; color: var(--cinza); }
+h1 { font-size: 168px; font-weight: 600; letter-spacing: -.035em; line-height: .92; }
+h2 { font-size: 92px; font-weight: 600; letter-spacing: -.025em; line-height: .98; max-width: 1100px; }
+h2 em, h1 em { font-style: normal; }
 .lead { font-size: 34px; line-height: 1.3; letter-spacing: -.015em; color: #3a3a3a; max-width: 760px; }
 .chip { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px; border: 2px solid var(--tinta); background: var(--papel); font-size: 22px; font-weight: 600; }
 .chip.verde { background: var(--verde); }
@@ -62,14 +56,11 @@ h2 em, h1 em { font-style: italic; font-weight: 500; color: var(--verde-texto); 
 .marca .um { --dx: -7px; --dy: -14px; } .marca .dois { --dx: 8px; --dy: -12px; }
 @keyframes lasca { 0%, 64% { opacity: 0; transform: none; } 68% { opacity: 1; } 84% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(45deg); } 100% { opacity: 0; } }
 
-/* cubinhos de voxel flutuando ao fundo */
-.voxel { position: absolute; width: var(--t); aspect-ratio: 1; animation: boia var(--dur, 7s) ease-in-out infinite; animation-delay: var(--atraso, 0s); pointer-events: none; }
-@keyframes boia { 0%, 100% { translate: 0 0; } 50% { translate: 0 -18px; } }
 
 /* celulares com os prints reais */
-.cel { width: 300px; border: 2px solid var(--tinta); border-radius: 34px; padding: 10px; background: var(--tinta); box-shadow: 14px 14px 0 var(--verde); }
+.cel { width: 300px; border: 2px solid var(--tinta); border-radius: 34px; padding: 10px; background: var(--tinta); }
 .cel img { display: block; width: 100%; border-radius: 24px; }
-.tela { border: 2px solid var(--tinta); box-shadow: 14px 14px 0 var(--verde); background: var(--papel); }
+.tela { border: 2px solid var(--tinta); background: var(--papel); }
 .tela img { display: block; width: 100%; }
 
 /* capa */
@@ -135,7 +126,7 @@ h2 em, h1 em { font-style: italic; font-weight: 500; color: var(--verde-texto); 
 /* fechamento */
 .fim { display: grid; grid-template-columns: 1fr auto; gap: 80px; align-items: center; }
 .fim h2 { font-size: 112px; }
-.qr { width: 380px; padding: 28px; border: 2px solid var(--tinta); background: var(--papel); box-shadow: 14px 14px 0 var(--verde); }
+.qr { width: 380px; padding: 28px; border: 2px solid var(--tinta); background: var(--papel); }
 .qr img { display: block; width: 100%; }
 .url { font-size: 40px; font-weight: 600; color: var(--verde-texto); letter-spacing: -.02em; }
 .stack { font-size: 22px; color: var(--cinza); }
@@ -163,7 +154,7 @@ body.grade .palco { display: none; }
 body.grade .grade-v { display: grid; }
 .grade-v button { position: relative; aspect-ratio: 16 / 9; border: 2px solid var(--tinta); background: var(--papel); font: 600 22px var(--fonte); text-align: left; padding: 18px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; }
 .grade-v button.ativo { box-shadow: 8px 8px 0 var(--verde); }
-.grade-v button small { font-size: 14px; color: var(--verde-texto); text-transform: uppercase; letter-spacing: .03em; }
+.grade-v button small { font-size: 14px; color: var(--cinza); }
 
 @media (prefers-reduced-motion: reduce) {
   .marca .metade, .marca .lasca, .voxel, .solo, .ponto { animation: none !important; }
@@ -176,16 +167,16 @@ body.grade .grade-v { display: grid; }
 
   <!-- 1 capa -->
   <section class="slide capa">
-    <span class="rotulo"><i></i>OpenAI DevDay São Paulo · Hackathon</span>
+    <span class="rotulo">OpenAI DevDay São Paulo · Hackathon</span>
     <h1>Quebra-<br>Gelo</h1>
-    <p class="lead">O networking do DevDay, <em style="color:var(--verde-texto)">jogável.</em></p>
+    <p class="lead">O networking do DevDay, jogável.</p>
     <div class="linha"><span class="chip verde">Trilha Educação e inclusão</span><span class="chip">Miguel e Julio Akamine</span></div>
     <svg class="marca" data-marca viewBox="0 0 100 100" aria-hidden="true"></svg>
   </section>
 
   <!-- 2 problema -->
   <section class="slide prob">
-    <span class="rotulo"><i></i>O problema</span>
+    <span class="rotulo">O problema</span>
     <h2>Todo evento tem <em>gelo.</em></h2>
     <p class="lead">Cada um fica no próprio grupo. Puxar conversa com quem você não conhece trava, ainda mais para quem é tímido ou está chegando na área.</p>
     <div class="grupos" aria-hidden="true">
@@ -200,7 +191,7 @@ body.grade .grade-v { display: grid; }
   <section class="slide">
     <div class="duas">
       <div>
-        <span class="rotulo sobe"><i></i>A ideia</span>
+        <span class="rotulo sobe">A ideia</span>
         <h2 class="sobe d1">Seu pet só cresce quando você <em>conversa de verdade.</em></h2>
         <p class="lead sobe d2">Em 30 segundos você cria um pet de voxel e diz sua área, com o que quer ajuda e com o que pode ajudar. O jogo usa isso para sugerir com quem conversar.</p>
         <div class="linha sobe d3"><span class="chip">Sem instalar</span><span class="chip">Abre no celular</span><span class="chip">QR no telão</span></div>
@@ -211,7 +202,7 @@ body.grade .grade-v { display: grid; }
 
   <!-- 4 como joga -->
   <section class="slide">
-    <span class="rotulo"><i></i>Como joga</span>
+    <span class="rotulo">Como joga</span>
     <h2 style="font-size:76px">4 missões. Cada uma começa com <em>um encontro real.</em></h2>
     <div class="ciclo">
       <div class="passo sobe d2 feito"><div class="cel"><img src="m-1-aguardando.jpg" alt="Missão aguardando: código e QR" /></div><span class="n"><i>1</i>Encontrar: troque o código</span></div>
@@ -222,7 +213,7 @@ body.grade .grade-v { display: grid; }
 
   <!-- 5 alcance x profundidade -->
   <section class="slide">
-    <span class="rotulo"><i></i>A escolha</span>
+    <span class="rotulo">A escolha</span>
     <h2 style="font-size:84px">Papo rápido ou <em>conversa funda?</em></h2>
     <div class="medir">
       <div class="medidor sobe d2"><span class="mais">+2</span><h3>Alcance</h3><p>Conhecer mais gente. Um oi, uma troca rápida, o próximo encontro.</p><div class="barra"><span style="--w:72%"></span></div></div>
@@ -234,7 +225,7 @@ body.grade .grade-v { display: grid; }
   <section class="slide">
     <div class="duas">
       <div>
-        <span class="rotulo sobe"><i></i>O final</span>
+        <span class="rotulo sobe">O final</span>
         <h2 class="sobe d1" style="font-size:80px">Seu jeito de conversar decide <em>o seu final.</em></h2>
         <div class="finais sobe d2"><div class="final">Final 1<small>3 finais possíveis</small></div><div class="final">Final 2<small>pelo Alcance e Profundidade</small></div><div class="final">Final 3<small>e dá para ver outro</small></div></div>
         <p class="lead sobe d3" style="font-size:30px">No fim você leva a lista de quem conheceu. O LinkedIn é opcional e só aparece para quem te encontrou.</p>
@@ -247,7 +238,7 @@ body.grade .grade-v { display: grid; }
   <section class="slide">
     <div class="duas">
       <div>
-        <span class="rotulo sobe"><i></i>Inclusão · Academia</span>
+        <span class="rotulo sobe">Inclusão · Academia</span>
         <h2 class="sobe d1">Puxar assunto <em>se aprende.</em></h2>
         <p class="lead sobe d2">Um diagnóstico de 5 perguntas monta uma trilha curta com atividades para quem trava na hora de conversar. Treina, depois vai para o evento.</p>
         <div class="linha sobe d3"><span class="chip verde">Diagnóstico</span><span class="chip">Trilha</span><span class="chip">Prática no evento</span></div>
@@ -258,7 +249,7 @@ body.grade .grade-v { display: grid; }
 
   <!-- 8 telão ao vivo -->
   <section class="slide vivo">
-    <span class="rotulo"><i></i>Telão do evento</span>
+    <span class="rotulo">Telão do evento</span>
     <h2 style="font-size:84px"><span class="ponto"></span>A sala inteira vê <em>o gelo quebrando.</em></h2>
     <div class="numeros">
       <div class="numero"><b data-stat="pessoas">0</b><span>pessoas jogando agora</span></div>
@@ -271,10 +262,8 @@ body.grade .grade-v { display: grid; }
   <section class="slide">
     <div class="fim" style="height:100%">
       <div style="display:flex;flex-direction:column;gap:30px">
-        <span class="rotulo sobe"><i></i>Bora?</span>
         <h2 class="sobe d1">Abra no celular e <em>quebre o gelo.</em></h2>
         <p class="url sobe d2">quebra-gelo.julioakamine.com</p>
-        <p class="stack sobe d3">Vite · TypeScript · Three.js · Express · roda no navegador</p>
       </div>
       <div class="qr sobe d4"><img src="qr.svg" alt="QR code para quebra-gelo.julioakamine.com" /></div>
     </div>
@@ -307,16 +296,6 @@ const marca = `<g stroke="#141414" stroke-width="3.2" stroke-linejoin="round">` 
   `<path class="lasca um" d="M44 2 49 4.5 44 7 39 4.5z" fill="#e8f7ed" stroke-width="2"/><path class="lasca dois" d="M57 0 61 2 57 4 53 2z" fill="#22b04b" stroke-width="2"/></g>`
 document.querySelectorAll('[data-marca]').forEach((s) => { s.innerHTML = marca })
 
-// cubinhos de voxel espalhados pelo palco
-const palco = document.getElementById('palco')
-const cubo = (c1, c2, c3) => `<svg viewBox="0 0 100 100"><g stroke="#141414" stroke-width="4" stroke-linejoin="round"><path d="M50 8 90 28 50 48 10 28z" fill="${c1}"/><path d="M10 28 50 48 50 92 10 72z" fill="${c2}"/><path d="M90 28 50 48 50 92 90 72z" fill="${c3}"/></g></svg>`
-;[[1380, 90, 54, 0, 'v'], [1500, 640, 40, 1.2, 'g'], [70, 720, 34, 2, 'g'], [820, 40, 28, .6, 'v'], [1180, 780, 30, 1.8, 'v']].forEach(([x, y, t, a, k]) => {
-  const d = document.createElement('div')
-  d.className = 'voxel'; d.setAttribute('aria-hidden', 'true')
-  d.style.cssText = `left:${x}px;top:${y}px;--t:${t}px;--atraso:-${a}s;--dur:${6 + a}s`
-  d.innerHTML = k === 'v' ? cubo('#e8f7ed', '#22b04b', '#178a39') : cubo('#ffffff', '#e4e4e0', '#cfcfca')
-  palco.prepend(d)
-})
 
 // escala do palco
 function escalar() {
