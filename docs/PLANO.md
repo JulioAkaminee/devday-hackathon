@@ -28,6 +28,11 @@ sem esperar o outro.
 - [x] Lapidação aplicada no MVP por padrão: **L1** (todo capítulo nasce de um encontro), **L2 (b)**
       (encontro sempre abre o capítulo), **L3** (cada um abre o próprio capítulo)
 - [ ] L4 (problema e solução em uma frase) e L5 (nome e trilha): com o Julio, junto da identidade
+- [x] **D7** (ver `QUEBRA-GELO.md`): mundo vira **mapa de 5 ilhas**, UI segue `docs/referencias/`,
+      marca "OpenAI DevDay Community", 10 pets-objeto voxel, coração (ícone) removido
+- [x] Academia inteira (K1–K6) no ar: diagnóstico no prólogo, trilha, atividades, dica de treino na
+      Missão (commits `b247b3a`, `01210e5`, `f06fe75`)
+- Resumo para quem chega agora (Julio e o agente dele): **`AGENTS.md` na raiz**
 
 ---
 
@@ -93,7 +98,9 @@ paralelo (inclusive por agentes). Marcar `[x]` com o hash do commit.
       `:root` (contrato da seção 3)
 - [ ] **V2 · Menu do mundo** — Julio · V1 · hub com Credenciamento, Aventura, Academia e Quem eu
       conheci, chamando as funções do contrato
-- [ ] **V3 · Pets** — Julio · — · 6 espécies e 4 acessórios refinados em `pet.ts`, mantendo a assinatura
+- [~] **V3 · Pets** — Miguel fez os 10 pets da `pets-do-evento-v1.png` em voxel (`pet.ts`, `PETS`);
+      Julio: ajustar proporção/cor e mandar novos assets — basta acrescentar uma entrada em `PETS`
+      e a espécie em `story.ts`
 - [ ] **V4 · Arte das fases e dos finais** — Julio · — · `FASES[].montar` e `cenaFinal` com a
       identidade nova
 - [ ] **V5 · UI** — Julio · V1 · HUD, balões, tela de criação e tela da trilha seguindo os tokens,
@@ -102,11 +109,11 @@ paralelo (inclusive por agentes). Marcar `[x]` com o hash do commit.
 
 ### A — Aventura (desafio nº 10)
 
-- [ ] **A1 · Aviso de encontro** — Miguel/agente · — · quando alguém digita o seu código, aparece
+- [x] **A1 · Aviso de encontro** — Miguel/agente · — · quando alguém digita o seu código, aparece
       "X te encontrou!" e o pet dele entra pela porta, sem recarregar
 - [ ] **A2 · Colisão com os móveis** — agente · — · o pet não atravessa mesas e paredes (caixas
       simples por fase)
-- [ ] **A3 · Mapa entre as fases** — Miguel + Julio · V2 · a transição de capítulo passa pelo mapa
+- [x] **A3 · Mapa entre as fases** *(feito: o pet viaja entre ilhas em `world.ts`, `irPara`)* — Miguel + Julio · V2 · a transição de capítulo passa pelo mapa
       da ilha (pode ser o próprio menu do mundo)
 - [ ] **A4 · Rota de estatísticas** — agente · — · `/api/stats`: pets, encontros, finais (alimenta
       telão e pitch)
@@ -117,19 +124,19 @@ paralelo (inclusive por agentes). Marcar `[x]` com o hash do commit.
 
 ### K — Academia (desafio nº 4)
 
-- [ ] **K1 · Conteúdo** — Miguel (rascunho por agente) · — · `docs/ACADEMIA.md`: 5 questões
+- [x] **K1 · Conteúdo** — Miguel (rascunho por agente) · — · `docs/ACADEMIA.md`: 5 questões
       diagnósticas (cada uma ligada a Abordar, Escutar ou Conectar) e 3 atividades por habilidade,
       cada uma com opções, resposta certa e explicação
-- [ ] **K2 · Motor da Academia** — agente · K1 · funções puras em `src/shared/academia.ts`:
+- [x] **K2 · Motor da Academia** — agente · K1 · funções puras em `src/shared/academia.ts`:
       pontuar diagnóstico, ordenar trilha (mais fraca primeiro), registrar atividade; teste provando
       que **dois perfis geram trilhas diferentes**
-- [ ] **K3 · Rotas e persistência** — Miguel · K2 · `/api/diagnostico`, `/api/atividade`; progresso
+- [x] **K3 · Rotas e persistência** — Miguel · K2 · `/api/diagnostico`, `/api/atividade`; progresso
       salvo com o pet; **separado** de Alcance e Profundidade
-- [ ] **K4 · Diagnóstico no credenciamento** — Miguel · K3 · na primeira entrada, o pet-recepcionista
+- [x] **K4 · Diagnóstico no credenciamento** — Miguel · K3 · na primeira entrada, o pet-recepcionista
       faz as 5 perguntas na fase do prólogo
-- [ ] **K5 · Tela da trilha** — Miguel + Julio (V5) · K3 · caminho de bolinhas, cadeados, atividade
-      com explicação, barras por habilidade
-- [ ] **K6 · Ligação com a Aventura** — Miguel · K5 · a trilha sugere o capítulo da habilidade fraca
+- [x] **K5 · Tela da trilha** — Miguel + Julio (V5) · K3 · caminho de bolinhas, cadeados, atividade
+      com explicação, barras por habilidade *(funciona; Julio pode refinar o visual)*
+- [x] **K6 · Ligação com a Aventura** — Miguel · K5 · a trilha sugere o capítulo da habilidade fraca
 
 ### I — IA (API da OpenAI, sempre com plano B)
 

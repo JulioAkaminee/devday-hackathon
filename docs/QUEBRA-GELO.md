@@ -28,6 +28,7 @@ toda escolha nasce de um encontro.
 | D4 | O critério é **complexidade, não tempo**: trabalho dividido em módulos com contrato, tocados em paralelo por duas pessoas e vários agentes (seção 9) |
 | D6 | O projeto cumpre também o **desafio nº 4** (liberado pelo embaixador): a **Academia** ensina networking, a **Aventura** põe em prática. Os dois ficam separados nas regras para cada desafio ser verificável sozinho (seção 3B) |
 | D5 | A aventura acontece num **mundo 3D em Three.js, no estilo Overcooked / Moving Out**: fases pequenas com câmera fixa, o pet anda livre dentro da fase e **as decisões são lugares para onde ele caminha** (seção 3A) |
+| D7 | O mundo é **um mapa de 5 ilhas** (Credenciamento + 4 Missões: Novas pessoas, Troca de ajuda, Cultive conexões, Palco DevDay) e o pet viaja entre elas. A UI segue `docs/referencias/` (Julio). Marca do evento: **"OpenAI DevDay Community"** (verde, preto e creme do banner). Pets são os **10 objetos** da referência, em voxel; a cor vem do pet (D1 sem escolha de cor). O ícone de coração saiu |
 
 ## 2. Regras oficiais do evento
 
