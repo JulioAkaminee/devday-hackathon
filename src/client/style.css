@@ -125,6 +125,7 @@ legend i { font-style: normal; color: var(--cinza); font-weight: 500; margin-rig
 .escolha:disabled { opacity: 0.38; }
 .escanear { width: 100%; justify-content: center; background: var(--tinta); color: var(--papel); font-weight: 600; font-size: 1.05rem; min-height: 54px; }
 .escanear:hover { background: #2a2a2a !important; }
+.cartao .escanear { position: sticky; bottom: 0; box-shadow: 0 -12px 0 var(--papel), 0 20px 0 var(--papel); }
 .encontro { display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: start; }
 .consequencia { border-left: 4px solid var(--verde); padding-left: 12px; margin-bottom: 16px; line-height: 1.45; display: grid; gap: 4px; }
 .consequencia.profunda { border-color: var(--tinta); }
