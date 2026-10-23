@@ -9,6 +9,7 @@ import {
   habilidadeFraca, novaAcademia, progresso, proximaAtividade, responderAtividade, responderDiagnostico, type Academia,
 } from '../shared/academia.ts'
 import { ACESSORIOS, COR_ESPECIE, ESPECIES, TEMAS, type Acessorio, type Especie, type Tema } from '../shared/story.ts'
+import { ErroHttp, alvoDoEncontro } from './regras.ts'
 
 interface Pet {
   id: string
@@ -94,9 +95,6 @@ function mudar(p: Pet, novo: Estado) {
   sujo = true
 }
 
-class ErroHttp extends Error {
-  constructor(public status: number, msg: string) { super(msg) }
-}
 const um = <T extends string>(v: unknown, lista: readonly T[], campo: string): T => {
   if (typeof v !== 'string' || !lista.includes(v as T)) throw new ErroHttp(400, `${campo} inválido`)
   return v as T
@@ -183,8 +181,7 @@ app.post('/api/comecar', (req, res) => {
 app.post('/api/encontro', (req, res) => {
   const p = eu(req)
   const codigo = String(req.body?.codigo ?? '').trim().toUpperCase()
-  const outro = [...pets.values()].find((x) => x.codigo === codigo)
-  if (!outro) throw new ErroHttp(404, 'código não encontrado')
+  const outro = alvoDoEncontro(p.estado, codigo, (c) => [...pets.values()].find((x) => x.codigo === c))
   if (outro.id === p.id) throw new ErroHttp(400, 'esse é o seu próprio pet')
   mudar(p, encontrar(p.estado, outro.id))
   // O encontro vale para os dois: se o outro está esperando alguém, o capítulo dele abre também (L3)
