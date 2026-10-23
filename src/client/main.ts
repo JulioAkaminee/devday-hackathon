@@ -166,6 +166,8 @@ function telaCriar() {
   }
   // mais de uma por pergunta: "trabalho com front e design" é comum, e restringir a uma empobrece as sugestões
   const marcados: Record<Pergunta, Tema[]> = { area: ['front'], procura: ['back'], oferece: ['front'] }
+  // o primeiro toque troca a sugestão inicial em vez de somar a ela: quem toca "marketing" quer marketing
+  const tocou = new Set<Pergunta>()
   let passo = -1 // -1 é a boas-vindas: proposta e como funciona antes de pedir qualquer coisa
   mundo.mostrarVitrine(dna)
 
@@ -265,9 +267,14 @@ function telaCriar() {
         // alterna: o primeiro não sai (a resposta precisa de pelo menos uma área)
         const campo = grupo.dataset.perfil as Pergunta
         const t = b.dataset.v as Tema
-        const dentro = marcados[campo].includes(t)
-        if (dentro && marcados[campo].length === 1) return
-        marcados[campo] = dentro ? marcados[campo].filter((x) => x !== t) : [...marcados[campo], t]
+        if (!tocou.has(campo)) {
+          tocou.add(campo)
+          marcados[campo] = [t]
+        } else {
+          const dentro = marcados[campo].includes(t)
+          if (dentro && marcados[campo].length === 1) return
+          marcados[campo] = dentro ? marcados[campo].filter((x) => x !== t) : [...marcados[campo], t]
+        }
         grupo.querySelectorAll('button').forEach((x) => {
           const sel = marcados[campo].includes(x.dataset.v as Tema)
           x.classList.toggle('sel', sel)
