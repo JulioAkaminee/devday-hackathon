@@ -104,8 +104,8 @@ conheceu hoje. Digita o código de um contato de novo.
 ## Finais
 
 ### Time dos Sonhos
-Chegou a hora da jornada final e {lista_amigos} vieram comigo. Cada um trabalha numa área, e com cada
-um você teve uma conversa longa. Esse é o nosso time.
+Chegou a hora da jornada final e {lista_amigos} vieram comigo. Cada um trabalha numa área, e com
+alguns você foi além do oi. Esse é o nosso time.
 
 ### Colecionador de Crachás
 Olha quanta gente: {n} crachás pendurados em mim. Na hora de chamar o time para a jornada final,

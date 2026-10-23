@@ -118,7 +118,7 @@ export const CAPITULOS: Capitulo[] = [
 export const FINAIS: Record<Final, { titulo: string; texto: string }> = {
   time: {
     titulo: 'Time dos Sonhos',
-    texto: 'Chegou a hora da jornada final e {lista_amigos} vieram comigo. Cada um trabalha numa área, e com cada um você teve uma conversa longa. Esse é o nosso time.',
+    texto: 'Chegou a hora da jornada final e {lista_amigos} vieram comigo. Cada um trabalha numa área, e com alguns você foi além do oi. Esse é o nosso time.',
   },
   colecionador: {
     titulo: 'Colecionador de Crachás',
