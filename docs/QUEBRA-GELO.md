@@ -29,6 +29,7 @@ toda escolha nasce de um encontro.
 | D6 | O projeto cumpre também o **desafio nº 4** (liberado pelo embaixador): a **Academia** ensina networking, a **Aventura** põe em prática. Os dois ficam separados nas regras para cada desafio ser verificável sozinho (seção 3B) |
 | D5 | A aventura acontece num **mundo 3D em Three.js, no estilo Overcooked / Moving Out**: fases pequenas com câmera fixa, o pet anda livre dentro da fase e **as decisões são lugares para onde ele caminha** (seção 3A) |
 | D7 | O mundo é **um mapa de 5 ilhas** (Credenciamento + 4 Missões: Novas pessoas, Troca de ajuda, Cultive conexões, Palco DevDay) e o pet viaja entre elas. A UI segue `docs/referencias/` (Julio). Marca do evento: **"OpenAI DevDay Community"** (verde, preto e creme do banner). Pets são os **10 objetos** da referência, em voxel; a cor vem do pet (D1 sem escolha de cor). O ícone de coração saiu |
+| D8 | **`mapa-aventura-v1.png` é o front final** (layout) e o **banner do evento é a identidade** (tipografia e cor): grotesca Inter Tight de tracking fechado, branco/preto/verde `#22b04b`, bola verde com olhos de anel como marca (os olhos seguem o ponteiro). Regra: **zero AI slop**, sem emoji na UI, sem sombra difusa, sem gradiente; textos passam pelo stop-slop. As 4 ilhas ficam sempre à vista; a escolha é **por botão no cartão** (substitui "andar até a zona" do D5). O mapa se navega **arrastando** (mouse e toque) e com **zoom por roda e pinça**, limitado entre 0,55× e 1,7×. Animações de UI com **motion** (motion.dev) |
 
 ## 2. Regras oficiais do evento
 
