@@ -226,6 +226,44 @@ app.get('/api/online', (req, res) => {
   })
 })
 
+// Vídeo de onboarding narrado, para o time e para a banca. Página própria, sem passar pelo SPA.
+app.get('/video', (_req, res) => {
+  res.type('html').send(`<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quebra-Gelo — o vídeo</title>
+<meta name="description" content="Um minuto e dezesseis segundos para entender o Quebra-Gelo: o networking do DevDay, jogável.">
+<style>
+  :root{--verde:#0f9d58;--tinta:#101010;--creme:#f6f3ea;--linha:#d8d3c4}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--creme);color:var(--tinta);font:16px/1.55 "Helvetica Neue",Arial,sans-serif}
+  header{display:flex;align-items:center;gap:12px;padding:16px 24px;border-bottom:1px solid var(--linha)}
+  header b{font-size:15px}
+  header span{margin-left:auto;font-size:13px;color:#6b675c}
+  main{max-width:1000px;margin:0 auto;padding:24px;display:grid;gap:20px}
+  h1{font-size:24px;margin:0;letter-spacing:-.01em}
+  h1 small{display:block;font-size:14px;font-weight:400;color:#6b675c;margin-top:6px}
+  video{width:100%;border-radius:14px;background:#000;box-shadow:0 12px 34px #00000026}
+  .linha{display:flex;flex-wrap:wrap;gap:10px}
+  a{color:var(--tinta);border:1px solid var(--tinta);border-radius:999px;padding:9px 16px;font-size:14px;text-decoration:none}
+  a.principal{background:var(--verde);border-color:var(--verde);color:#fff;font-weight:600}
+  p{font-size:14px;color:#6b675c;margin:0}
+</style></head>
+<body>
+<header><b>Quebra-Gelo</b><span>DevDay · São Paulo</span></header>
+<main>
+  <h1>O jogo em um minuto e dezesseis
+    <small>Onboarding narrado: o pet, o encontro pelo código, a escolha e o final.</small></h1>
+  <video controls playsinline preload="metadata" poster="/og.png" src="/video-narrado.mp4"></video>
+  <div class="linha">
+    <a class="principal" href="/">Criar meu pet</a>
+    <a href="/video-narrado.mp4" download>Baixar o vídeo</a>
+    <a href="/tela">Telão do evento</a>
+  </div>
+  <p>Seu pet só avança quando você conversa com alguém de verdade. Quatro missões, três finais, e no fim a lista de quem você conheceu.</p>
+</main></body></html>`)
+})
+
 // Telão do evento: QR para entrar e os números ao vivo. Página própria, sem passar pelo SPA.
 app.get('/tela', async (req, res) => {
   const url = process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`
