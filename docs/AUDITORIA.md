@@ -72,9 +72,9 @@ Cada item vira **um commit**. Marcar `[x]` com o hash.
 - [x] `95367b1` S10 Dockerfile: `CMD ["node", "--import", "tsx", "src/server/index.ts"]` (SIGTERM chega ao
       salvamento) e `HEALTHCHECK` em `/health`
 
-## Decisões abertas (não implementar sem o Miguel)
+## Decisões (Miguel, 23/10/2026)
 
 - **Encontro com alguém ocupado** (prólogo ou no meio de um encontro): o outro só registra que te
-  conheceu e não pode mais te contar nas Missões 1–3. Aceitar ou pular o `conhecer` no prólogo?
-- **Texto do Time dos Sonhos** diz "com cada um você teve uma conversa longa", mas o final sai com 2
-  escolhas profundas de 4. Ajustar o texto (story.ts + HISTORIA.md)?
+  conheceu e não pode mais te contar nas Missões 1–3. **Aceito como está.**
+- **Texto do Time dos Sonhos**: dizia "com cada um você teve uma conversa longa", mas o final sai com 2
+  escolhas profundas de 4. **Ajustado** para "com alguns você foi além do oi".
