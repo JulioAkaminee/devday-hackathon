@@ -32,6 +32,9 @@ const NOMES_TEMA: Record<Tema, string> = {
   front: 'front-end', back: 'back-end', fullstack: 'fullstack', mobile: 'mobile', dados: 'dados', design: 'design', produto: 'produto',
   marketing: 'marketing', comercial: 'comercial', rh: 'RH e pessoas', gestao: 'gestão', carreira: 'carreira',
 }
+// na criação, as áreas de fora da tecnologia vêm primeiro: quem é de RH ou comercial se acha sem rolar
+const FORA_DA_TI: readonly Tema[] = ['marketing', 'comercial', 'rh', 'gestao']
+const ORDEM_TEMAS = [...FORA_DA_TI, ...TEMAS.filter((t) => !FORA_DA_TI.includes(t))]
 const SUGESTOES_NOME = ['Xícaro', 'Bolacha', 'Pipoca', 'Tampinha', 'Biscoito', 'Faísca', 'Pudim', 'Teco', 'Bug', 'Cometa']
 
 // Ícones de traço (24px, traço 1.75): desenhados aqui, sem biblioteca e sem emoji
@@ -166,7 +169,7 @@ function telaCriar() {
   const opcao = (grupo: string, v: string, rotulo: string, sel: boolean, extra = '') =>
     `<button type="button" class="${sel ? 'sel' : ''}" aria-pressed="${sel}" data-v="${v}" ${grupo === 'especie' ? `aria-label="${rotulo}"` : ''}>${extra}${grupo === 'especie' ? `<span>${rotulo}</span>` : rotulo}</button>`
   const chips = (campo: 'area' | 'procura' | 'oferece') =>
-    `<div class="chips" data-perfil="${campo}">${TEMAS.map((t) => opcao(campo, t, NOMES_TEMA[t], perfil[campo] === t)).join('')}</div>`
+    `<div class="chips" data-perfil="${campo}">${ORDEM_TEMAS.map((t) => opcao(campo, t, NOMES_TEMA[t], perfil[campo] === t)).join('')}</div>`
   const proximo = `<button class="principal">Próximo ${ICONE.seta}</button>`
   // as três perguntas do dia: título, por que importa e as áreas para tocar
   const PERGUNTAS: Record<number, { campo: 'area' | 'procura' | 'oferece'; titulo: string; dica: string }> = {
@@ -201,7 +204,7 @@ function telaCriar() {
       <label>Seu nome<input name="dono" minlength="2" maxlength="16" required placeholder="Ana" autocomplete="given-name" value="${esc(perfil.dono)}"></label>
       <label>Nome do pet<span class="com-botao"><input name="nome" minlength="2" maxlength="16" required value="${esc(perfil.nome)}"><button type="button" data-sortear aria-label="Sortear outro nome">${ICONE.dado}</button></span></label>
       <label>Seu LinkedIn (opcional)<input name="linkedin" maxlength="140" placeholder="linkedin.com/in/ana" inputmode="url" autocomplete="url" spellcheck="false" value="${esc(perfil.linkedin)}"></label>
-      <p class="dica">Quem encontrar seu pet vê esses dois nomes. O LinkedIn só aparece para quem te encontrar no evento.</p>
+      <p class="dica">Quem encontrar seu pet vê esses dois nomes. O LinkedIn é opcional: só quem te encontrar no evento vê, para vocês continuarem a conversa depois.</p>
       <div class="navegacao">${voltar(0)}${proximo}</div>`
     const q = PERGUNTAS[passo]
     const ultimo = passo === TOTAL - 1
@@ -209,7 +212,7 @@ function telaCriar() {
       ${progresso()}<h2>${q.titulo}</h2>
       <p class="dica">${q.dica}</p>
       ${chips(q.campo)}
-      <div class="navegacao">${voltar(passo - 1)}${ultimo ? `<button class="principal">Avançar ${ICONE.seta}</button>` : proximo}</div>`
+      <div class="navegacao">${voltar(passo - 1)}${ultimo ? `<button class="principal">Criar meu pet ${ICONE.seta}</button>` : proximo}</div>`
   }
 
   const desenhar = () => {
@@ -401,7 +404,7 @@ function diagnostico() {
       ? `<p class="texto">Não deu para enviar suas respostas.</p><button class="principal" data-acao="reenviar-diag">Tentar de novo ${ICONE.seta}</button>`
       : '<p class="texto">Montando sua trilha…</p>'
   }
-  return `<p class="texto">Cinco situações rápidas. Suas respostas montam sua trilha na Academia.</p>
+  return `<p class="texto">A Academia treina você para puxar conversa no evento. Responda 5 situações e a gente monta uma trilha começando pelo que você mais precisa. Não muda seu Alcance nem sua Profundidade.</p>
     ${questao(DIAGNOSTICO[i], 'data-diag', `${i + 1}/${DIAGNOSTICO.length}`)}`
 }
 
@@ -561,24 +564,29 @@ function cartaoMissao(v: Visao) {
   }
   if (e.fase === 'aguardando') {
     const sug = v.sugestoes.length
-      ? `<div class="sugestoes"><p class="rotulo">${e.cap === 4 ? 'Seus contatos' : e.cap === 2 ? `Oferecem ${NOMES_TEMA[v.pet.procura]}` : 'De outra área'} <span>toque para encontrar</span></p>${v.sugestoes.map((s) => `<button data-codigo="${s.codigo}">${foto(s, 'mini')}<span><b>${esc(s.nome)}</b> · ${esc(s.dono)}</span><code>${s.codigo}</code></button>`).join('')}</div>`
+      // gente real: o encontro só vale com o código que a pessoa mostra; pet de exemplo (sem dono no evento) abre no toque
+      ? `<div class="sugestoes"><p class="rotulo">${e.cap === 4 ? 'Seus contatos' : e.cap === 2 ? `Oferecem ${NOMES_TEMA[v.pet.procura]}` : 'De outra área'} <span>procure no evento e peça o código</span></p>${v.sugestoes.map((s) => s.demo
+        ? `<button data-codigo="${s.codigo}">${foto(s, 'mini')}<span><b>${esc(s.nome)}</b> · ${esc(s.dono)}<small>pet de exemplo · toque para encontrar</small></span><code>${s.codigo}</code></button>`
+        : `<button data-procurar="${esc(s.dono)}">${foto(s, 'mini')}<span><b>${esc(s.nome)}</b> · ${esc(s.dono)}<small>${NOMES_TEMA[s.area]}</small></span></button>`).join('')}</div>`
       : ''
     const f = v.academia.fraca
     const treino = f && CAPITULO_SUGERIDO[f] === e.cap ? `<p class="nota">Aqui você treina <b>${NOMES_HABILIDADE[f]}</b>, sua habilidade mais fraca.</p>` : ''
     // o encontro acontece aqui mesmo: o seu código à mostra e o campo para o código da outra pessoa
-    return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}<p class="texto">${esc(preencher(cap.abertura, vars))}</p>${treino}
+    const como = e.cap === 1 ? '<p class="nota"><b>Como funciona:</b> são 4 missões. Cada uma começa quando você encontra uma pessoa aqui no evento. No fim, o jeito como você conversou decide o seu final.</p>' : ''
+    return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}${como}<p class="texto">${esc(preencher(cap.abertura, vars))}</p>${treino}
       <div class="encontrar">
         <div class="meu-qr">${qrMeu ? `<img src="${qrMeu}" alt="QR do seu pet">` : ''}<div><p class="rotulo">Seu código</p><p class="grande">${v.pet.codigo}</p><small>Mostre para a pessoa: ela digita o código ou lê o QR com a câmera do celular.</small></div></div>
         <form class="codigo-dela" data-encontro><label class="rotulo" for="codigo-dela">Código da outra pessoa</label><div><input id="codigo-dela" name="codigo" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="principal">Encontrar</button></div></form>
       </div>${sug}
-      <p class="dica">Depois do encontro, você escolhe: papo rápido (+2 Alcance) ou conversa funda (+2 Profundidade).</p>`
+      <p class="dica">Vá até a pessoa, conversem e troquem os códigos: um digita o do outro ou lê o QR.</p>`
   }
   if (e.fase === 'encontro') {
     const a = v.amigo!
     return `${topo(`Missão ${e.cap} de ${TOTAL_CAPITULOS}`, cap.objetivo)}
       <div class="encontro">${foto(a, 'mini')}<p class="texto">${esc(preencher(cap.encontro, vars))}</p></div>
       ${linkedin(a, 'botao-linkedin', `Conectar com ${esc(a.dono)} no LinkedIn`)}
-      <p class="pergunta">${esc(cap.pergunta)}</p>${escolhas(true)}`
+      <p class="pergunta">${esc(cap.pergunta)}</p>${escolhas(true)}
+      <p class="dica">Papo rápido soma Alcance: você conhece mais gente. Conversa funda soma Profundidade: você conhece melhor. As duas contam para o final.</p>`
   }
   if (e.fase === 'consequencia') {
     const o = e.escolhas.at(-1)!
@@ -595,7 +603,7 @@ function cartaoMissao(v: Visao) {
 }
 
 const retomar = (v: Visao) => v.capitulosSalvos.length
-  ? `<p class="rotulo">Tente o outro caminho</p><div class="salvos">${v.capitulosSalvos.map((c) => `<button data-retomar="${c}">Missão ${c}</button>`).join('')}</div>`
+  ? `<p class="rotulo">Quer ver outro final?</p><p class="dica">Volte a uma missão e escolha diferente. Seus contatos continuam salvos.</p><div class="salvos">${v.capitulosSalvos.map((c) => `<button data-retomar="${c}">Missão ${c}</button>`).join('')}</div>`
   : ''
 
 function painelAba(v: Visao) {
@@ -603,7 +611,7 @@ function painelAba(v: Visao) {
   if (aba === 'contatos') {
     const lista = v.conhecidos.length
       ? `<ul class="lista">${v.conhecidos.map((c) => `<li>${foto(c, 'mini')}<div><b>${esc(c.nome)}</b> · ${esc(c.dono)}<small>${NOMES_TEMA[c.area]} · ajuda com ${NOMES_TEMA[c.oferece]}</small></div>${linkedin(c, 'linkedin')}<code>${c.codigo}</code></li>`).join('')}</ul>`
-      : '<p class="texto">Ninguém ainda. Escaneie um pet para começar.</p>'
+      : '<p class="texto">Ninguém ainda. Na aba Mapa, mostre seu código para alguém ou digite o código da pessoa.</p>'
     return `<div class="cartao-topo"><span>${v.conhecidos.length} ${v.conhecidos.length === 1 ? 'pessoa' : 'pessoas'}</span></div><h2>Quem eu conheci</h2>${lista}`
   }
   if (aba === 'conexoes') {
@@ -648,7 +656,7 @@ function render() {
   }
 
   const medidor = (nome: string, valor: number, cls: string) =>
-    `<div class="medidor ${cls}" title="${cls === 'ampla' ? 'Quanta gente você conheceu' : 'Até onde você levou cada conversa'}"><span>${nome}</span><b>${valor}</b><i><em data-alvo="${Math.min(100, (valor / 12) * 100)}" style="width:${Math.min(100, (medidas[cls as keyof typeof medidas] / 12) * 100)}%"></em></i></div>`
+    `<div class="medidor ${cls}" title="${cls === 'ampla' ? 'Quanta gente você conheceu' : 'Até onde você levou cada conversa'}"><span>${nome}</span><b>${valor}</b><small>${cls === 'ampla' ? 'gente que você conheceu' : 'conversas que foram fundo'}</small><i><em data-alvo="${Math.min(100, (valor / 12) * 100)}" style="width:${Math.min(100, (medidas[cls as keyof typeof medidas] / 12) * 100)}%"></em></i></div>`
   // a Academia ganha um ponto verde enquanto o diagnóstico (5 perguntas) não foi feito
   const abaBtn = (id: Aba, nome: string) =>
     `<button class="${aba === id ? 'ativa' : ''}" data-aba="${id}" aria-label="${nome}" ${aba === id ? 'aria-current="page"' : ''}>${ICONE[id]}<span>${nome}</span>${id === 'academia' && !v.academia.diagnostico ? '<i class="novo" aria-hidden="true"></i>' : ''}</button>`
@@ -740,6 +748,7 @@ ui.addEventListener('click', (ev) => {
   else if (d.acao === 'escanear') abrirEscanear()
   else if (d.acao === 'online') abrirOnline()
   else if (d.op) escolher(d.op as Opcao)
+  else if (d.procurar) { aviso(`Procure ${d.procurar} no evento e peça o código de 4 letras.`); ui.querySelector<HTMLInputElement>('#codigo-dela')?.focus() }
   else if (d.codigo) acao('encontro', { codigo: d.codigo })
   else if (d.retomar) { capMontado = -1; aba = 'mapa'; acao('retomar', { cap: Number(d.retomar) }) }
   else if (d.diag !== undefined) {

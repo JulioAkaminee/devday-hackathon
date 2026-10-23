@@ -114,14 +114,14 @@ export function telao(qr: string, url: string) {
     <div class="lado">
       <div class="qr">
         <img src="${qr}" alt="QR para entrar no Quebra-Gelo">
-        <b>Aponte a câmera</b>
+        <b>Aponte a câmera e crie seu pet em 30 segundos</b>
         <small>${url}</small>
       </div>
       <ul id="topo"></ul>
     </div>
   </main>
   <footer>
-    <p>Seu pet só cresce quando você conversa com alguém de verdade.</p>
+    <p>Encontre 4 pessoas pelo evento. Seu pet só cresce quando você conversa com alguém de verdade.</p>
     <span class="online" id="online" hidden><i></i><b id="onlineN">0</b> online agora</span>
     <span class="ao-vivo">ao vivo</span>
   </footer>

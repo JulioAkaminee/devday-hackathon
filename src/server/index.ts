@@ -233,7 +233,9 @@ function visao(p: Pet) {
   const peso = (x: Pet) => (x.demo ? 2 : x.estado.fase === 'aguardando' ? 0 : 1)
   const novos = (f: (x: Pet) => boolean) =>
     [...pets.values()].filter((x) => x.id !== p.id && !p.estado.conhecidos.includes(x.id) && f(x))
-      .sort((a, b) => peso(a) - peso(b)).slice(0, 3).map(publico)
+      .sort((a, b) => peso(a) - peso(b)).slice(0, 3)
+      // gente real vai sem o código: o encontro só vale com o código que a pessoa mostra ao vivo
+      .map((x) => (x.demo ? publico(x) : { ...publico(x), codigo: '' }))
   const cap = p.estado.cap
   const sugestoes = cap === 1 || cap === 3 ? novos((x) => x.area !== p.area)
     : cap === 2 ? novos((x) => x.oferece === p.procura)

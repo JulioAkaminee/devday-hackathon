@@ -446,7 +446,7 @@ export class Mundo {
     this.camera.updateProjectionMatrix()
     const r = w / h
     // painel à esquerda (formulário da criação, cartão da missão): o foco vai para o centro do espaço livre
-    const painel = w <= 760 ? 0 : this.modo === 'vitrine' ? Math.min(520, w) : 464
+    const painel = w <= 760 ? 0 : this.modo === 'vitrine' ? Math.min(520, w) : 528 // cartão: 24 + 480 + 24
     if (painel) this.camera.setViewOffset(w, h, -painel / 2, 0, w, h)
     // celular: o cartão ocupa a metade de baixo; o foco sobe para o espaço acima dele
     else if (this.modo !== 'vitrine') this.camera.setViewOffset(w, h, 0, h * 0.15, w, h)

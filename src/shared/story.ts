@@ -39,8 +39,8 @@ export const NOMES_ACESSORIO: Record<Acessorio, string> = {
 }
 
 export const PROLOGO =
-  'Oi, eu sou {pet}. Nasci agora, no meio de um hackathon onde todo mundo já tem time, ideia e café. ' +
-  'Até o pitch a gente precisa montar um time para a jornada final, e eu não conheço ninguém, então você vai me apresentar.'
+  'Oi, eu sou {pet}. Nasci agora, no meio do DevDay, onde todo mundo já tem turma, ideia e café. ' +
+  'Até o fim do evento a gente precisa montar um time, e eu não conheço ninguém, então você vai me apresentar.'
 
 export interface Capitulo {
   titulo: string
@@ -64,7 +64,7 @@ export const CAPITULOS: Capitulo[] = [
       consequencia: 'Vocês trocaram nomes, uma piada sobre o Wi-Fi e cada um foi para um lado. {amigo} acenou de longe. Será que vai lembrar do meu nome?',
     },
     profunda: {
-      opcao: 'Fazer a pergunta-desafio',
+      opcao: 'Perguntar algo pessoal e ouvir',
       consequencia: 'Você perguntou qual foi o pior bug da vida de {dono_amigo}. Virou dez minutos de história, com servidor caindo em plena Black Friday e deploy às 3 da manhã. Eu ouvi tudo sem piscar.',
     },
   },
@@ -100,8 +100,8 @@ export const CAPITULOS: Capitulo[] = [
   },
   {
     titulo: 'Palco DevDay',
-    objetivo: 'Reencontre um contato antes do pitch',
-    abertura: 'Faltam poucos minutos para o pitch. Última missão: reencontrar alguém que a gente já conheceu hoje. Digita o código de um contato de novo.',
+    objetivo: 'Reencontre alguém antes das apresentações finais',
+    abertura: 'Faltam poucos minutos para as apresentações finais. Última missão: encontrar de novo alguém que você já conheceu hoje. Digita o código de um contato de novo.',
     encontro: '{amigo} voltou! Faz duas horas, mas para mim pareceu uma semana.',
     pergunta: 'O que a gente faz com o tempo que sobrou?',
     ampla: {
@@ -109,8 +109,8 @@ export const CAPITULOS: Capitulo[] = [
       consequencia: '{dono_amigo} te levou até uma roda de seis pessoas e apresentou uma por uma. Eu decorei três nomes e perdi o resto. Minha cabeça está girando.',
     },
     profunda: {
-      opcao: 'Ficar e torcer pelo pitch',
-      consequencia: 'Você sentou na primeira fila do pitch de {dono_amigo} e aplaudiu quando o slide travou. No fim, a primeira pessoa que {dono_amigo} procurou foi você. Agora eu sei a quem pedir ajuda amanhã.',
+      opcao: 'Ficar e torcer pela apresentação',
+      consequencia: 'Você sentou na primeira fila da apresentação de {dono_amigo} e aplaudiu quando o slide travou. No fim, a primeira pessoa que {dono_amigo} procurou foi você. Agora eu sei a quem pedir ajuda amanhã.',
     },
   },
 ]
@@ -118,11 +118,11 @@ export const CAPITULOS: Capitulo[] = [
 export const FINAIS: Record<Final, { titulo: string; texto: string }> = {
   time: {
     titulo: 'Time dos Sonhos',
-    texto: 'Chegou a hora da jornada final e {lista_amigos} vieram comigo. Cada um trabalha numa área, e com alguns você foi além do oi. Esse é o nosso time.',
+    texto: 'Chegou o fim do evento e {lista_amigos} vieram comigo. Cada um trabalha numa área, e com alguns você foi além do oi. Esse é o time que você montou hoje.',
   },
   colecionador: {
     titulo: 'Colecionador de Crachás',
-    texto: 'Olha quanta gente: {n} crachás pendurados em mim. Na hora de chamar o time para a jornada final, ninguém lembrou do meu nome. Da próxima vez, fica um pouco mais em cada conversa?',
+    texto: 'Olha quanta gente: {n} crachás pendurados em mim. Na hora de montar o time no fim do evento, ninguém lembrou do meu nome. Da próxima vez, fica um pouco mais em cada conversa?',
   },
   amigo: {
     titulo: 'Amigo de Um Só',
