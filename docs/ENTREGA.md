@@ -12,8 +12,10 @@ Ordem: deploy no ar → ensaio → gravação → formulário.
 Rodar na URL pública, não no localhost.
 
 - [ ] `https://…/health` responde `ok`
-- [ ] Notebook (Chrome, tela cheia): criar pet, diagnóstico, Missão 1 por sugestão do cartão
-- [ ] Celular (Android ou iPhone): criar pet, abrir a câmera, ler o QR do pet do notebook
+- [ ] Notebook (Chrome, tela cheia): criar o pet nos **3 passos**, Missão 1 por sugestão do cartão
+- [ ] Celular (Android ou iPhone): criar o pet e ler o QR do pet do notebook com a câmera nativa
+- [ ] **Diagnóstico é opcional** (mudou): a aba Academia ganha um ponto verde até ser feito; é lá que ele
+      vive. Se o vídeo mostrar o desafio nº 4, entrar pela aba, não pelo caminho da aventura
 - [ ] Dois caminhos até o fim:
   - **A, tudo amplo** (papo rápido nas 4) → **Colecionador de Crachás**
   - **B**: no final do A, "Tente o outro caminho" → **Missão 3**; ir a fundo na 3 e na 4 →
@@ -32,13 +34,14 @@ Gravação de tela do notebook + um corte curto do celular lendo o QR. Fala em o
 
 | Tempo | Tela | Fala |
 |---|---|---|
-| 0:00–0:15 | Mapa com as 4 ilhas | "Em evento, a gente conversa com quem já conhece. O Quebra-Gelo é um pet que só anda na história quando você fala com alguém de verdade." |
-| 0:15–0:35 | Criação do pet | "Você monta o pet em uma tela: espécie, acessório, área, o que oferece e o que procura." |
-| 0:35–1:00 | Credenciamento: 5 perguntas, depois aba Academia | "Cinco perguntas medem três habilidades: abordar, escutar e conectar. A trilha começa pela mais fraca. Cada atividade explica a resposta. Esse é o desafio 4." |
-| 1:00–1:30 | Missão 1: sugestões, celular lendo o QR, encontro | "Cada missão pede um encontro. O cartão sugere quem procurar. A outra pessoa lê o QR ou digita o código, e o pet dela entra na sua história." |
-| 1:30–2:05 | Escolha e consequência; barras no topo | "Depois do encontro, você escolhe. Papo rápido soma Alcance. Ir a fundo soma Profundidade. A consequência aparece na história." |
-| 2:05–2:40 | Final A, "Tente o outro caminho", final B | "Quatro decisões, três finais. Fui só no papo rápido: Colecionador de Crachás. Volto à Missão 3 e vou a fundo: Time dos Sonhos. Esse é o desafio 10." |
-| 2:40–3:00 | Aba Quem eu conheci + logo | "No fim, você sai com a lista de quem conheceu. Quebra-Gelo." |
+| 0:00–0:12 | Telão em `/tela`: QR grande e contadores | "Isto é o que a sala inteira vê: quantas pessoas têm pet, quantos encontros aconteceram e quem mais conectou. O jogo é o networking do evento." |
+| 0:12–0:30 | Criação em 3 passos | "Em 30 segundos: escolhe o bichinho, o nome e o que você busca hoje. Os chips definem quem o pet vai te apresentar." |
+| 0:30–0:55 | Missão 1: código + QR no cartão, campo "Código da outra pessoa"; corte do celular lendo o QR | "Cada missão só abre com uma pessoa de verdade. Seu código fica à mostra; a outra pessoa digita ou aponta a câmera." |
+| 0:55–1:20 | Encontro, escolha e consequência; barras no topo | "Depois do encontro, você escolhe: papo rápido soma Alcance, ir a fundo soma Profundidade. A consequência aparece na história." |
+| 1:20–1:45 | Aba Academia: ponto verde, 5 perguntas, trilha com a mais fraca primeiro | "A Academia treina o que falta: cinco perguntas medem abordar, escutar e conectar, e a trilha começa pela habilidade mais fraca. Esse é o desafio 4." |
+| 1:45–2:20 | Final A, "Tente o outro caminho", final B | "Quatro decisões, três finais. Fui só no papo rápido: Colecionador de Crachás. Volto à Missão 3 e vou a fundo: Time dos Sonhos. Esse é o desafio 10." |
+| 2:20–2:45 | Cartão do final com "O que você leva", depois aba Quem eu conheci | "No fim, o pet vira o retrato de quem você conheceu — e você sai com essa lista." |
+| 2:45–3:00 | Logo + telão | "Quebra-Gelo. Menos “oi, tudo bem”, mais gente de verdade." |
 
 Dicas: gravar em 1920×1080, zoom do navegador em 100%, cursor visível, sem notificações. Cortar
 esperas de animação na edição.
@@ -52,8 +55,8 @@ Preencher na hora; os links ficam em aberto até existirem.
 - **Desafio:** nº 10, Aventura com escolhas e consequências (cumpre também o nº 4, Trilha de estudo
   personalizada)
 - **Trilha do evento:** Educação e inclusão
-- **Repositório:** _link do GitHub_
-- **URL pública:** _URL do Dokploy_
+- **Repositório:** <https://github.com/JulioAkaminee/devday-hackathon>
+- **URL pública:** <https://quebra-gelo.julioakamine.com>
 - **Vídeo:** _link_
 - **Descrição curta:** Um pet virtual que só avança na história quando você conversa com uma pessoa
   real do evento. Cada encontro vira uma missão; o jeito de conduzir a conversa soma Alcance ou
